@@ -1,0 +1,3 @@
+[console_scripts]
+simple_publisher = clase_05.simple_publisher:main
+simple_subscriber = clase_05.simple_subscriber:main

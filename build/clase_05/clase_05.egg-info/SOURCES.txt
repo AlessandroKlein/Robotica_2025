@@ -1,0 +1,17 @@
+package.xml
+setup.cfg
+setup.py
+../../build/clase_05/clase_05.egg-info/PKG-INFO
+../../build/clase_05/clase_05.egg-info/SOURCES.txt
+../../build/clase_05/clase_05.egg-info/dependency_links.txt
+../../build/clase_05/clase_05.egg-info/entry_points.txt
+../../build/clase_05/clase_05.egg-info/requires.txt
+../../build/clase_05/clase_05.egg-info/top_level.txt
+../../build/clase_05/clase_05.egg-info/zip-safe
+clase_05/__init__.py
+clase_05/simple_publisher.py
+clase_05/simple_subscriber.py
+resource/clase_05
+test/test_copyright.py
+test/test_flake8.py
+test/test_pep257.py

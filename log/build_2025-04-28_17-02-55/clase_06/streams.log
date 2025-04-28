@@ -1,0 +1,33 @@
+[1.141s] Invoking command in '/home/ale/robotica-2025/src/clase_06': PYTHONPATH=/home/ale/robotica-2025/build/clase_06/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/clase_06 build --build-base /home/ale/robotica-2025/build/clase_06/build install --record /home/ale/robotica-2025/build/clase_06/install.log --single-version-externally-managed install_data
+[1.340s] running egg_info
+[1.341s] creating ../../build/clase_06/clase_06.egg-info
+[1.355s] writing ../../build/clase_06/clase_06.egg-info/PKG-INFO
+[1.355s] writing dependency_links to ../../build/clase_06/clase_06.egg-info/dependency_links.txt
+[1.356s] writing requirements to ../../build/clase_06/clase_06.egg-info/requires.txt
+[1.356s] writing top-level names to ../../build/clase_06/clase_06.egg-info/top_level.txt
+[1.356s] writing manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+[1.387s] reading manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+[1.387s] writing manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+[1.387s] running build
+[1.387s] running build_py
+[1.387s] creating /home/ale/robotica-2025/build/clase_06/build
+[1.388s] creating /home/ale/robotica-2025/build/clase_06/build/lib
+[1.388s] creating /home/ale/robotica-2025/build/clase_06/build/lib/clase_06
+[1.389s] copying clase_06/__init__.py -> /home/ale/robotica-2025/build/clase_06/build/lib/clase_06
+[1.389s] running install
+[1.394s] running install_lib
+[1.410s] creating /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06
+[1.411s] copying /home/ale/robotica-2025/build/clase_06/build/lib/clase_06/__init__.py -> /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06
+[1.411s] byte-compiling /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06/__init__.py to __init__.cpython-312.pyc
+[1.412s] running install_data
+[1.412s] creating /home/ale/robotica-2025/install/clase_06/share/ament_index
+[1.412s] creating /home/ale/robotica-2025/install/clase_06/share/ament_index/resource_index
+[1.413s] creating /home/ale/robotica-2025/install/clase_06/share/ament_index/resource_index/packages
+[1.413s] copying resource/clase_06 -> /home/ale/robotica-2025/install/clase_06/share/ament_index/resource_index/packages
+[1.414s] copying package.xml -> /home/ale/robotica-2025/install/clase_06/share/clase_06
+[1.414s] creating /home/ale/robotica-2025/install/clase_06/share/clase_06/launch
+[1.414s] running install_egg_info
+[1.430s] Copying ../../build/clase_06/clase_06.egg-info to /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06-0.0.0-py3.12.egg-info
+[1.431s] running install_scripts
+[1.533s] writing list of installed files to '/home/ale/robotica-2025/build/clase_06/install.log'
+[1.568s] Invoked command in '/home/ale/robotica-2025/src/clase_06' returned '0': PYTHONPATH=/home/ale/robotica-2025/build/clase_06/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/clase_06 build --build-base /home/ale/robotica-2025/build/clase_06/build install --record /home/ale/robotica-2025/build/clase_06/install.log --single-version-externally-managed install_data

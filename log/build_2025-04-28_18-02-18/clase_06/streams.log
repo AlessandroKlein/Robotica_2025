@@ -1,0 +1,19 @@
+[0.658s] Invoking command in '/home/ale/robotica-2025/src/clase_06': PYTHONPATH=/home/ale/robotica-2025/build/clase_06/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/clase_06 build --build-base /home/ale/robotica-2025/build/clase_06/build install --record /home/ale/robotica-2025/build/clase_06/install.log --single-version-externally-managed install_data
+[0.864s] running egg_info
+[0.879s] writing ../../build/clase_06/clase_06.egg-info/PKG-INFO
+[0.880s] writing dependency_links to ../../build/clase_06/clase_06.egg-info/dependency_links.txt
+[0.880s] writing requirements to ../../build/clase_06/clase_06.egg-info/requires.txt
+[0.880s] writing top-level names to ../../build/clase_06/clase_06.egg-info/top_level.txt
+[0.912s] reading manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+[0.912s] writing manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+[0.913s] running build
+[0.913s] running build_py
+[0.913s] running install
+[0.918s] running install_lib
+[0.935s] running install_data
+[0.935s] running install_egg_info
+[0.951s] removing '/home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06-0.0.0-py3.12.egg-info' (and everything under it)
+[0.952s] Copying ../../build/clase_06/clase_06.egg-info to /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06-0.0.0-py3.12.egg-info
+[0.953s] running install_scripts
+[1.058s] writing list of installed files to '/home/ale/robotica-2025/build/clase_06/install.log'
+[1.087s] Invoked command in '/home/ale/robotica-2025/src/clase_06' returned '0': PYTHONPATH=/home/ale/robotica-2025/build/clase_06/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/clase_06 build --build-base /home/ale/robotica-2025/build/clase_06/build install --record /home/ale/robotica-2025/build/clase_06/install.log --single-version-externally-managed install_data

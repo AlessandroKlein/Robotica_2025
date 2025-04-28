@@ -1,0 +1,30 @@
+[0.636s] Invoking command in '/home/ale/robotica-2025/src/clase_06': PYTHONPATH=/home/ale/robotica-2025/build/clase_06/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/clase_06 build --build-base /home/ale/robotica-2025/build/clase_06/build install --record /home/ale/robotica-2025/build/clase_06/install.log --single-version-externally-managed install_data
+[0.837s] running egg_info
+[0.851s] writing ../../build/clase_06/clase_06.egg-info/PKG-INFO
+[0.852s] writing dependency_links to ../../build/clase_06/clase_06.egg-info/dependency_links.txt
+[0.852s] writing entry points to ../../build/clase_06/clase_06.egg-info/entry_points.txt
+[0.852s] writing requirements to ../../build/clase_06/clase_06.egg-info/requires.txt
+[0.852s] writing top-level names to ../../build/clase_06/clase_06.egg-info/top_level.txt
+[0.882s] reading manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+[0.882s] writing manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+[0.882s] running build
+[0.882s] running build_py
+[0.883s] copying clase_06/temperature_sensor.py -> /home/ale/robotica-2025/build/clase_06/build/lib/clase_06
+[0.883s] copying clase_06/temperature_monitor.py -> /home/ale/robotica-2025/build/clase_06/build/lib/clase_06
+[0.883s] running install
+[0.888s] running install_lib
+[0.903s] copying /home/ale/robotica-2025/build/clase_06/build/lib/clase_06/temperature_sensor.py -> /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06
+[0.903s] copying /home/ale/robotica-2025/build/clase_06/build/lib/clase_06/temperature_monitor.py -> /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06
+[0.903s] byte-compiling /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06/temperature_sensor.py to temperature_sensor.cpython-312.pyc
+[0.904s] byte-compiling /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06/temperature_monitor.py to temperature_monitor.cpython-312.pyc
+[0.904s] running install_data
+[0.905s] copying launch/ejemplo.launch.py -> /home/ale/robotica-2025/install/clase_06/share/clase_06/launch
+[0.905s] copying launch/start_temperature_system.launch.py -> /home/ale/robotica-2025/install/clase_06/share/clase_06/launch
+[0.905s] running install_egg_info
+[0.921s] removing '/home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06-0.0.0-py3.12.egg-info' (and everything under it)
+[0.921s] Copying ../../build/clase_06/clase_06.egg-info to /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06-0.0.0-py3.12.egg-info
+[0.922s] running install_scripts
+[1.026s] Installing temperature_monitor script to /home/ale/robotica-2025/install/clase_06/lib/clase_06
+[1.027s] Installing temperature_sensor script to /home/ale/robotica-2025/install/clase_06/lib/clase_06
+[1.027s] writing list of installed files to '/home/ale/robotica-2025/build/clase_06/install.log'
+[1.054s] Invoked command in '/home/ale/robotica-2025/src/clase_06' returned '0': PYTHONPATH=/home/ale/robotica-2025/build/clase_06/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/clase_06 build --build-base /home/ale/robotica-2025/build/clase_06/build install --record /home/ale/robotica-2025/build/clase_06/install.log --single-version-externally-managed install_data

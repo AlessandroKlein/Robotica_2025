@@ -1,0 +1,31 @@
+running egg_info
+creating ../../build/clase_06/clase_06.egg-info
+writing ../../build/clase_06/clase_06.egg-info/PKG-INFO
+writing dependency_links to ../../build/clase_06/clase_06.egg-info/dependency_links.txt
+writing requirements to ../../build/clase_06/clase_06.egg-info/requires.txt
+writing top-level names to ../../build/clase_06/clase_06.egg-info/top_level.txt
+writing manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+reading manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+writing manifest file '../../build/clase_06/clase_06.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/ale/robotica-2025/build/clase_06/build
+creating /home/ale/robotica-2025/build/clase_06/build/lib
+creating /home/ale/robotica-2025/build/clase_06/build/lib/clase_06
+copying clase_06/__init__.py -> /home/ale/robotica-2025/build/clase_06/build/lib/clase_06
+running install
+running install_lib
+creating /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06
+copying /home/ale/robotica-2025/build/clase_06/build/lib/clase_06/__init__.py -> /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06
+byte-compiling /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06/__init__.py to __init__.cpython-312.pyc
+running install_data
+creating /home/ale/robotica-2025/install/clase_06/share/ament_index
+creating /home/ale/robotica-2025/install/clase_06/share/ament_index/resource_index
+creating /home/ale/robotica-2025/install/clase_06/share/ament_index/resource_index/packages
+copying resource/clase_06 -> /home/ale/robotica-2025/install/clase_06/share/ament_index/resource_index/packages
+copying package.xml -> /home/ale/robotica-2025/install/clase_06/share/clase_06
+creating /home/ale/robotica-2025/install/clase_06/share/clase_06/launch
+running install_egg_info
+Copying ../../build/clase_06/clase_06.egg-info to /home/ale/robotica-2025/install/clase_06/lib/python3.12/site-packages/clase_06-0.0.0-py3.12.egg-info
+running install_scripts
+writing list of installed files to '/home/ale/robotica-2025/build/clase_06/install.log'
