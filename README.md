@@ -5,7 +5,7 @@ nameserver 8.8.4.4
 ```
 
 
-```markdown
+
 # Guía de Comandos ROS2
 
 ## Configuración del Proyecto
