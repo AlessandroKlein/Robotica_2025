@@ -124,4 +124,6 @@ touch src/<nombre_paquete>/launch/<nombre_archivo>.launch.py
 - Reemplaza `<nombre_paquete>` y `<nombre_archivo>` (ej: `clase_06` y `mi_lanzamiento`).
 ```
 
-Este formato organiza los comandos en secciones lógicas, mantiene los ejemplos claros y usa placeholders (`< >`) para personalización. Ideal para documentación técnica en español.
+Este formato organiza los comandos en secciones lógicas,
+mantiene los ejemplos claros y usa placeholders (`< >`) para personalización.
+Ideal para documentación técnica en español.
