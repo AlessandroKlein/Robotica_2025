@@ -1,63 +1,127 @@
+```markdown
+# Guía de Comandos ROS2
 
-Crear Proyecto nuevo:
-    cd ./src && ros2 pkg create --build-type ament_python clase_04 && cd ..
+## Configuración del Proyecto
 
-Istalar las librerias utilizadas:
-    rosdep install -i --from-path src -y
+### Crear un Nuevo Proyecto
+```bash
+cd ./src && ros2 pkg create --build-type ament_python <nombre_paquete> && cd ..
+```
+- Crea un nuevo paquete Python para ROS2. Reemplaza `<nombre_paquete>` (ej: `clase_04`).
 
-Compilar:
-    colcon build
-    colcon build --packages-select clase_06
+### Instalar Dependencias
+```bash
+rosdep install -i --from-path src -y
+```
+- Instala todas las dependencias listadas en los archivos `package.xml`.
 
+### Compilar el Proyecto
+```bash
+colcon build  # Compila todos los paquetes
+colcon build --packages-select <nombre_paquete>  # Compila solo un paquete
+```
+- Usa `--packages-select` para compilar paquetes específicos (ej: `clase_06`).
 
-Agregar Libreria a Ros2:
-    source install/setup.bash
+### Agregar Paquete al Entorno ROS2
+```bash
+source install/setup.bash
+```
+- Actualiza el entorno para reconocer el paquete compilado.
 
+---
 
-____________________________________________________________________________________
+## Gestión de Paquetes
 
-Listar paquete con filtro:
-    ros2 pkg executables | grep clase_04
-    
-    
-Ejecutar el Proyecto:
-    ros2 run clase_04 
+### Listar Ejecutables de un Paquete
+```bash
+ros2 pkg executables | grep <nombre_paquete>
+```
+- Muestra los ejecutables disponibles en `<nombre_paquete>` (ej: `clase_04`).
 
-Ver Nodos:
-    ros2 node list
+---
 
-Ver La info de un nodo:
-    ros2 node info "node_name"
+## Ejecución y Depuración
 
-Listar los topics:
-    ros2 topic list
+### Ejecutar un Nodo
+```bash
+ros2 run <nombre_paquete> <nombre_ejecutable>
+```
+- Ejemplo: `ros2 run clase_04 mi_nodo`.
 
-Informacion de un topic:
-    ros2 topic info "topic_name"
+### Listar Nodos Activos
+```bash
+ros2 node list
+```
+- Muestra todos los nodos en ejecución.
 
-Ver los datos de un topic:
-    ros2 topic echo "topic_name"
+### Inspeccionar un Nodo
+```bash
+ros2 node info <nombre_nodo>
+```
+- Muestra detalles del nodo: publicadores, suscriptores, etc.
 
+---
 
+## Gestión de Topics
 
-____________________________________________________________________________________
-Escaleas de mensajes:
-    nodo.get_logger().info('Publique el mensaje "%s"' % msg.data)
-    
-    FATAL
-    ERROR
-    WARN
-    INFO
-    DEBUG
-    
-Tipos de mensajes de tiempo:
-    once: Solo una ves
-    self.get_logger().warn('Advertencia una sola vez', once=True)
-    skip_first: No lo veo la primera vez
-    throttle_duration_sec: La cantidad de veces que se puede enviar el mensaje por segundo (Cantidad de mensajes por segundo)
-    self.get_logger().debug(f'Valor de la medicion {valor}', throttle_duration_sec=1)
+### Listar Topics Activos
+```bash
+ros2 topic list
+```
+- Muestra todos los topics disponibles.
 
-____________________________________________________________________________________
-Crear paquete archvio launch:
-    mkdir ./launch && cd ./launch && touch {name}.launch.py 
-    touch ./src/clase_06/launch/{name}.launch.py 
+### Obtener Metadatos de un Topic
+```bash
+ros2 topic info <nombre_topic>
+```
+- Muestra tipo de mensaje, publicadores y suscriptores.
+
+### Monitorear Datos de un Topic
+```bash
+ros2 topic echo <nombre_topic>
+```
+- Muestra en tiempo real los datos publicados en el topic.
+
+---
+
+## Registros y Control de Mensajes
+
+### Niveles de Severidad de Logs
+```python
+# Niveles de prioridad (orden ascendente):
+self.get_logger().fatal('Error crítico!')
+self.get_logger().error('Error detectado')
+self.get_logger().warn('Advertencia')
+self.get_logger().info('Información general')
+self.get_logger().debug('Depuración')
+```
+
+### Opciones Avanzadas de Logging
+```python
+# Log único (sin repeticiones)
+self.get_logger().warn('Advertica única', once=True)
+
+# Omitir primer mensaje
+self.get_logger().info('Mensaje omitido', skip_first=True)
+
+# Limitar frecuencia (1 mensaje/segundo)
+self.get_logger().debug(f'Dato: {valor}', throttle_duration_sec=1)
+```
+
+---
+
+## Archivos de Lanzamiento (Launch)
+
+### Crear Directorio para Launch Files
+```bash
+mkdir -p src/<nombre_paquete>/launch  # Ejemplo: src/clase_06/launch
+```
+
+### Crear Nuevo Archivo de Lanzamiento
+```bash
+touch src/<nombre_paquete>/launch/<nombre_archivo>.launch.py
+```
+- Reemplaza `<nombre_paquete>` y `<nombre_archivo>` (ej: `clase_06` y `mi_lanzamiento`).
+```
+
+Este formato organiza los comandos en secciones lógicas, mantiene los ejemplos claros y usa placeholders (`< >`) para personalización. Ideal para documentación técnica en español.
