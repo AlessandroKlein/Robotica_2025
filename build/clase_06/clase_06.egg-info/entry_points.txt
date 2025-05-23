@@ -1,3 +1,0 @@
-[console_scripts]
-temperature_monitor = clase_06.temperature_monitor:main
-temperature_sensor = clase_06.temperature_sensor:main
