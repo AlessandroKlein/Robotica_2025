@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:macro name="motor" params="prefix chassis_width:=0 reflect:=false">
+        <!-- Parámetros -->
         <xacro:property name="motor_mass" value="0.1"/>
         <xacro:property name="motor_x_size" value="0.07"/>
         <xacro:property name="motor_y_size" value="0.0188"/>
@@ -13,22 +14,24 @@
         <xacro:property name="pos_x_joint" value="${motor_x_offset}"/>
         <xacro:property name="pos_y_joint" value="${(chassis_width/2) - motor_y_offset + (motor_y_size/2)}"/>
         <xacro:property name="pos_z_joint" value="${motor_z_offset}"/>
-        
 
-        <link name="${prefix}_motor">        
+        <!-- Link del motor -->
+        <link name="${prefix}_motor">
+            <!-- Visual -->
             <visual>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
                     <xacro:if value="${reflect}">
-                        <mesh filename="file://$(find tp1_robot)/meshes/motor.stl" scale="1 -1 1" />
+                        <mesh filename="file://$(find tp1_robot)/meshes/motor.stl" scale="1 -1 1"/>
                     </xacro:if>
                     <xacro:unless value="${reflect}">
-                        <mesh filename="file://$(find tp1_robot)/meshes/motor.stl" />
+                        <mesh filename="file://$(find tp1_robot)/meshes/motor.stl"/>
                     </xacro:unless>
                 </geometry>
                 <material name="blue"/>
             </visual>
-        
+
+            <!-- Colisión -->
             <collision>
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
@@ -36,21 +39,23 @@
                 </geometry>
             </collision>
 
+            <!-- Inercia -->
             <xacro:inertial_box mass="${motor_mass}" x="${motor_x_size}" y="${motor_y_size}" z="${motor_z_size}">
                 <origin xyz="0 0 0" rpy="0 0 0"/>
             </xacro:inertial_box>
         </link>
 
+        <!-- Joint del motor -->
         <joint name="${prefix}_motor_joint" type="fixed">
             <parent link="base_link"/>
             <child link="${prefix}_motor"/>
 
             <xacro:if value="${reflect}">
-                <origin xyz="${pos_x_joint} ${-pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/> 
+                <origin xyz="${pos_x_joint} ${-1 * pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/>
             </xacro:if>
             <xacro:unless value="${reflect}">
-                <origin xyz="${pos_x_joint} ${pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/> 
+                <origin xyz="${pos_x_joint} ${pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/>
             </xacro:unless>
         </joint>
-	</xacro:macro>
+    </xacro:macro>
 </robot>

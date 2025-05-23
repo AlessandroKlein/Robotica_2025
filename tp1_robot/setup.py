@@ -35,7 +35,12 @@ setup(
 
 # rm -rf build/tp1_robot install/tp1_robot
 # colcon build --packages-select tp1_robot
-# colcon build --packages-select tp1_robot
+# source install/setup.bash
+
 # ros2 launch tp1_robot description.launch.py
+# ros2 launch tp1_robot description.launch.py testing:=false
+
 # ros2 run xacro xacro /home/ale/robotica-2025/install/tp1_robot/share/tp1_robot/urdf/diffbot.xacro
 # ros2 run tp1_robot teleop_twist_keyboard_node
+
+# ros2 run robot_state_publisher robot_state_publisher --ros-args -p robot_description:="$(xacro /home/ale/robotica-2025/src/tp1_robot/urdf/diffbot.xacro)"
