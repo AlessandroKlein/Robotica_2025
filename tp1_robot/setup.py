@@ -38,9 +38,26 @@ setup(
 # source install/setup.bash
 
 # ros2 launch tp1_robot description.launch.py
+# ros2 launch tp1_robot description.launch.py testing:=true
 # ros2 launch tp1_robot description.launch.py testing:=false
 
-# ros2 run xacro xacro /home/ale/robotica-2025/install/tp1_robot/share/tp1_robot/urdf/diffbot.xacro
+# ros2 node list | grep robot_state_publisher
+# ros2 topic list | grep tf
+# ros2 topic echo /tf
+
+# ros2 run xacro xacro /home/ale/robotica-2025/src/tp1_robot/urdf/diffbot.xacro
 # ros2 run tp1_robot teleop_twist_keyboard_node
 
 # ros2 run robot_state_publisher robot_state_publisher --ros-args -p robot_description:="$(xacro /home/ale/robotica-2025/src/tp1_robot/urdf/diffbot.xacro)"
+
+
+# que utilice base link   -   <link name="base_link"> </link>
+# ros2 run tf2_ros static_transform_publisher --frame-id map --child-frame-id base_link
+# 
+
+
+# ros2 run tf2_ros tf2_monitor
+# ros2 run rqt_tf_tree rqt_tf_tree
+
+
+# ros-jazzy-rqt-tf-tree

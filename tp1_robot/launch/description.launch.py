@@ -20,7 +20,7 @@ def generate_launch_description():
         PathJoinSubstitution([
             FindPackageShare('tp1_robot'),
             'urdf',
-            'diffbot.xacro'
+            'diffbot.urdf.xacro'
         ])
     ])
 
@@ -29,14 +29,14 @@ def generate_launch_description():
         package='robot_state_publisher',
         executable='robot_state_publisher',
         output='screen',
-        parameters=[{'robot_description': robot_description_content}]
+        parameters=[{'robot_description': robot_description_content}],
     )
 
     # Nodo joint_state_publisher_gui (condicional)
     joint_state_publisher_gui = Node(
         package='joint_state_publisher_gui',
         executable='joint_state_publisher_gui',
-        condition=IfCondition(LaunchConfiguration('testing'))  # Uso de IfCondition
+        condition=IfCondition(LaunchConfiguration('testing')),
     )
 
     # Nodo RViz (condicional)
