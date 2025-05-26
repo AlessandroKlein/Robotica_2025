@@ -16,7 +16,7 @@ setup(
         (os.path.join('share', package_name, 'urdf'), glob('urdf/*')),  # Modelos URDF
         (os.path.join('share', package_name, 'meshes'), glob('meshes/*')),  # Mallas 3D
         ('share/' + 'tp1_robot/launch', ['launch/description.launch.py']),
-        ('share/' + 'tp1_robot/urdf', ['urdf/diffbot.xacro']),  # Asegúrate de que el archivo XACRO exista
+        #('share/' + 'tp1_robot/urdf', ['urdf/diffbot.xacro']),  # Asegúrate de que el archivo XACRO exista
         ('share/' + 'tp1_robot/meshes', glob('meshes/*.stl')),  # Incluye todos los .stl
     ],
     install_requires=['setuptools'],
