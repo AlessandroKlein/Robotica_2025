@@ -18,6 +18,7 @@ setup(
         ('share/' + 'tp1_robot/launch', ['launch/description.launch.py']),
         #('share/' + 'tp1_robot/urdf', ['urdf/diffbot.xacro']),  # Asegúrate de que el archivo XACRO exista
         ('share/' + 'tp1_robot/meshes', glob('meshes/*.stl')),  # Incluye todos los .stl
+        ('share/' + 'tp1_robot/', glob('diffbot.rviz')),  # Incluye todos los .stl
     ],
     install_requires=['setuptools'],
     zip_safe=True,
