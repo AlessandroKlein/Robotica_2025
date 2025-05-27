@@ -62,3 +62,13 @@ setup(
 
 
 # ros-jazzy-rqt-tf-tree
+
+
+# Convertir el archivo .xacro a .urdf directamente
+# xacro `ros2 pkg prefix tp1_robot`/share/tp1_robot/urdf/diffbot.urdf.xacro > /tmp/diffbot.urdf
+# Ejecutar robot_state_publisher con el URDF generado
+# ros2 run robot_state_publisher robot_state_publisher /tmp/diffbot.urdf
+# (Opcional) Ejecutar joint_state_publisher_gui si tu robot lo requiere
+# ros2 run joint_state_publisher_gui joint_state_publisher_gui
+# Ejecutar RViz con tu archivo .rviz
+# rviz2 -d `ros2 pkg prefix tp1_robot`/share/tp1_robot/rviz/diffbot.rviz
