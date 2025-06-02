@@ -2,203 +2,199 @@
 
 <robot name="diffbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- Propiedades -->
+  <!-- ======================= -->
+  <!-- === Propiedades === -->
+  <!-- ======================= -->
+
   <!-- Masa del chasis en kilogramos -->
   <xacro:property name="chassis_mass" value="0.8"/>
-  <!-- Radio de cada rueda en metros -->
+
+  <!-- Radio de las ruedas (m) -->
   <xacro:property name="wheel_radius" value="0.035"/>
-  <!-- Ancho (longitud del cilindro) de cada rueda -->
+
+  <!-- Ancho de las ruedas (m) -->
   <xacro:property name="wheel_width" value="0.025"/>
-  <!-- Separación entre las ruedas izquierda y derecha -->
+
+  <!-- Separación entre las dos ruedas principales (m) -->
   <xacro:property name="wheel_separation" value="0.16"/>
 
-  <!-- Includes -->
-  <!-- Incluye macros para definir inercia -->
+  <!-- Color de las ruedas -->
+  <xacro:property name="wheel_color" value="silver"/>
+
+  <!-- Posición del caster con respecto al centro del robot (x, y, z) en metros -->
+  <xacro:property name="caster_origin_xyz" value="-0.075 0 0.002"/>
+
+  <!-- Color del caster y sus partes -->
+  <xacro:property name="caster_color" value="orange"/>
+
+  <!-- ======================= -->
+  <!-- === Includes === -->
+  <!-- ======================= -->
+
+  <!-- Inclusión de macros para cálculo de masa -->
   <xacro:include filename="$(find tp1_robot)/urdf/inertial_macros.xacro"/>
-  <!-- Incluye definición del motor -->
+
+  <!-- Inclusión de componentes para motores -->
   <xacro:include filename="$(find tp1_robot)/urdf/motor.xacro"/>
 
-  <!-- Chasis -->
-  <!-- Enlace principal del robot (base) -->
+  <!-- ======================= -->
+  <!-- === Chasis del robot === -->
+  <!-- ======================= -->
+
   <link name="base_link">
     <visual>
-      <!-- Posición y orientación del mesh visual respecto al link (x,y,z / roll,pitch,yaw) -->
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Posición y orientación visual del chasis -->
       <geometry>
-        <!-- Malla 3D del chasis -->
-        <mesh filename="file://$(find tp1_robot)/meshes/chassis.stl"/>
+        <mesh filename="file://$(find tp1_robot)/meshes/chassis.stl"/> <!-- Malla visual -->
       </geometry>
     </visual>
     <collision>
-      <!-- Posición y orientación de la geometría de colisión -->
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Posición y orientación de colisiones -->
       <geometry>
-        <!-- Caja de colisión con dimensiones en x,y,z -->
-        <box size="0.195 0.1 0.05"/>
+        <box size="0.195 0.1 0.05"/> <!-- Tamaño de la caja de colisión: largo, ancho, alto (m) -->
       </geometry>
     </collision>
-    <!-- Inercia del chasis, coincide con la caja de colisión -->
     <xacro:inertial_box mass="${chassis_mass}" x="0.195" y="0.1" z="0.05">
-    <!-- Centro de masa en el origen del link -->
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Centro de masa -->
     </xacro:inertial_box>
   </link>
 
-  <!-- Ruedas -->
-  <!-- Macro para definir una rueda -->
+  <!-- ======================= -->
+  <!-- === Macro para ruedas === -->
+  <!-- ======================= -->
+
   <xacro:macro name="wheel" params="prefix xyz axis">
-    <!-- Nombre del link de la rueda (left/right) -->
     <link name="${prefix}_wheel">
       <visual>
-        <!-- Gira el cilindro 90° sobre el eje X para que se oriente correctamente -->
-        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/> <!-- Rueda girada para estar vertical -->
         <geometry>
-          <!-- Geometría cilíndrica de la rueda -->
-          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/> <!-- Cilindro como rueda -->
         </geometry>
+        <material name="${wheel_color}"/>
       </visual>
       <collision>
-        <!-- Igual que visual, gira el cilindro sobre X -->
         <origin xyz="0 0 0" rpy="1.5708 0 0"/>
         <geometry>
-          <!-- Geometría de colisión de la rueda -->
           <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
+        <material name="${wheel_color}"/>
       </collision>
     </link>
-
-    <!-- Unión continua entre base_link y la rueda -->
     <joint name="${prefix}_wheel_joint" type="continuous">
-      <!-- Posición de la rueda respecto a base_link (X adelante, Y lateral, Z altura) -->
-      <origin xyz="${xyz}" rpy="0 0 0"/>
-      <!-- Elemento padre es el chasis -->
+      <origin xyz="${xyz}" rpy="0 0 0"/> <!-- Posición de la rueda respecto al chasis -->
       <parent link="base_link"/>
-      <!-- Hijo es la rueda correspondiente -->
       <child link="${prefix}_wheel"/>
-      <!-- Eje de rotación de la rueda (0 1 0) indica giro sobre eje Y -->
-      <axis xyz="${axis}"/>
+      <axis xyz="${axis}"/> <!-- Eje de rotación de la rueda -->
     </joint>
   </xacro:macro>
 
-  <!-- Instancias de ruedas -->
-  <!-- Rueda izquierda: un poco hacia adelante, desplazada a la izquierda y por debajo -->
-  <xacro:wheel prefix="left"  xyz="0.0175  0.065 -0.0175" axis="0 1 0"/>
-  <!-- Rueda derecha: simétrica, desplazada a la derecha -->
-  <xacro:wheel prefix="right" xyz="0.0175 -0.065 -0.0175" axis="0 1 0"/>
+  <!-- ======================= -->
+  <!-- === Ruedas izquierda y derecha === -->
+  <!-- ======================= -->
 
-  <!-- Motores -->
-  <!-- Motor izquierdo, no reflejado -->
-  <xacro:motor prefix="left" chassis_width="0.1" reflect="false"/>
-  <!-- Motor derecho, reflejado para simetría -->
-  <xacro:motor prefix="right" chassis_width="0.1" reflect="true"/>
+  <xacro:wheel prefix="left"  xyz="0.0175  0.065 -0.0175" axis="0 1 0"/> <!-- Rueda izquierda -->
+  <xacro:wheel prefix="right" xyz="0.0175 -0.065 -0.0175" axis="0 1 0"/> <!-- Rueda derecha -->
 
-  <!-- Caster Base -->
-  <!-- Base del soporte trasero (caster) -->
-  <link name="caster_base">
+  <xacro:motor prefix="left" chassis_width="0.1" reflect="false"/> <!-- Motor izquierdo -->
+  <xacro:motor prefix="right" chassis_width="0.1" reflect="true"/> <!-- Motor derecho -->
+
+  <!-- ======================= -->
+  <!-- === Caster trasero (rueda loca) === -->
+  <!-- ======================= -->
+
+  <!-- Base del caster -->
+  <link name="caster">
     <visual>
-      <!-- Adelantado respecto al link padre base_link -->
-      <origin xyz="0.0 0 0.0045" rpy="0 0 0"/>
+      <origin xyz="0 0 0.0045" rpy="0 0 0"/>
       <geometry>
-        <!-- Malla visual del soporte base -->
         <mesh filename="file://$(find tp1_robot)/meshes/caster_base.stl"/>
       </geometry>
+      <material name="${caster_color}"/>
     </visual>
   </link>
-  <!-- Unión fija al chasis -->
-  <joint name="caster_base_joint" type="fixed">
+  <joint name="caster_joint" type="fixed">
     <parent link="base_link"/>
-    <child link="caster_base"/>
-    <!-- Posición respecto a base_link: adelante y más abajo -->
-    <origin xyz="0.08 0 -0.025" rpy="0 0 0"/>
+    <child link="caster"/>
+    <origin xyz="${caster_origin_xyz}" rpy="0 0 0"/> <!-- Posición del caster respecto al chasis -->
   </joint>
 
-  <!-- Caster Wheel -->
-  <!-- Rueda trasera del caster -->
+  <!-- Rueda rotante del caster -->
   <link name="caster_wheel">
     <visual>
-      <!-- Debajo del caster_base -->
       <origin xyz="-0.015 0 -0.020" rpy="0 0 0"/>
       <geometry>
-        <!-- Malla de la rueda libre trasera -->
         <mesh filename="file://$(find tp1_robot)/meshes/caster_wheel.stl"/>
       </geometry>
+      <material name="${caster_color}"/>
     </visual>
   </link>
-  <!-- Unión fija a caster_base -->
-  <joint name="caster_wheel_joint" type="fixed">
-    <parent link="caster_base"/>
+  <joint name="caster_wheel_joint" type="continuous">
+    <parent link="caster"/>
     <child link="caster_wheel"/>
-    <!-- Posicionada justo debajo -->
-    <origin xyz="0 0 -0.01" rpy="0 0 0"/>
+    <origin xyz="0 0 -0.01" rpy="0 0 0"/> <!-- Eje de giro libre -->
+    <axis xyz="0 0 1"/> <!-- Rueda gira libremente en z -->
   </joint>
 
-  <!-- Caster Wheel Support -->
-  <!-- Soporte de la rueda trasera -->
+  <!-- Soporte de la rueda del caster -->
   <link name="caster_wheel_support">
     <visual>
-      <!-- Coincide con caster_wheel -->
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <!-- Malla del soporte -->
         <mesh filename="file://$(find tp1_robot)/meshes/caster_wheel_support.stl"/>
       </geometry>
+      <material name="${caster_color}"/>
     </visual>
   </link>
-  <!-- Unión fija a la rueda trasera -->
   <joint name="caster_support_joint" type="fixed">
     <parent link="caster_wheel"/>
     <child link="caster_wheel_support"/>
-    <!-- Mismo origen que la rueda trasera -->
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Unido directamente sin movimiento -->
   </joint>
 
-  <!-- Transformación odom -->
-  <!-- Enlace lógico para la odometría -->
+  <!-- ======================= -->
+  <!-- === Odometría del robot === -->
+  <!-- ======================= -->
+
   <link name="odom"/>
-  <!-- Unión entre el marco de odometría y la base -->
   <joint name="odom_to_base_link" type="fixed">
     <parent link="odom"/>
     <child link="base_link"/>
-    <!-- Sin transformación: los marcos coinciden -->
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Sistema de referencia absoluto -->
   </joint>
 
-  <!-- Plugin Gazebo -->
+  <!-- ======================= -->
+  <!-- === Plugin de Gazebo para ROS1 === -->
+  <!-- ======================= -->
+
   <gazebo>
-    <!-- Plugin para control diferencial en Gazebo -->
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_diff_drive.so">
-      <!-- Namespace para los tópicos -->
       <ros><namespace>/diffbot</namespace></ros>
-      <!-- Distancia entre ruedas -->
       <wheel_separation>${wheel_separation}</wheel_separation>
-      <!-- Diámetro de la rueda (2 * radio) -->
       <wheel_diameter>0.07</wheel_diameter>
-      <!-- Nombre del joint de la rueda izquierda -->
       <left_joint>left_wheel_joint</left_joint>
-      <!-- Nombre del joint de la rueda derecha -->
       <right_joint>right_wheel_joint</right_joint>
     </plugin>
   </gazebo>
 
-  <!-- ROS2 Control -->
-  <!-- Controlador ROS2 para el robot -->
+  <!-- ======================= -->
+  <!-- === Controlador ROS 2 === -->
+  <!-- ======================= -->
+
   <ros2_control name="diffbot_controller" type="system">
     <hardware>
-      <!-- Plugin de simulación para hardware -->
       <plugin>gazebo_ros2_control/RobotHWSim</plugin>
     </hardware>
-    <!-- Control sobre la rueda izquierda -->
     <joint name="left_wheel_joint">
-      <!-- Se puede enviar velocidad -->
       <command_interface name="velocity"/>
-      <!-- Se puede leer la posición -->
       <state_interface name="position"/>
-      <!-- Se puede leer la velocidad -->
       <state_interface name="velocity"/>
     </joint>
-    <!-- Igual que la izquierda pero para la rueda derecha -->
     <joint name="right_wheel_joint">
       <command_interface name="velocity"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="caster_wheel_joint">
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
