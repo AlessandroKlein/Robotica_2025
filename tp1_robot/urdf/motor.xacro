@@ -1,61 +1,91 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="motor" params="prefix chassis_width:=0 reflect:=false">
-        <!-- Parámetros -->
-        <xacro:property name="motor_mass" value="0.1"/>
-        <xacro:property name="motor_x_size" value="0.07"/>
-        <xacro:property name="motor_y_size" value="0.0188"/>
-        <xacro:property name="motor_z_size" value="0.0225"/>
 
-        <xacro:property name="motor_x_offset" value="0.0015"/>
-        <xacro:property name="motor_y_offset" value="0.0216"/>
-        <xacro:property name="motor_z_offset" value="-0.017"/>
+  <!-- ======================= -->
+  <!-- === Macro de Motor === -->
+  <!-- ======================= -->
 
-        <xacro:property name="pos_x_joint" value="${motor_x_offset}"/>
-        <xacro:property name="pos_y_joint" value="${(chassis_width/2) - motor_y_offset + (motor_y_size/2)}"/>
-        <xacro:property name="pos_z_joint" value="${motor_z_offset}"/>
+  <!-- Este macro inserta un motor en el chasis del robot.
+       Se puede usar para ambos lados (izquierdo o derecho)
+       Parametrizado para posicionar correctamente el motor según el ancho del chasis.
+       Opcionalmente se puede reflejar para el lado derecho. -->
 
-        <!-- Link del motor -->
-        <link name="${prefix}_motor">
-            <!-- Visual -->
-            <visual>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-                <geometry>
-                    <xacro:if value="${reflect}">
-                        <mesh filename="file://$(find tp1_robot)/meshes/motor.stl" scale="1 -1 1"/>
-                    </xacro:if>
-                    <xacro:unless value="${reflect}">
-                        <mesh filename="file://$(find tp1_robot)/meshes/motor.stl"/>
-                    </xacro:unless>
-                </geometry>
-                <material name="blue"/>
-            </visual>
+  <!-- === Parámetros del macro === -->
+  <!-- prefix: prefijo para los nombres del link y joint (ej: left, right) -->
+  <!-- chassis_width: ancho total del chasis (usado para calcular posición Y del motor) -->
+  <!-- reflect: booleano que indica si el motor debe ser reflejado (para el lado derecho) -->
 
-            <!-- Colisión -->
-            <collision>
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-                <geometry>
-                    <box size="${motor_x_size} ${motor_y_size} ${motor_z_size}"/>
-                </geometry>
-            </collision>
+  <xacro:macro name="motor" params="prefix chassis_width:=0 reflect:=false">
 
-            <!-- Inercia -->
-            <xacro:inertial_box mass="${motor_mass}" x="${motor_x_size}" y="${motor_y_size}" z="${motor_z_size}">
-                <origin xyz="0 0 0" rpy="0 0 0"/>
-            </xacro:inertial_box>
-        </link>
+    <!-- === Propiedades físicas del motor === -->
+    <!-- Masa del motor en kilogramos -->
+    <xacro:property name="motor_mass" value="0.1"/>
 
-        <!-- Joint del motor -->
-        <joint name="${prefix}_motor_joint" type="fixed">
-            <parent link="base_link"/>
-            <child link="${prefix}_motor"/>
+    <!-- Dimensiones del motor en metros (x, y, z) -->
+    <xacro:property name="motor_x_size" value="0.07"/>
+    <xacro:property name="motor_y_size" value="0.0188"/>
+    <xacro:property name="motor_z_size" value="0.0225"/>
 
-            <xacro:if value="${reflect}">
-                <origin xyz="${pos_x_joint} ${-1 * pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/>
-            </xacro:if>
-            <xacro:unless value="${reflect}">
-                <origin xyz="${pos_x_joint} ${pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/>
-            </xacro:unless>
-        </joint>
-    </xacro:macro>
+    <!-- Desplazamiento del motor respecto al centro del chasis -->
+    <xacro:property name="motor_x_offset" value="0.0015"/>
+    <xacro:property name="motor_y_offset" value="0.0216"/>
+    <xacro:property name="motor_z_offset" value="-0.017"/>
+
+    <!-- Cálculo automático de posición Y del joint -->
+    <xacro:property name="pos_y_joint"
+      value="${(chassis_width / 2) - motor_y_offset + (motor_y_size / 2)}"/>
+
+    <!-- Posición fija del joint en X y Z -->
+    <xacro:property name="pos_x_joint" value="${motor_x_offset}"/>
+    <xacro:property name="pos_z_joint" value="${motor_z_offset}"/>
+
+    <!-- === Definición del link del motor === -->
+    <link name="${prefix}_motor">
+
+      <!-- === Visualización del motor === -->
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <!-- Si 'reflect' es true, escala negativo en Y para invertir orientación -->
+          <xacro:if value="${reflect}">
+            <mesh filename="file://$(find tp1_robot)/meshes/motor.stl" scale="1 -1 1"/>
+          </xacro:if>
+          <xacro:unless value="${reflect}">
+            <mesh filename="file://$(find tp1_robot)/meshes/motor.stl"/>
+          </xacro:unless>
+        </geometry>
+        <material name="blue"/>
+      </visual>
+
+      <!-- === Colisión del motor (caja simple para simuladores) === -->
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${motor_x_size} ${motor_y_size} ${motor_z_size}"/>
+        </geometry>
+      </collision>
+
+      <!-- === Inercia del motor (calculada automáticamente) === -->
+      <xacro:inertial_box mass="${motor_mass}" x="${motor_x_size}" y="${motor_y_size}" z="${motor_z_size}">
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+      </xacro:inertial_box>
+
+    </link>
+
+    <!-- === Joint fijo entre el chasis y el motor === -->
+    <joint name="${prefix}_motor_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="${prefix}_motor"/>
+
+      <!-- Posicionamiento dinámico del motor -->
+      <xacro:if value="${reflect}">
+        <origin xyz="${pos_x_joint} ${-1 * pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/>
+      </xacro:if>
+      <xacro:unless value="${reflect}">
+        <origin xyz="${pos_x_joint} ${pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/>
+      </xacro:unless>
+    </joint>
+
+  </xacro:macro>
+
 </robot>

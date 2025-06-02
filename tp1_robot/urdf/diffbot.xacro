@@ -43,19 +43,19 @@
 
   <link name="base_link">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Posición y orientación visual del chasis -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <mesh filename="file://$(find tp1_robot)/meshes/chassis.stl"/> <!-- Malla visual -->
+        <mesh filename="file://$(find tp1_robot)/meshes/chassis.stl"/>
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Posición y orientación de colisiones -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.195 0.1 0.05"/> <!-- Tamaño de la caja de colisión: largo, ancho, alto (m) -->
+        <box size="0.195 0.1 0.05"/>
       </geometry>
     </collision>
     <xacro:inertial_box mass="${chassis_mass}" x="0.195" y="0.1" z="0.05">
-      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Centro de masa -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
     </xacro:inertial_box>
   </link>
 
@@ -66,9 +66,9 @@
   <xacro:macro name="wheel" params="prefix xyz axis">
     <link name="${prefix}_wheel">
       <visual>
-        <origin xyz="0 0 0" rpy="1.5708 0 0"/> <!-- Rueda girada para estar vertical -->
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
         <geometry>
-          <cylinder radius="${wheel_radius}" length="${wheel_width}"/> <!-- Cilindro como rueda -->
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
         <material name="${wheel_color}"/>
       </visual>
@@ -81,10 +81,10 @@
       </collision>
     </link>
     <joint name="${prefix}_wheel_joint" type="continuous">
-      <origin xyz="${xyz}" rpy="0 0 0"/> <!-- Posición de la rueda respecto al chasis -->
+      <origin xyz="${xyz}" rpy="0 0 0"/>
       <parent link="base_link"/>
       <child link="${prefix}_wheel"/>
-      <axis xyz="${axis}"/> <!-- Eje de rotación de la rueda -->
+      <axis xyz="${axis}"/>
     </joint>
   </xacro:macro>
 
@@ -92,11 +92,11 @@
   <!-- === Ruedas izquierda y derecha === -->
   <!-- ======================= -->
 
-  <xacro:wheel prefix="left"  xyz="0.0175  0.065 -0.0175" axis="0 1 0"/> <!-- Rueda izquierda -->
-  <xacro:wheel prefix="right" xyz="0.0175 -0.065 -0.0175" axis="0 1 0"/> <!-- Rueda derecha -->
+  <xacro:wheel prefix="left" xyz="0.0175  0.065 -0.0175" axis="0 1 0"/>
+  <xacro:wheel prefix="right" xyz="0.0175 -0.065 -0.0175" axis="0 1 0"/>
 
-  <xacro:motor prefix="left" chassis_width="0.1" reflect="false"/> <!-- Motor izquierdo -->
-  <xacro:motor prefix="right" chassis_width="0.1" reflect="true"/> <!-- Motor derecho -->
+  <xacro:motor prefix="left" chassis_width="0.1" reflect="false"/>
+  <xacro:motor prefix="right" chassis_width="0.1" reflect="true"/>
 
   <!-- ======================= -->
   <!-- === Caster trasero (rueda loca) === -->
@@ -115,7 +115,7 @@
   <joint name="caster_joint" type="fixed">
     <parent link="base_link"/>
     <child link="caster"/>
-    <origin xyz="${caster_origin_xyz}" rpy="0 0 0"/> <!-- Posición del caster respecto al chasis -->
+    <origin xyz="${caster_origin_xyz}" rpy="0 0 0"/>
   </joint>
 
   <!-- Rueda rotante del caster -->
@@ -131,8 +131,8 @@
   <joint name="caster_wheel_joint" type="continuous">
     <parent link="caster"/>
     <child link="caster_wheel"/>
-    <origin xyz="0 0 -0.01" rpy="0 0 0"/> <!-- Eje de giro libre -->
-    <axis xyz="0 0 1"/> <!-- Rueda gira libremente en z -->
+    <origin xyz="0 0 -0.01" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
   </joint>
 
   <!-- Soporte de la rueda del caster -->
@@ -148,39 +148,34 @@
   <joint name="caster_support_joint" type="fixed">
     <parent link="caster_wheel"/>
     <child link="caster_wheel_support"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Unido directamente sin movimiento -->
+    <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
 
   <!-- ======================= -->
-  <!-- === Odometría del robot === -->
-  <!-- ======================= -->
-
-  <link name="odom"/>
-  <joint name="odom_to_base_link" type="fixed">
-    <parent link="odom"/>
-    <child link="base_link"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Sistema de referencia absoluto -->
-  </joint>
-
-  <!-- ======================= -->
-  <!-- === Plugin de Gazebo para ROS1 === -->
+  <!-- === Plugin de Gazebo para ROS 2 === -->
   <!-- ======================= -->
 
   <gazebo>
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_diff_drive.so">
-      <ros><namespace>/diffbot</namespace></ros>
+    <plugin name="gazebo_ros_diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <namespace>/diffbot</namespace>
+      </ros>
       <wheel_separation>${wheel_separation}</wheel_separation>
       <wheel_diameter>0.07</wheel_diameter>
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <update_rate>50</update_rate>
+      <torque>5.0</torque>
     </plugin>
   </gazebo>
 
   <!-- ======================= -->
-  <!-- === Controlador ROS 2 === -->
+  <!-- === ROS 2 Control === -->
   <!-- ======================= -->
 
-  <ros2_control name="diffbot_controller" type="system">
+  <ros2_control name="diffbot_ros2_control" type="system">
     <hardware>
       <plugin>gazebo_ros2_control/RobotHWSim</plugin>
     </hardware>
