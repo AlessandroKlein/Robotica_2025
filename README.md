@@ -1,3 +1,7 @@
+```
+rm -rf build/tp1_robot install/tp1_robot && colcon build --packages-select tp1_robot && source install/setup.bash && ros2 launch tp1_robot description.launch.py testing:=true
+```
+
 # Wiki del Proyecto `tp1_robot` (Robotica_2025)
 
 ---
