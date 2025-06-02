@@ -1,3 +1,4 @@
+# launch/description.launch.py
 import os
 import xacro
 from launch import LaunchDescription
@@ -57,6 +58,7 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('testing'))
     )
 
+    # Controlador de estados de juntas
     controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -68,10 +70,13 @@ def generate_launch_description():
         executable="spawner",
         arguments=["left_velocity_controller", "right_velocity_controller"],
     )
-
+    
+    # Devuelve la descripción del lanzamiento con todos los nodos
     return LaunchDescription([
         declare_testing_arg,
         robot_state_publisher,
         joint_state_publisher_gui,
-        rviz
+        rviz,
+        controller_spawner,
+        velocity_spawner
     ])

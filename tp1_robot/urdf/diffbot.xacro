@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-
 <robot name="diffbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- ======================= -->
@@ -22,7 +21,7 @@
   <xacro:property name="wheel_color" value="silver"/>
 
   <!-- Posición del caster con respecto al centro del robot (x, y, z) en metros -->
-  <xacro:property name="caster_origin_xyz" value="-0.075 0 0.002"/>
+  <xacro:property name="caster_origin_xyz" value="-0.075 0 -0.007"/>
 
   <!-- Color del caster y sus partes -->
   <xacro:property name="caster_color" value="orange"/>
@@ -66,24 +65,24 @@
   <xacro:macro name="wheel" params="prefix xyz axis">
     <link name="${prefix}_wheel">
       <visual>
-        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/> <!-- Rotación base -->
         <geometry>
-          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+          <mesh filename="file://$(find tp1_robot)/meshes/wheel.stl"/>
         </geometry>
         <material name="${wheel_color}"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="1.5708 0 0"/>
         <geometry>
-          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+          <mesh filename="file://$(find tp1_robot)/meshes/wheel.stl"/>
         </geometry>
-        <material name="${wheel_color}"/>
       </collision>
     </link>
+
     <joint name="${prefix}_wheel_joint" type="continuous">
-      <origin xyz="${xyz}" rpy="0 0 0"/>
       <parent link="base_link"/>
       <child link="${prefix}_wheel"/>
+      <origin xyz="${xyz}" rpy="0 0 0"/>
       <axis xyz="${axis}"/>
     </joint>
   </xacro:macro>
@@ -92,9 +91,41 @@
   <!-- === Ruedas izquierda y derecha === -->
   <!-- ======================= -->
 
-  <xacro:wheel prefix="left" xyz="0.0175  0.065 -0.0175" axis="0 1 0"/>
-  <xacro:wheel prefix="right" xyz="0.0175 -0.065 -0.0175" axis="0 1 0"/>
+  <!-- Rueda izquierda -->
+  <xacro:wheel prefix="left"
+               xyz="0.018  0.050 -0.018"
+               axis="0 1 0"/>
 
+  <!-- Rueda derecha con rotación extra de 180° en eje Z -->
+  <xacro:macro name="right_wheel_with_rotation">
+    <link name="right_wheel">
+      <visual>
+        <origin xyz="0 0 0" rpy="1.5708 0 3.1416"/> <!-- Rotación base + 180° extra en Z -->
+        <geometry>
+          <mesh filename="file://$(find tp1_robot)/meshes/wheel.stl"/>
+        </geometry>
+        <material name="${wheel_color}"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="1.5708 0 3.1416"/>
+        <geometry>
+          <mesh filename="file://$(find tp1_robot)/meshes/wheel.stl"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="right_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="right_wheel"/>
+      <origin xyz="0.018 -0.050 -0.018" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- Llamada a macro personalizada para rueda derecha rotada -->
+  <xacro:right_wheel_with_rotation/>
+
+  <!-- Motores -->
   <xacro:motor prefix="left" chassis_width="0.1" reflect="false"/>
   <xacro:motor prefix="right" chassis_width="0.1" reflect="true"/>
 
@@ -157,9 +188,7 @@
 
   <gazebo>
     <plugin name="gazebo_ros_diff_drive" filename="libgazebo_ros_diff_drive.so">
-      <ros>
-        <namespace>/diffbot</namespace>
-      </ros>
+      <ros><namespace>/diffbot</namespace></ros>
       <wheel_separation>${wheel_separation}</wheel_separation>
       <wheel_diameter>0.07</wheel_diameter>
       <left_joint>left_wheel_joint</left_joint>
