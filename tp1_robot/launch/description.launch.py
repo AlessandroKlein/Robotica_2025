@@ -20,7 +20,7 @@ def generate_launch_description():
         PathJoinSubstitution([
             FindPackageShare('tp1_robot'),
             'urdf',
-            'diffbot.urdf.xacro'
+            'diffbot.xacro'
         ])
     ])
 
