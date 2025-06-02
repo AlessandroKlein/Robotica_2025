@@ -32,6 +32,10 @@ setup(
     entry_points={
         'console_scripts': [
             'teleop_twist_keyboard_node = tp1_robot.teleop_twist_keyboard_node:main',
+            'automatic_mover_node = tp1_robot.automatic_mover_node:main',
+            'inverse_kinematics_node = tp1_robot.inverse_kinematics_node:main',
+            'odometry_node = tp1_robot.odometry_node:main',
+            'tf_publisher_node = tp1_robot.tf_publisher_node:main',
         ],
     },
 )

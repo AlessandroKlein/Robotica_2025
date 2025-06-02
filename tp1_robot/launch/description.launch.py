@@ -57,6 +57,18 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('testing'))
     )
 
+    controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_state_broadcaster"],
+    )
+
+    velocity_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["left_velocity_controller", "right_velocity_controller"],
+    )
+
     return LaunchDescription([
         declare_testing_arg,
         robot_state_publisher,
