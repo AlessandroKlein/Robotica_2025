@@ -1,43 +1,32 @@
-# Configuración de controladores para DiffBot
-# Compatible con ROS2 Control y Gazebo
-
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Frecuencia de actualización en Hz
-    use_sim_time: true  # Importante para Gazebo
+    update_rate: 50
 
-    # Broadcaster de estados de juntas
+    use_sim_time: true
+
+    # Nombre del controlador (debe coincidir con el nombre usado en spawner)
+    diffbot_base_controller:
+      type: diff_drive_controller/DiffDriveController
+
     joint_state_broadcaster:
-      type: joint_state_controller/JointStateBroadcaster
+      type: joint_state_broadcaster/JointStateBroadcaster
 
-    # Controlador para la rueda izquierda
-    left_velocity_controller:
-      type: velocity_controllers/JointGroupVelocityController
-      joints:
-        - left_wheel_joint  # Debe coincidir con el nombre en diffbot.xacro
-      command_interfaces:
-        - velocity
-      state_interfaces:
-        - position
-        - velocity
-      pid_gains:
-        velocity:
-          p: 0.3
-          i: 0.01
-          d: 0.0
+diffbot_base_controller:
+  ros__parameters:
+    # Nombres de las articulaciones
+    left_wheel_names:
+      - left_wheel_joint
+    right_wheel_names:
+      - right_wheel_joint
 
-    # Controlador para la rueda derecha
-    right_velocity_controller:
-      type: velocity_controllers/JointGroupVelocityController
-      joints:
-        - right_wheel_joint  # Debe coincidir con el nombre en diffbot.xacro
-      command_interfaces:
-        - velocity
-      state_interfaces:
-        - position
-        - velocity
-      pid_gains:
-        velocity:
-          p: 0.3
-          i: 0.01
-          d: 0.0
+    # Parámetros cinemáticos
+    wheel_separation: 0.16
+    wheel_radius: 0.035
+    wheel_separation_multiplier: 1.0
+    left_to_right_wheel_radius_diff: 0.0
+
+    # Configuración adicional
+    use_stamped_vel: false
+    publish_rate: 50.0
+    base_frame_id: base_link
+    name: diffbot_base_controller

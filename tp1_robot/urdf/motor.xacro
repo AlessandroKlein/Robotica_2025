@@ -1,78 +1,63 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro"
        xmlns:gazebo="http://www.gazebosim.org/schema/gazebo_urdf">
+       
+    <xacro:macro name="motor" params="prefix chassis_width:=0 reflect:=false">
+        <!-- Parámetros -->
+        <xacro:property name="motor_mass" value="0.1"/>
+        <xacro:property name="motor_x_size" value="0.07"/>
+        <xacro:property name="motor_y_size" value="0.0188"/>
+        <xacro:property name="motor_z_size" value="0.0225"/>
 
-  <!-- Macro para insertar un motor con inercia -->
-  <xacro:macro name="motor" params="prefix chassis_width reflect">
-    
-    <!-- Parámetros internos -->
-    <xacro:property name="motor_mass" value="0.1"/> <!-- Masa del motor (kg) -->
-    <xacro:property name="motor_length" value="0.07"/> <!-- Largo del motor (m) -->
-    <xacro:property name="motor_width" value="0.025"/> <!-- Ancho del motor (m) -->
-    <xacro:property name="motor_height" value="0.025"/> <!-- Altura del motor (m) -->
-    <xacro:property name="motor_radius" value="0.0125"/> <!-- Radio de los extremos (m) -->
+        <xacro:property name="motor_x_offset" value="0.0015"/>
+        <xacro:property name="motor_y_offset" value="0.0216"/>
+        <xacro:property name="motor_z_offset" value="-0.017"/>
 
-    <!-- Posición en X (ajustada según reflect) -->
-    <xacro:if value="${reflect}">
-      <xacro:property name="motor_x" value="${chassis_width/2 - 0.035}"/>
-    </xacro:if>
-    <xacro:unless value="${reflect}">
-      <xacro:property name="motor_x" value="${-chassis_width/2 + 0.035}"/>
-    </xacro:unless>
+        <xacro:property name="pos_x_joint" value="${motor_x_offset}"/>
+        <xacro:property name="pos_y_joint" value="${(chassis_width/2) - motor_y_offset + (motor_y_size/2)}"/>
+        <xacro:property name="pos_z_joint" value="${motor_z_offset}"/>
 
-    <!-- Link del motor -->
-    <link name="${prefix}_motor_link">
-      <visual>
-        <origin xyz="${motor_x} -0.01 0" rpy="0 0 0"/>
-        <geometry>
-          <box size="${motor_length} ${motor_width} ${motor_height}"/>
-        </geometry>
-        <material name="black"/>
-      </visual>
-      <collision>
-        <origin xyz="${motor_x} -0.01 0" rpy="0 0 0"/>
-        <geometry>
-          <box size="${motor_length} ${motor_width} ${motor_height}"/>
-        </geometry>
-      </collision>
+        <!-- Link del motor -->
+        <link name="${prefix}_motor">
+            <!-- Visual -->
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <xacro:if value="${reflect}">
+                        <mesh filename="file://$(find tp1_robot)/meshes/motor.stl" scale="1 -1 1"/>
+                    </xacro:if>
+                    <xacro:unless value="${reflect}">
+                        <mesh filename="file://$(find tp1_robot)/meshes/motor.stl"/>
+                    </xacro:unless>
+                </geometry>
+                <material name="blue"/>
+            </visual>
 
-      <!-- Usamos el macro box_inertia con el parámetro correcto 'm' -->
-      <xacro:box_inertia m="${motor_mass}" x="${motor_length}" y="${motor_width}" z="${motor_height}"/>
-    </link>
+            <!-- Colisión -->
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <box size="${motor_x_size} ${motor_y_size} ${motor_z_size}"/>
+                </geometry>
+            </collision>
 
-    <!-- Joint del motor (fijo al chasis) -->
-    <joint name="${prefix}_motor_joint" type="fixed">
-      <parent link="base_link"/>
-      <child link="${prefix}_motor_link"/>
-      <origin xyz="${motor_x} -0.01 0" rpy="0 0 0"/>
-    </joint>
+            <!-- Inercia -->
+            <xacro:inertial_box mass="${motor_mass}" x="${motor_x_size}" y="${motor_y_size}" z="${motor_z_size}">
+                <!-- <origin xyz="0 0 0" rpy="0 0 0"/>-->
+            </xacro:inertial_box>
+        </link>
 
-    <!-- Rotor del motor (simulado como cilindro) -->
-    <link name="${prefix}_motor_rotor_link">
-      <visual>
-        <origin xyz="0 0 0" rpy="0 1.5708 0"/>
-        <geometry>
-          <cylinder radius="${motor_radius}" length="${motor_width}"/>
-        </geometry>
-        <material name="gray"/>
-      </visual>
-      <collision>
-        <origin xyz="0 0 0" rpy="0 1.5708 0"/>
-        <geometry>
-          <cylinder radius="${motor_radius}" length="${motor_width}"/>
-        </geometry>
-      </collision>
+        <!-- Joint del motor -->
+        <joint name="${prefix}_motor_joint" type="fixed">
+            <parent link="base_link"/>
+            <child link="${prefix}_motor"/>
 
-      <!-- Usamos el macro cylinder_inertia con el parámetro correcto 'm' -->
-      <xacro:cylinder_inertia m="${motor_mass/2}" r="${motor_radius}" h="${motor_width}"/>
-    </link>
-
-    <!-- Joint del rotor del motor (fijo al motor) -->
-    <joint name="${prefix}_motor_rotor_joint" type="fixed">
-      <parent link="${prefix}_motor_link"/>
-      <child link="${prefix}_motor_rotor_link"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint>
-
-  </xacro:macro>
+            <xacro:if value="${reflect}">
+                <origin xyz="${pos_x_joint} ${-1 * pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/>
+            </xacro:if>
+            <xacro:unless value="${reflect}">
+                <origin xyz="${pos_x_joint} ${pos_y_joint} ${pos_z_joint}" rpy="0 0 0"/>
+            </xacro:unless>
+        </joint>
+    </xacro:macro>
 </robot>

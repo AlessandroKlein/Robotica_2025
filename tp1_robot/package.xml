@@ -22,8 +22,6 @@
   <exec_depend>launch</exec_depend>
   <exec_depend>launch_ros</exec_depend>
   <exec_depend>xacro</exec_depend>-->
-  <depend>controller_manager</depend>
-  <depend>velocity_controllers</depend>
 
   <!-- Dependencias de compilación y ejecución -->
   <build_depend>rclpy</build_depend>
@@ -32,6 +30,8 @@
   <build_depend>nav_msgs</build_depend>
   <build_depend>robot_state_publisher</build_depend>
   <build_depend>joint_state_publisher_gui</build_depend>
+  <depend>controller_manager</depend>
+  <depend>velocity_controllers</depend>
   <!-- <build_depend>gazebo_ros2_control</build_depend> -->
 
   <!-- Dependencias de tiempo de ejecución -->

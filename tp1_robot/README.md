@@ -72,3 +72,22 @@ ros2 topic echo /cmd_vel
 ```
 ros2 topic echo /odom
 ```
+
+
+# Gazebo
+```
+ros2 run ros_gz_sim create -topic robot_description
+```
+
+# V2
+
+ros2 launch tp1_robot diffbot_sim.launch.py
+
+# Xacro
+
+ros2 run xacro xacro $(ros2 pkg prefix tp1_robot)/share/tp1_robot/urdf/diffbot.xacro
+
+# Ver datos
+```
+ps -a
+```
