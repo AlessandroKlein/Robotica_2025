@@ -1,38 +1,84 @@
 #!/usr/bin/env python3
+# tp1_robot/inverse_kinematics_node.py
 
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64MultiArray
+import math
 
-class InverseKinematicsNode(Node):
+class InverseKinematics(Node):
     def __init__(self):
         super().__init__('inverse_kinematics_node')
-        self.declare_parameter('wheel_separation', 0.1)
-        self.declare_parameter('wheel_radius', 0.035)
+        
+        # Parámetros configurables
+        self.declare_parameter('wheel_radius', 0.035)  # m (de diffbot.xacro)
+        self.declare_parameter('wheel_separation', 0.23)  # m (de diffbot.xacro)
+        
+        self.wheel_radius = self.get_parameter('wheel_radius').value
+        self.wheel_separation = self.get_parameter('wheel_separation').value
+        
+        # Validar parámetros
+        if self.wheel_radius <= 0 or self.wheel_separation <= 0:
+            self.get_logger().error('Parámetros inválidos: radio o separación de ruedas <= 0')
+            raise ValueError('Parámetros de ruedas deben ser positivos')
+        
+        # Suscripción a /cmd_vel
+        self.cmd_vel_sub = self.create_subscription(
+            Twist,
+            '/cmd_vel',
+            self.cmd_vel_callback,
+            10
+        )
+        
+        # Publicadores para controladores de velocidad
+        self.left_cmd_pub = self.create_publisher(Float64MultiArray, '/left_velocity_controller/commands', 10)
+        self.right_cmd_pub = self.create_publisher(Float64MultiArray, '/right_velocity_controller/commands', 10)
+        
+        self.get_logger().info('Nodo de cinemática inversa iniciado')
+        self.get_logger().info(f'Radio de rueda: {self.wheel_radius} m, Separación: {self.wheel_separation} m')
 
-        self.wheel_separation = self.get_parameter('wheel_separation').get_parameter_value().double_value
-        self.wheel_radius = self.get_parameter('wheel_radius').get_parameter_value().double_value
+    def cmd_vel_callback(self, msg):
+        # Extraer velocidades lineales y angulares
+        linear_x = msg.linear.x
+        angular_z = msg.angular.z
+        
+        # Calcular velocidades angulares de las ruedas (rad/s)
+        try:
+            left_vel = (linear_x - (angular_z * self.wheel_separation / 2)) / self.wheel_radius
+            right_vel = (linear_x + (angular_z * self.wheel_separation / 2)) / self.wheel_radius
+            
+            # Publicar en controladores
+            left_msg = Float64MultiArray()
+            right_msg = Float64MultiArray()
+            
+            left_msg.data = [left_vel]
+            right_msg.data = [right_vel]
+            
+            self.left_cmd_pub.publish(left_msg)
+            self.right_cmd_pub.publish(right_msg)
+            
+        except ZeroDivisionError:
+            self.get_logger().error('División por cero en cálculo de cinemática')
+        except Exception as e:
+            self.get_logger().error(f'Error en cálculo de cinemática: {str(e)}')
 
-        self.left_pub = self.create_publisher(Float64, 'left_wheel_cmd', 10)
-        self.right_pub = self.create_publisher(Float64, 'right_wheel_cmd', 10)
-        self.subscription = self.create_subscription(Twist, 'cmd_vel', self.twist_callback, 10)
-
-    def twist_callback(self, msg):
-        v = msg.linear.x
-        w = msg.angular.z
-
-        v_left = (v - (w * self.wheel_separation / 2)) / self.wheel_radius
-        v_right = (v + (w * self.wheel_separation / 2)) / self.wheel_radius
-
-        self.left_pub.publish(Float64(data=v_left))
-        self.right_pub.publish(Float64(data=v_right))
-
-def main():
-    rclpy.init()
-    node = InverseKinematicsNode()
-    rclpy.spin(node)
-    rclpy.shutdown()
+def main(args=None):
+    rclpy.init(args=args)
+    ik_node = InverseKinematics()
+    
+    try:
+        rclpy.spin(ik_node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        # Detener el robot al salir
+        zero_msg = Float64MultiArray(data=[0.0])
+        ik_node.left_cmd_pub.publish(zero_msg)
+        ik_node.right_cmd_pub.publish(zero_msg)
+        ik_node.get_logger().info('Robot detenido')
+        ik_node.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

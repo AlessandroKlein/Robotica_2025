@@ -1,4 +1,5 @@
-# launch/description.launch.py
+# tp1_robot/launch/description.launch.py
+
 import os
 import xacro
 from launch import LaunchDescription
@@ -18,18 +19,16 @@ def generate_launch_description():
         description='Activa joint_state_publisher_gui y RViz si es true'
     )
 
-    # Ruta absoluta al archivo XACRO
+    # Procesar XACRO
     xacro_file = os.path.join(
         get_package_share_directory('tp1_robot'),
-        'urdf',
+        'urdf', 
         'diffbot.xacro'
     )
-
-    # Procesar el archivo XACRO
     robot_description_raw = xacro.process_file(xacro_file)
     robot_description_str = robot_description_raw.toxml()
 
-    # Nodo robot_state_publisher con robot_description como string
+    # Nodo robot_state_publisher
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -52,26 +51,27 @@ def generate_launch_description():
         executable='rviz2',
         arguments=['-d', PathJoinSubstitution([
             FindPackageShare('tp1_robot'),
-            'rviz',
+            'rviz', 
             'diffbot.rviz'
         ])],
-        condition=IfCondition(LaunchConfiguration('testing'))
+        condition=IfCondition(LaunchConfiguration('testing')),
     )
 
-    # Controlador de estados de juntas
+    # Spawners de ROS2 Control
     controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["joint_state_broadcaster"],
+        output="screen"
     )
 
     velocity_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=["left_velocity_controller", "right_velocity_controller"],
+        output="screen"
     )
-    
-    # Devuelve la descripción del lanzamiento con todos los nodos
+
     return LaunchDescription([
         declare_testing_arg,
         robot_state_publisher,

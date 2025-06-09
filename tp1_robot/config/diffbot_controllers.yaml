@@ -1,16 +1,43 @@
+# Configuración de controladores para DiffBot
+# Compatible con ROS2 Control y Gazebo
+
 controller_manager:
   ros__parameters:
-    update_rate: 100
+    update_rate: 100  # Frecuencia de actualización en Hz
+    use_sim_time: true  # Importante para Gazebo
 
+    # Broadcaster de estados de juntas
     joint_state_broadcaster:
       type: joint_state_controller/JointStateBroadcaster
 
+    # Controlador para la rueda izquierda
     left_velocity_controller:
       type: velocity_controllers/JointGroupVelocityController
       joints:
-        - left_wheel_joint
+        - left_wheel_joint  # Debe coincidir con el nombre en diffbot.xacro
+      command_interfaces:
+        - velocity
+      state_interfaces:
+        - position
+        - velocity
+      pid_gains:
+        velocity:
+          p: 0.3
+          i: 0.01
+          d: 0.0
 
+    # Controlador para la rueda derecha
     right_velocity_controller:
       type: velocity_controllers/JointGroupVelocityController
       joints:
-        - right_wheel_joint
+        - right_wheel_joint  # Debe coincidir con el nombre en diffbot.xacro
+      command_interfaces:
+        - velocity
+      state_interfaces:
+        - position
+        - velocity
+      pid_gains:
+        velocity:
+          p: 0.3
+          i: 0.01
+          d: 0.0
