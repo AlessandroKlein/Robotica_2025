@@ -5,6 +5,7 @@ from launch.event_handlers import OnProcessStart
 from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
+from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 import os
 
@@ -16,7 +17,9 @@ def generate_launch_description():
     ])
 
     robot_description_content = Command(['xacro ', urdf_file])
-    robot_description = {'robot_description': robot_description_content}
+    robot_description = {
+        'robot_description': ParameterValue(robot_description_content, value_type=str)
+    }
 
     # Lanzar Gazebo
     gazebo = IncludeLaunchDescription(
@@ -25,7 +28,10 @@ def generate_launch_description():
                 FindPackageShare('ros_gz_sim'), 'launch', 'gz_sim.launch.py'
             ])
         ),
-        launch_arguments={'gz_args': '-r empty.sdf'}.items(),
+        launch_arguments={
+            'gz_args': '-r empty.sdf',
+            'use_sim_time': 'true'
+        }.items(),
     )
 
     # Publicar robot_description
@@ -42,58 +48,34 @@ def generate_launch_description():
         executable='create',
         arguments=['-entity', 'diffbot', '-topic', 'robot_description', '-x', '0.0', '-y', '0.0', '-z', '0.1'],
         output='screen',
-        parameters=[{'use_sim_time': True}]
     )
 
-    # Iniciar controller_manager
-    controller_manager = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        parameters=[
-            robot_description,
-            os.path.join(get_package_share_directory('tp1_robot'), 'config', 'diffbot_controllers.yaml')
+    # Bridge para control
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=[
+            '/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
+            '/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry',
+            '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
+            '/joint_states@sensor_msgs/msg/JointState@gz.msgs.Model',
         ],
         output='screen'
     )
 
-    # Spawners
-    joint_state_broadcaster_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_state_broadcaster'],
-        output='screen'
-    )
-
-    diffbot_base_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['diffbot_base_controller'],
+    # Joint state publisher
+    joint_state_publisher = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        parameters=[robot_description],
         output='screen'
     )
 
     return LaunchDescription([
         gazebo,
         robot_state_publisher,
+        joint_state_publisher,
         create,
-
-        RegisterEventHandler(
-            event_handler=OnProcessStart(
-                target_action=create,
-                on_start=[controller_manager],
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessStart(
-                target_action=controller_manager,
-                on_start=[joint_state_broadcaster_spawner],
-            )
-        ),
-
-        RegisterEventHandler(
-            event_handler=OnProcessStart(
-                target_action=joint_state_broadcaster_spawner,
-                on_start=[diffbot_base_controller_spawner],
-            )
-        ),
+        bridge,
     ])

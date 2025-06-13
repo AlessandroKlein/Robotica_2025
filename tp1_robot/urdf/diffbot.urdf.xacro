@@ -8,11 +8,11 @@
   <!-- ======================= -->
 
   <xacro:property name="chassis_mass" value="0.8"/>
-  <xacro:property name="wheel_radius" value="0.035"/>
-  <xacro:property name="wheel_width" value="0.025"/>
-  <xacro:property name="wheel_separation" value="0.16"/>
+  <xacro:property name="wheel_radius" value="0.035"/> <!-- Radio de la rueda en metros -->
+  <xacro:property name="wheel_width" value="0.025"/> <!-- Ancho de la rueda en metros -->
+  <xacro:property name="wheel_separation" value="0.16"/> <!-- Separación entre ruedas en metros -->
   <xacro:property name="wheel_color" value="silver"/>
-  <xacro:property name="caster_origin_xyz" value="-0.075 0 0.002"/>
+  <xacro:property name="caster_origin_xyz" value="-0.075 0 -0.0015"/> <!-- Posición del caster respecto al chasis (x: atrás, y: centro, z: altura) -->
   <xacro:property name="caster_color" value="orange"/>
 
   <!-- ======================= -->
@@ -28,15 +28,13 @@
 
   <link name="base_link">
     <visual>
-      <!-- <origin xyz="0 0 0" rpy="0 0 0"/>-->
       <geometry>
         <mesh filename="file://$(find tp1_robot)/meshes/chassis.stl"/>
       </geometry>
     </visual>
     <collision>
-      <!-- <origin xyz="0 0 0" rpy="0 0 0"/>-->
       <geometry>
-        <box size="0.195 0.1 0.05"/>
+        <box size="0.195 0.1 0.05"/> <!-- Tamaño del chasis (x: largo, y: ancho, z: alto) -->
       </geometry>
     </collision>
     <xacro:inertial_box mass="${chassis_mass}" x="0.195" y="0.1" z="0.05"/>
@@ -46,24 +44,24 @@
   <!-- === Macro para ruedas === -->
   <!-- ======================= -->
 
-  <xacro:macro name="wheel" params="prefix xyz axis">
+  <xacro:macro name="wheel" params="prefix xyz axis rpy">
     <link name="${prefix}_wheel">
       <visual>
-        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/> <!-- Origen de la visualización de la rueda -->
         <geometry>
-          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+          <mesh filename="file://$(find tp1_robot)/meshes/wheel.stl"/>
         </geometry>
         <material name="${wheel_color}"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <origin xyz="0 0 0" rpy="1.5708 0 0"/> <!-- Origen de la colisión de la rueda -->
         <geometry>
           <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
       </collision>
       <inertial>
         <mass value="0.2"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Centro de masa de la rueda -->
         <inertia ixx="0.001" ixy="0.0" ixz="0.0"
                  iyy="0.001" iyz="0.0"
                  izz="0.001"/>
@@ -71,7 +69,7 @@
     </link>
 
     <joint name="${prefix}_wheel_joint" type="continuous">
-      <origin xyz="${xyz}" rpy="0 0 0"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/> <!-- Posición de la rueda respecto al chasis (x: adelante/atrás, y: izquierda/derecha, z: arriba/abajo) -->
       <parent link="base_link"/>
       <child link="${prefix}_wheel"/>
       <axis xyz="${axis}"/>
@@ -91,8 +89,8 @@
   <!-- === Ruedas y motores === -->
   <!-- ======================= -->
 
-  <xacro:wheel prefix="left"  xyz="0.0175  0.065 -0.0175" axis="0 1 0"/>
-  <xacro:wheel prefix="right" xyz="0.0175 -0.065 -0.0175" axis="0 1 0"/>
+  <xacro:wheel prefix="left"  xyz="0.0185  0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 0"/> <!-- Rueda izquierda (x: adelante, y: izquierda, z: abajo) -->
+  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 3.14159"/> <!-- Rueda derecha (x: adelante, y: derecha, z: abajo) -->
   <xacro:motor prefix="left" chassis_width="0.1" reflect="false"/>
   <xacro:motor prefix="right" chassis_width="0.1" reflect="true"/>
 
@@ -102,16 +100,16 @@
 
   <link name="caster">
     <visual>
-      <origin xyz="0 0 0.0045" rpy="0 0 0"/>
+      <origin xyz="0 0 0.0045" rpy="0 0 0"/> <!-- Origen de la visualización del caster -->
       <geometry>
         <mesh filename="file://$(find tp1_robot)/meshes/caster_base.stl"/>
       </geometry>
       <material name="${caster_color}"/>
     </visual>
     <collision>
-      <origin xyz="0 0 0.0045" rpy="0 0 0"/>
+      <origin xyz="0 0 0.0045" rpy="0 0 0"/> <!-- Origen de la colisión del caster -->
       <geometry>
-        <box size="0.05 0.05 0.01"/>
+        <box size="0.05 0.05 0.01"/> <!-- Tamaño del caster (x: largo, y: ancho, z: alto) -->
       </geometry>
     </collision>
     <inertial>
@@ -123,21 +121,21 @@
   <joint name="caster_joint" type="fixed">
     <parent link="base_link"/>
     <child link="caster"/>
-    <origin xyz="${caster_origin_xyz}" rpy="0 0 0"/>
+    <origin xyz="${caster_origin_xyz}" rpy="0 0 0"/> <!-- Posición del caster respecto al chasis -->
   </joint>
 
   <link name="caster_wheel">
     <visual>
-      <origin xyz="-0.015 0 -0.020" rpy="0 0 0"/>
+      <origin xyz="-0.015 0 -0.020" rpy="0 0 0"/> <!-- Origen de la visualización de la rueda del caster -->
       <geometry>
         <mesh filename="file://$(find tp1_robot)/meshes/caster_wheel.stl"/>
       </geometry>
       <material name="${caster_color}"/>
     </visual>
     <collision>
-      <origin xyz="-0.015 0 -0.020" rpy="0 0 0"/>
+      <origin xyz="-0.015 0 -0.020" rpy="0 0 0"/> <!-- Origen de la colisión de la rueda del caster -->
       <geometry>
-        <cylinder radius="0.02" length="0.01"/>
+        <cylinder radius="0.02" length="0.01"/> <!-- Radio y longitud de la rueda del caster -->
       </geometry>
     </collision>
     <inertial>
@@ -149,22 +147,22 @@
   <joint name="caster_wheel_joint" type="continuous">
     <parent link="caster"/>
     <child link="caster_wheel"/>
-    <origin xyz="0 0 -0.01" rpy="0 0 0"/>
+    <origin xyz="0 0 -0.01" rpy="0 0 0"/> <!-- Posición de la rueda del caster respecto al caster -->
     <axis xyz="0 0 1"/>
   </joint>
 
   <link name="caster_wheel_support">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Origen de la visualización del soporte del caster -->
       <geometry>
         <mesh filename="file://$(find tp1_robot)/meshes/caster_wheel_support.stl"/>
       </geometry>
       <material name="${caster_color}"/>
     </visual>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Origen de la colisión del soporte del caster -->
       <geometry>
-        <box size="0.02 0.02 0.02"/>
+        <box size="0.02 0.02 0.02"/> <!-- Tamaño del soporte del caster (x: largo, y: ancho, z: alto) -->
       </geometry>
     </collision>
     <inertial>
