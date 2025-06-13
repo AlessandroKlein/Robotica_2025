@@ -30,9 +30,11 @@
   <build_depend>nav_msgs</build_depend>
   <build_depend>robot_state_publisher</build_depend>
   <build_depend>joint_state_publisher_gui</build_depend>
-  <depend>controller_manager</depend>
-  <depend>velocity_controllers</depend>
-  <!-- <build_depend>gazebo_ros2_control</build_depend> -->
+  <build_depend>controller_manager</build_depend>
+  <build_depend>velocity_controllers</build_depend>
+  <build_depend>diff_drive_controller</build_depend>
+  <build_depend>ros_gz_sim</build_depend>
+  <build_depend>gz_ros2_control</build_depend>
 
   <!-- Dependencias de tiempo de ejecución -->
   <exec_depend>rclpy</exec_depend>
@@ -41,9 +43,12 @@
   <exec_depend>nav_msgs</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>joint_state_publisher_gui</exec_depend>
-  <exec_depend>ros_gz</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>velocity_controllers</exec_depend>
+  <exec_depend>diff_drive_controller</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
   <exec_depend>gz_ros2_control</exec_depend>
-  <!-- <exec_depend>gazebo_ros2_control</exec_depend> -->
+  <exec_depend>joint_state_broadcaster</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>
