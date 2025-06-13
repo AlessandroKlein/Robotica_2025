@@ -133,7 +133,7 @@
       <material name="${caster_color}"/>
     </visual>
     <collision>
-      <origin xyz="-0.015 0 -0.020" rpy="0 0 0"/> <!-- Origen de la colisión de la rueda del caster -->
+      <origin xyz="-0.015 0 -0.030" rpy="0 0 0"/> <!-- Origen de la colisión de la rueda del caster (Modificar colicion rueda giro)-->
       <geometry>
         <cylinder radius="0.02" length="0.01"/> <!-- Radio y longitud de la rueda del caster -->
       </geometry>
