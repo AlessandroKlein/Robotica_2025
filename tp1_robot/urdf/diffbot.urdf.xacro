@@ -240,4 +240,17 @@
     </plugin>
   </gazebo>
 
+  <!-- ======================= -->
+  <!-- === Plugin de control === -->
+  <!-- ======================= -->
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(find tp1_robot)/config/diffbot_controllers.yaml</parameters>
+      <robot_sim_type>gz_ros2_control/GazeboSimSystem</robot_sim_type>
+    </plugin>
+  </gazebo>
+
 </robot>

@@ -1,23 +1,26 @@
 controller_manager:
   ros__parameters:
-    update_rate: 50
+    update_rate: 100
     use_sim_time: true
 
-    joint_state_broadcaster:
-      type: joint_state_broadcaster/JointStateBroadcaster
-
-    diffbot_base_controller:
-      type: diff_drive_controller/DiffDriveController
-
-diffbot_base_controller:
+diff_drive_controller:
   ros__parameters:
+    use_sim_time: true
     left_wheel_names: ['left_wheel_joint']
     right_wheel_names: ['right_wheel_joint']
     wheel_separation: 0.16
     wheel_radius: 0.035
-    publish_rate: 50.0
-    base_frame_id: base_link
     linear.x.has_velocity_limits: true
     linear.x.max_velocity: 0.5
     angular.z.has_velocity_limits: true
     angular.z.max_velocity: 1.0
+    publish_rate: 50.0
+    base_frame_id: base_link
+    odom_frame_id: odom
+    enable_odom_tf: true
+    publish_wheel_tf: true
+    publish_wheel_odom_tf: true
+
+joint_state_broadcaster:
+  ros__parameters:
+    use_sim_time: true

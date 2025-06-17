@@ -1,6 +1,6 @@
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, RegisterEventHandler
-from launch.substitutions import PathJoinSubstitution, Command
+from launch.actions import IncludeLaunchDescription, RegisterEventHandler, DeclareLaunchArgument
+from launch.substitutions import PathJoinSubstitution, Command, LaunchConfiguration
 from launch.event_handlers import OnProcessStart
 from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -10,6 +10,9 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
+    # Declarar argumento para tiempo simulado
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+
     pkg_share = FindPackageShare('tp1_robot')
 
     urdf_file = PathJoinSubstitution([
@@ -18,7 +21,8 @@ def generate_launch_description():
 
     robot_description_content = Command(['xacro ', urdf_file])
     robot_description = {
-        'robot_description': ParameterValue(robot_description_content, value_type=str)
+        'robot_description': ParameterValue(robot_description_content, value_type=str),
+        'use_sim_time': use_sim_time
     }
 
     # Lanzar Gazebo
@@ -30,7 +34,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             'gz_args': '-r empty.sdf',
-            'use_sim_time': 'true'
+            'use_sim_time': use_sim_time
         }.items(),
     )
 
@@ -60,7 +64,10 @@ def generate_launch_description():
             '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/joint_states@sensor_msgs/msg/JointState@gz.msgs.Model',
         ],
-        output='screen'
+        output='screen',
+        respawn=True,
+        respawn_delay=2,
+        parameters=[{'use_sim_time': use_sim_time}]
     )
 
     # Joint state publisher
@@ -73,9 +80,14 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        DeclareLaunchArgument(
+            'use_sim_time',
+            default_value='true',
+            description='Use simulation time'
+        ),
         gazebo,
         robot_state_publisher,
         joint_state_publisher,
         create,
-        bridge,
+        bridge
     ])
