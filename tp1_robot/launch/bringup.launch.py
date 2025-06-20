@@ -1,59 +1,106 @@
+##  ros2 launch tp1_robot bringup.launch.py use_rviz:=true
+
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, ExecuteProcess
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import Command, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
-from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-from ament_index_python.packages import get_package_share_directory
-import xacro
-import os
+from launch_ros.parameter_descriptions import ParameterValue
+
 
 def generate_launch_description():
-    # Parámetro testing
-    declare_testing_arg = DeclareLaunchArgument(
-        'testing',
-        default_value='true',
-        description='Activa herramientas GUI si es true'
-    )
+    # ========================
+    # Argumentos
+    # ========================
+    use_rviz = LaunchConfiguration('use_rviz', default='false')
 
-    # Procesar XACRO
-    xacro_file = os.path.join(get_package_share_directory('tp1_robot'), 'urdf', 'diffbot.xacro')
-    robot_description_raw = xacro.process_file(xacro_file)
-    robot_description_str = robot_description_raw.toxml()
+    # ========================
+    # Paths
+    # ========================
+    pkg_tp1 = FindPackageShare('tp1_robot')
+    urdf_file = PathJoinSubstitution([pkg_tp1, 'urdf', 'diffbot.urdf.xacro'])
+    controllers_yaml = PathJoinSubstitution([pkg_tp1, 'config', 'diffbot_controllers.yaml'])
+    rviz_config = PathJoinSubstitution([pkg_tp1, 'rviz', 'diffbot.rviz'])
 
-    # Nodo robot_state_publisher
+    robot_description = Command(['xacro ', urdf_file])
+
+    # ========================
+    # Nodos ROS 2
+    # ========================
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        parameters=[{'robot_description': ParameterValue(robot_description_str, value_type=str)}]
+        name='robot_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': ParameterValue(robot_description, value_type=str)}]
     )
 
-    # Nodo joint_state_publisher_gui (opcional)
-    joint_state_publisher_gui = Node(
-        package='joint_state_publisher_gui',
-        executable='joint_state_publisher_gui',
-        condition=IfCondition(LaunchConfiguration('testing'))
+    controller_manager = Node(
+        package='controller_manager',
+        executable='ros2_control_node',
+        parameters=[
+            {'robot_description': ParameterValue(robot_description, value_type=str)},
+            controllers_yaml
+        ],
+        output='screen'
     )
 
-    # Nodo RViz
+    spawn_entity = Node(
+        package='ros_gz_sim',
+        executable='create',
+        arguments=['-name', 'diffbot', '-topic', 'robot_description'],
+        output='screen'
+    )
+
+    load_js_broadcaster = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'joint_state_broadcaster'],
+        output='screen'
+    )
+
+    load_left_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'left_wheel_velocity_controller'],
+        output='screen'
+    )
+
+    load_right_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'right_wheel_velocity_controller'],
+        output='screen'
+    )
+
+    # ========================
+    # Gazebo (vía ros_gz_sim)
+    # ========================
+    gazebo_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([FindPackageShare('ros_gz_sim'), 'launch', 'gz_sim.launch.py'])
+        ),
+        launch_arguments={'gz_args': 'empty.sdf'}.items()
+    )
+
+    # ========================
+    # RViz opcional
+    # ========================
     rviz = Node(
+        condition=IfCondition(use_rviz),
         package='rviz2',
         executable='rviz2',
-        arguments=['-d', PathJoinSubstitution([FindPackageShare('tp1_robot'), 'rviz', 'diffbot.rviz'])],
-        condition=IfCondition(LaunchConfiguration('testing'))
+        arguments=['-d', rviz_config],
+        output='screen'
     )
 
-    automatic_mover = Node(
-        package='tp1_robot',
-        executable='automatic_mover_node',
-        name='automatic_mover'
-    )
-
+    # ========================
+    # Ensamblado final
+    # ========================
     return LaunchDescription([
-        declare_testing_arg,
+        DeclareLaunchArgument('use_rviz', default_value='false', description='Lanzar RViz'),
         robot_state_publisher,
-        joint_state_publisher_gui,
-        rviz,
-        automatic_mover
+        gazebo_launch,
+        controller_manager,
+        spawn_entity,
+        load_js_broadcaster,
+        load_left_controller,
+        load_right_controller,
+        rviz
     ])
