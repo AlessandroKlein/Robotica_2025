@@ -12,9 +12,7 @@ from ament_index_python.packages import get_package_share_directory
 import os
 
 def generate_launch_description():
-    # Declarar argumento para tiempo simulado
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-
     pkg_share = FindPackageShare('tp1_robot')
 
     urdf_file = PathJoinSubstitution([
@@ -35,12 +33,12 @@ def generate_launch_description():
             ])
         ),
         launch_arguments={
-            'gz_args': '-r empty.sdf',
+            'gz_args': '-r -v 4 empty.sdf',  # -v 4 aumenta el nivel de detalle
             'use_sim_time': use_sim_time
         }.items(),
     )
 
-    # Publicar robot_description
+    # Publicar descripción del robot
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -56,7 +54,7 @@ def generate_launch_description():
         output='screen',
     )
 
-    # Bridge para control
+    # Bridge
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',

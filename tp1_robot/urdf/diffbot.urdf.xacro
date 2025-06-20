@@ -191,7 +191,7 @@
 
   <ros2_control name="DiffbotSystemHardware" type="system">
     <hardware>
-      <plugin>mock_components/GenericSystem</plugin>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
     <joint name="left_wheel_joint">
       <command_interface name="velocity"/>
@@ -214,13 +214,13 @@
   <!-- ============================ -->
 
   <gazebo>
-    <plugin name="gz_ros2_control" filename="libgz_ros2_control.so">
+    <plugin name="gazebo_ros2_control" filename="libgz_ros2_control.so">
       <ros2_control_parameters>$(find tp1_robot)/config/diffbot_controllers.yaml</ros2_control_parameters>
     </plugin>
   </gazebo>
 
   <!-- ======================= -->
-  <!-- === Plugin de control === -->
+  <!-- === Plugin Gazebo   === -->
   <!-- ======================= -->
 
   <gazebo>
