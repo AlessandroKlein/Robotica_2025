@@ -11,8 +11,8 @@ ros2 launch tp1_robot diffbot_sim.launch.py
 ros2 launch tp1_robot gazebo.launch.py
 
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "linear:
-  x: 0.2
-  y: 0.0
+  x: 2.0
+  y: 1.0
   z: 0.0
 angular:
   x: 0.0
@@ -21,6 +21,9 @@ angular:
 ```
 ```bash
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+
+ros2 run controller_manager spawner diff_drive_controller --param-file $(find tp1_robot)/config/diff_drive_controller.yaml
+ros2 run controller_manager spawner diff_drive_controller --param-file /home/ale/robotica-2025/install/tp1_robot/share/tp1_robot/config/diff_drive_controller.yaml
 ```
 ___
 # Instalar dependencias

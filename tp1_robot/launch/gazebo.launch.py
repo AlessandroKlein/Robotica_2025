@@ -75,27 +75,29 @@ def generate_launch_description():
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['joint_state_broadcaster'],
+        arguments=[
+            'joint_state_broadcaster',
+            '--param-file', PathJoinSubstitution([
+                FindPackageShare('tp1_robot'),
+                'config',
+                'joint_state_broadcaster.yaml'
+            ]),
+        ],
     )
 
-    # Retraso para asegurar que todo esté listo
-    delayed_diff_drive_controller_spawner = TimerAction(
-        period=3.0,
-        actions=[
-            Node(
-                package='controller_manager',
-                executable='spawner',
-                arguments=[
-                    'diff_drive_controller',
-                    '--param-file',
-                    PathJoinSubstitution([
-                        FindPackageShare('tp1_robot'),
-                        'config',
-                        'diff_drive_controller.yaml'
-                    ]),
-                ],
-            )
-        ]
+    # Controlador de movimiento diferencial (con retardo)
+    diff_drive_controller_spawner = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=[
+            'diff_drive_controller',
+            '--param-file',
+            PathJoinSubstitution([
+                FindPackageShare('tp1_robot'),
+                'config',
+                'diff_drive_controller.yaml'
+            ]),
+        ],
     )
 
     return LaunchDescription([
@@ -104,12 +106,14 @@ def generate_launch_description():
             default_value='true',
             description='Use simulation time'
         ),
+
+        # Lanzamientos iniciales
         gazebo,
         robot_state_publisher,
         create,
         bridge,
 
-        # Una vez que el robot esté creado, lanzamos los controladores
+        # Secuencia de controladores
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=create,
@@ -120,7 +124,12 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=joint_state_broadcaster_spawner,
-                on_exit=[delayed_diff_drive_controller_spawner],
+                on_exit=[
+                    TimerAction(
+                        period=2.0,
+                        actions=[diff_drive_controller_spawner]
+                    )
+                ],
             )
         )
     ])

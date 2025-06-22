@@ -36,6 +36,7 @@ def main(): # Define la función principal del programa.
     rclpy.init() # Inicializa el sistema de cliente de ROS2.
     mover = AutomaticMover() # Crea una instancia del nodo de movimiento automático.
     try: # Inicia un bloque try para manejar posibles excepciones.
+        mover.turn(duration=2.0) # Llama al método para girar durante 2 segundos.
         mover.move_straight(duration=3.0) # Llama al método para moverse recto durante 3 segundos.
         mover.turn(duration=2.0) # Llama al método para girar durante 2 segundos.
         mover.move_straight(duration=3.0) # Llama al método para moverse recto de nuevo durante 3 segundos.

@@ -60,6 +60,14 @@
         <geometry>
           <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
+        <!-- Movimos el contacto aquí -->
+        <contact>
+          <ode>
+            <min_depth>0.001</min_depth>
+            <kp>1e3</kp>
+            <kd>1e1</kd>
+          </ode>
+        </contact>
       </collision>
       <xacro:inertial_cylinder mass="0.150" radius="${wheel_radius}" length="${wheel_width}">
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -79,7 +87,7 @@
     <gazebo reference="${prefix}_wheel">
       <mu1>1.0</mu1>
       <mu2>1.0</mu2>
-      <!--<material>Gazebo/Grey</material>-->
+      <material>Gazebo/Grey</material>
     </gazebo>
   </xacro:macro>
 
@@ -98,16 +106,16 @@
 
   <link name="caster">
     <visual>
-      <origin xyz="0 0 0.0045" rpy="0 0 0"/> <!-- Origen de la visualización del caster -->
+      <origin xyz="0 0 0.0045" rpy="0 0 0"/>
       <geometry>
         <mesh filename="file://$(find tp1_robot)/meshes/caster_base.stl"/>
       </geometry>
       <material name="${caster_color}"/>
     </visual>
     <collision>
-      <origin xyz="0 0 0.0045" rpy="0 0 0"/> <!-- Origen de la colisión del caster -->
+      <origin xyz="0 0 0.0045" rpy="0 0 0"/>
       <geometry>
-        <box size="0.05 0.05 0.01"/> <!-- Tamaño del caster (x: largo, y: ancho, z: alto) -->
+        <box size="0.05 0.05 0.01"/>
       </geometry>
     </collision>
     <inertial>
@@ -135,6 +143,14 @@
       <geometry>
         <cylinder radius="0.02" length="0.01"/>
       </geometry>
+      <!-- Contacto también aquí si lo necesitas -->
+      <contact>
+        <ode>
+          <min_depth>0.001</min_depth>
+          <kp>1e3</kp>
+          <kd>1e1</kd>
+        </ode>
+      </contact>
     </collision>
     <xacro:inertial_cylinder mass="0.150" radius="0.015" length="0.015">
       <origin xyz="-0.015 0 -0.030" rpy="0 0 0"/>
@@ -150,16 +166,16 @@
 
   <link name="caster_wheel_support">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Origen de la visualización del soporte del caster -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
         <mesh filename="file://$(find tp1_robot)/meshes/caster_wheel_support.stl"/>
       </geometry>
       <material name="${caster_color}"/>
     </visual>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/> <!-- Origen de la colisión del soporte del caster -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <box size="0.02 0.02 0.02"/> <!-- Tamaño del soporte del caster (x: largo, y: ancho, z: alto) -->
+        <box size="0.02 0.02 0.02"/>
       </geometry>
     </collision>
     <inertial>
@@ -211,7 +227,7 @@
       <state_interface name="velocity"/>
     </joint>
 
-    <!-- Caster no necesita comando, solo estado -->
+    <!-- Caster solo estado -->
     <joint name="caster_wheel_joint">
       <state_interface name="position"/>
       <state_interface name="velocity"/>
@@ -224,9 +240,44 @@
 
   <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-      <parameters>$(find tp1_robot)/config/diffbot_controllers.yaml</parameters>
+      <parameters>$(find tp1_robot)/config/diff_drive_controller.yaml</parameters>
       <robot_sim_type>gz_ros2_control/GazeboSimSystem</robot_sim_type>
+      <control_period>0.01</control_period> <!-- 100 Hz -->
     </plugin>
+  </gazebo>
+
+  <!-- Material base para evitar warnings -->
+  <gazebo reference="base_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <!-- Parámetros físicos generales -->
+  <gazebo reference="left_wheel_joint">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <fdir1>1 0 0</fdir1>
+    <material>Gazebo/Rubber</material>
+    <kp>1e3</kp>
+    <kd>1e1</kd>
+    <maxContacts>10</maxContacts>
+  </gazebo>
+
+  <gazebo reference="right_wheel_joint">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <fdir1>1 0 0</fdir1>
+    <material>Gazebo/Rubber</material>
+    <kp>1e3</kp>
+    <kd>1e1</kd>
+    <maxContacts>10</maxContacts>
+  </gazebo>
+
+  <gazebo reference="caster_wheel_joint">
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>1e3</kp>
+    <kd>1e1</kd>
+    <maxContacts>10</maxContacts>
   </gazebo>
 
 </robot>
