@@ -1,7 +1,7 @@
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, RegisterEventHandler, DeclareLaunchArgument, TimerAction
 from launch.substitutions import PathJoinSubstitution, Command, LaunchConfiguration
-from launch.event_handlers import OnProcessExit, OnProcessStart
+from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.substitutions import FindPackageShare
@@ -63,7 +63,7 @@ def generate_launch_description():
             '/odom@nav_msgs/msg/Odometry@gz.msgs.Odometry',
             '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             '/joint_states@sensor_msgs/msg/JointState@gz.msgs.Model',
-            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'  # Añadimos el reloj de simulación
+            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'
         ],
         output='screen',
         respawn=True,
@@ -78,19 +78,24 @@ def generate_launch_description():
         arguments=['joint_state_broadcaster'],
     )
 
-    # Controlador de movimiento diferencial
-    diff_drive_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=[
-            'diff_drive_controller',
-            '--param-file',
-            PathJoinSubstitution([
-                FindPackageShare('tp1_robot'),
-                'config',
-                'diff_drive_controller.yaml'
-            ]),
-        ],
+    # Retraso para asegurar que todo esté listo
+    delayed_diff_drive_controller_spawner = TimerAction(
+        period=3.0,
+        actions=[
+            Node(
+                package='controller_manager',
+                executable='spawner',
+                arguments=[
+                    'diff_drive_controller',
+                    '--param-file',
+                    PathJoinSubstitution([
+                        FindPackageShare('tp1_robot'),
+                        'config',
+                        'diff_drive_controller.yaml'
+                    ]),
+                ],
+            )
+        ]
     )
 
     return LaunchDescription([
@@ -115,7 +120,7 @@ def generate_launch_description():
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=joint_state_broadcaster_spawner,
-                on_exit=[diff_drive_controller_spawner],
+                on_exit=[delayed_diff_drive_controller_spawner],
             )
         )
     ])
