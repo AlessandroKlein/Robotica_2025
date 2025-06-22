@@ -189,20 +189,29 @@
   <!-- === ros2_control === -->
   <!-- ======================= -->
 
-  <ros2_control name="DiffbotSystemHardware" type="system">
+  <ros2_control name="GazeboSimSystem" type="system">
     <hardware>
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      <param name="robot_param">robot_description</param>
+      <param name="legacy_mode">false</param>
+      <param name="update_rate">100.0</param>
     </hardware>
+
+    <!-- Rueda izquierda -->
     <joint name="left_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
+
+    <!-- Rueda derecha -->
     <joint name="right_wheel_joint">
       <command_interface name="velocity"/>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
+
+    <!-- Caster no necesita comando, solo estado -->
     <joint name="caster_wheel_joint">
       <state_interface name="position"/>
       <state_interface name="velocity"/>
@@ -214,19 +223,7 @@
   <!-- ============================ -->
 
   <gazebo>
-    <plugin name="gazebo_ros2_control" filename="libgz_ros2_control.so">
-      <ros2_control_parameters>$(find tp1_robot)/config/diffbot_controllers.yaml</ros2_control_parameters>
-    </plugin>
-  </gazebo>
-
-  <!-- ======================= -->
-  <!-- === Plugin Gazebo   === -->
-  <!-- ======================= -->
-
-  <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-      <robot_param>robot_description</robot_param>
-      <robot_param_node>robot_state_publisher</robot_param_node>
       <parameters>$(find tp1_robot)/config/diffbot_controllers.yaml</parameters>
       <robot_sim_type>gz_ros2_control/GazeboSimSystem</robot_sim_type>
     </plugin>

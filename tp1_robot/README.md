@@ -7,6 +7,8 @@ ros2 launch tp1_robot gazebo.launch.py
 # V2
 ```bash
 ros2 launch tp1_robot diffbot_sim.launch.py
+
+ros2 launch tp1_robot gazebo.launch.py
 ```
 ```bash
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
