@@ -26,6 +26,12 @@ ros2 run controller_manager spawner diff_drive_controller --param-file $(find tp
 ros2 run controller_manager spawner diff_drive_controller --param-file /home/ale/robotica-2025/install/tp1_robot/share/tp1_robot/config/diff_drive_controller.yaml
 ```
 ___
+
+Verifica que /controller_manager/list_controllers muestre el controlador
+```bash
+ros2 service call /controller_manager/list_controllers controller_manager_msgs/srv/ListControllers {}
+```
+___
 # Instalar dependencias
 ```bash
 rosdep install --from-paths src --ignore-src -r -y
