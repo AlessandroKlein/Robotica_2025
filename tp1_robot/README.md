@@ -1,125 +1,114 @@
-```bash
-rm -rf {build,install,log} && colcon build --packages-select tp1_robot && source install/setup.bash 
-```
-```bash
-ros2 launch tp1_robot gazebo.launch.py
-```
-# V2
-```bash
-ros2 launch tp1_robot diffbot_sim.launch.py
+# 🤖 Repositorio de Proyecto ROS 2 - `tp1_robot`
 
-ros2 launch tp1_robot gazebo.launch.py
+---
 
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "linear:
-  x: 2.0
-  y: 1.0
-  z: 0.0
-angular:
-  x: 0.0
-  y: 0.0
-  z: 0.2"
+## 📦 Estructura del Paquete
+
 ```
-```bash
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
-
-ros2 run controller_manager spawner diff_drive_controller --param-file $(find tp1_robot)/config/diff_drive_controller.yaml
-ros2 run controller_manager spawner diff_drive_controller --param-file /home/ale/robotica-2025/install/tp1_robot/share/tp1_robot/config/diff_drive_controller.yaml
-```
-___
-
-Verifica que /controller_manager/list_controllers muestre el controlador
-```bash
-ros2 service call /controller_manager/list_controllers controller_manager_msgs/srv/ListControllers {}
-```
-___
-# Instalar dependencias
-```bash
-rosdep install --from-paths src --ignore-src -r -y
-```
-
-# Construir
-```bash
-colcon build --packages-select tp1_robot
-```
-
-# Source
-```bash
-source install/setup.bash
-```
-
-ros2 launch tp1_robot diffbot_sim.launch.py
-
-# Lanzar visualización
-```bash
-ros2 launch tp1_robot description.launch.py testing:=true
-```
-
-# Lanzar sin GUI
-```bash
-ros2 launch tp1_robot description.launch.py testing:=false
-```
-
-# Ejecutar teleop
-```bash
-ros2 run tp1_robot teleop_twist_keyboard_node
-```
-
-# Ver estado de juntas
-```bash
-ros2 topic echo /joint_states
-```
-
-# Ver transformaciones
-```bash
-ros2 run tf2_ros tf2_monitor
+└── tp1_robot/
+    ├── launch/         # Archivos .launch.py para iniciar simulación, visualización y control
+    ├── urdf/           # Definición del robot en formato XACRO
+    ├── config/         # Configuración de controladores (YAML)
+    ├── rviz/           # Configuraciones predefinidas de RViz
+    ├── meshes/         # Modelos 3D (STL) usados en el robot
+    └── src/            # Código fuente de nodos personalizados
 ```
 
 ---
-# Lanzar todo
+
+## ⚙️ Comandos Principales
+
+### 🔧 **Construcción del paquete**
+
 ```bash
-ros2 launch tp1_robot bringup.launch.py testing:=true
+rm -rf {build,install,log} && colcon build --packages-select tp1_robot && source install/setup.bash
 ```
+> Limpia, construye y carga las variables de entorno del paquete `tp1_robot`.
 
-# Ver estado de juntas
-```bash
-ros2 topic echo /joint_states
-```
+---
 
-# Ver transformaciones
-```bash
-ros2 run tf2_ros tf2_monitor
-```
+### 🏃‍♂️ **Ejecutar el robot en simulación (Gazebo)**
 
-# Ver gráfico de TF
-```bash
-ros2 run rqt_tf_tree rqt_tf_tree
-```
-
-# Ver movimiento del robot
-```bash
-ros2 topic echo /cmd_vel
-```
-
-# Ver odometría
-```bash
-ros2 topic echo /odom
-```
-
-
-# Gazebo
-```bash
-ros2 run ros_gz_sim create -topic robot_description
-```
-
-# V2
 ```bash
 ros2 launch tp1_robot diffbot_sim.launch.py
 ```
-# Xacro
+
 ```bash
-ros2 run xacro xacro $(ros2 pkg prefix tp1_robot)/share/tp1_robot/urdf/diffbot.xacro
+ros2 launch tp1_robot gazebo.launch.py
 ```
-# Ver datos
+
+> Inicia Gazebo con el robot cargado, publica su descripción y establece comunicación con ROS 2 usando `ros_gz_bridge`.
+
+---
+
+### 🌐 **Lanzar solo la descripción del robot (RViz)**
+
 ```bash
-ps -a
+ros2 launch tp1_robot description.launch.py
 ```
+> Carga el modelo URDF del robot, publica el estado de las articulaciones y abre RViz para visualizar el modelo.
+
+---
+
+### 🕹️ **Teleoperación con teclado**
+
+```bash
+ros2 run tp1_robot teleop_twist_keyboard_node
+```
+> Permite mover el robot usando las teclas del teclado (similar a `teleop_twist_keyboard` pero personalizado).
+
+---
+
+### 📈 **Ver estado de las articulaciones**
+
+```bash
+ros2 topic echo /joint_states
+```
+> Muestra los valores actuales de posición, velocidad y esfuerzo de las articulaciones del robot.
+
+---
+
+### 🗺️ **Ver información de odometría**
+
+```bash
+ros2 topic echo /odom
+```
+> Muestra la estimación de la posición y orientación del robot en el marco de referencia `odom`.
+
+---
+
+### 🔄 **Monitor de transformaciones TF**
+
+```bash
+ros2 run tf2_ros tf2_monitor
+```
+> Muestra todas las transformaciones espaciales activas en el sistema (útil para debuggear TF).
+
+---
+
+### 📊 **Visualizar árbol de transformaciones (RQT)**
+
+```bash
+ros2 run rqt_tf_tree rqt_tf_tree
+```
+> Interfaz gráfica para ver el árbol completo de transformaciones (`tf`) en tiempo real.
+
+---
+
+### 🛠️ **Listar controladores activos**
+
+```bash
+ros2 service call /controller_manager/list_controllers controller_manager_msgs/srv/ListControllers {}
+```
+> Muestra los controladores activos gestionados por `controller_manager`.
+
+
+---
+
+## 📝 Notas Adicionales
+
+- Asegúrate de haber corrido `source install/setup.bash` después de construir el proyecto.
+- Si trabajas con Gazebo, verifica que los plugins estén correctamente incluidos en el URDF.
+- El paquete ya tiene soporte para ROS 2 Control y transformaciones TF.
+
+---
