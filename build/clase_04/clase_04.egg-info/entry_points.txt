@@ -1,3 +1,0 @@
-[console_scripts]
-publicar = clase_04.nodo_publicador:main
-suscribir = clase_04.nodo_suscriptor:main
