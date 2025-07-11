@@ -17,7 +17,6 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.actions import Node as RosNode
 from launch.actions import TimerAction
 
-
 def generate_launch_description():
     declare_robot_name = DeclareLaunchArgument(
         "name",
@@ -82,51 +81,27 @@ def generate_launch_description():
         output="screen",
     )
 
-    clock_bridge = RosNode(
+    clock_bridge = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
         arguments=["/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock"],
         output="screen",
     )
 
-    # Spawners con retrasos para evitar llamadas simultáneas
-    joint_state_broadcaster_spawner = TimerAction(
-        period=5.0,  # espera 5s antes de lanzarlo
-        actions=[
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=["joint_state_broadcaster"],
-                parameters=[{"use_sim_time": use_sim_time}],
-                output="screen",
-            )
-        ],
+    # Spawner del joint_state_broadcaster
+    joint_state_broadcaster_spawner = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'joint_state_broadcaster'],
+        output='screen'
     )
 
-    velocity_controller_l_spawner = TimerAction(
-        period=7.0,  # 2s después del anterior
-        actions=[
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=["velocity_controller_left"],
-                parameters=[{"use_sim_time": use_sim_time}],
-                output="screen",
-            )
-        ],
+    velocity_controller_left = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'velocity_controller_left'],
+        output='screen'
     )
 
-    velocity_controller_r_spawner = TimerAction(
-        period=9.0,  # 2s después del anterior
-        actions=[
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=["velocity_controller_right"],
-                parameters=[{"use_sim_time": use_sim_time}],
-                output="screen",
-            )
-        ],
+    velocity_controller_right = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'velocity_controller_right'],
+        output='screen'
     )
 
     return LaunchDescription(
@@ -138,7 +113,7 @@ def generate_launch_description():
             spawn_entity,
             clock_bridge,
             joint_state_broadcaster_spawner,
-            velocity_controller_l_spawner,
-            velocity_controller_r_spawner,
+            velocity_controller_left,
+            velocity_controller_right,
         ]
     )

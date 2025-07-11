@@ -15,12 +15,36 @@
     rm -rf build/control_robot install/control_robot  && colcon build --packages-select control_robot  && source install/setup.bash
 ```
 
-## Carga los controladores definidos (si están configurados en el launch), Rviz
+## Carga los controladores definidos (si están configurados en el launch), Rviz (Ejecicio 2)
 ```bash
     source install/setup.bash && ros2 launch robot_description description.launch.py
 ```
 
-## Carga los controladores definidos (si están configurados en el launch), Gzbo
+## Carga los controladores definidos (si están configurados en el launch), Gzbo (Ejercicio 3)
 ```bash
     source install/setup.bash && ros2 launch gz_robot gazebo.launch.py
+    ros2 topic pub /velocity_controller_left/commands std_msgs/msg/Float64MultiArray "data: [2.0]"
+    ros2 topic pub /velocity_controller_right/commands std_msgs/msg/Float64MultiArray "data: [2.0]"
 ```
+
+## (Ejercicio 4)
+```bash
+    source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
+```
+
+## Ver la respuesta del controllers
+```bash
+ros2 service call /controller_manager/list_controllers controller_manager_msgs/srv/ListControllers "{}"
+```
+
+## Listado de topic
+```bash
+ros2 topic list
+    ros2 topic echo /clock
+```
+
+```bash
+ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x:0.1, y: 0.1}, angular: {z:0.3}}"
+```
+
+## Libreria de ros2 jazzy
