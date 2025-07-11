@@ -1,216 +1,239 @@
 <?xml version="1.0"?>
-<robot name="diffbot" xmlns:xacro="http://www.ros.org/wiki/xacro"    
-    xmlns:gazebo="http://www.gazebosim.org/schema/gazebo_urdf">
+<robot name="diffbot"
+  xmlns:xacro="http://www.ros.org/wiki/xacro"
+  xmlns:gazebo="http://www.gazebosim.org/schema/gazebo_urdf">
 
   <!-- ======================= -->
   <!-- === Propiedades === -->
-  <!-- Definición de propiedades reutilizables como masas, colores, dimensiones de ruedas y caster -->
-  <xacro:property name="chassis_mass" value="0.800"/>
-  <xacro:property name="wheel_radius" value="0.035"/> <!-- Radio de la rueda en metros -->
-  <xacro:property name="wheel_width" value="0.025"/> <!-- Ancho de la rueda en metros -->
-  <xacro:property name="wheel_separation" value="0.16"/> <!-- Separación entre ruedas en metros -->
-  <xacro:property name="caster_origin_xyz" value="-0.075 0 -0.0075"/> <!-- Posición del caster respecto al chasis -->
-  
-  <xacro:property name="base_elevation" value="0.055"/>
-  <xacro:property name="base_color" value="green"/>
-  <xacro:property name="wheel_color" value="silver"/>
-  <xacro:property name="caster_color" value="orange"/>
+  <!-- Definición de propiedades reutilizables: masas, colores, dimensiones de ruedas y caster -->
+  <xacro:property name="chassis_mass" value="0.800" />
+  <xacro:property name="wheel_radius" value="0.035" />
+  <!-- Radio de la rueda en metros -->
+  <xacro:property name="wheel_width" value="0.025" />
+  <!-- Ancho de la rueda en metros -->
+  <xacro:property name="wheel_separation" value="0.16" />
+  <!-- Separación entre ruedas en metros -->
+  <xacro:property name="caster_origin_xyz" value="-0.075 0 -0.0075" />
+  <!-- Posición del caster respecto al chasis -->
 
-  <xacro:property name="wheelSeparation" value="0.13"/>
+  <xacro:property name="base_elevation" value="0.055" />
+  <xacro:property name="base_color" value="green" />
+  <xacro:property name="wheel_color" value="silver" />
+  <xacro:property name="caster_color" value="orange" />
+
+  <xacro:property name="wheelSeparation" value="0.13" />
 
   <!-- ======================= -->
   <!-- === Includes === -->
-  <!-- Inclusión de archivos xacro auxiliares para definir macros de inercia y motor -->
-  <xacro:include filename="$(find robot_description)/urdf/inertial_macros.xacro"/>
-  <xacro:include filename="$(find robot_description)/urdf/motor.xacro"/>
+  <!-- Inclusión de archivos xacro auxiliares para macros de inercia y motor -->
+  <xacro:include filename="$(find robot_description)/urdf/inertial_macros.xacro" />
+  <xacro:include filename="$(find robot_description)/urdf/motor.xacro" />
 
 
-  <link name="base_footprint"/>
+  <link name="base_footprint" />
   <joint name="base_joint" type="fixed">
-    <parent link="base_footprint"/>
-    <child link="base_link"/>
-    <origin xyz="0 0 ${base_elevation}" rpy="0 0 0"/>
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0 0 ${base_elevation}" rpy="0 0 0" />
   </joint>
 
   <!-- ======================= -->
   <!-- === Chasis del robot === -->
-  <!-- Definición del link principal del robot: el chasis -->
+  <!-- Link principal del robot: el chasis -->
   <link name="base_link">
     <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="file://$(find robot_description)/meshes/chassis.stl" scale="1 1 1"/>
+        <mesh filename="file://$(find robot_description)/meshes/chassis.stl" scale="1 1 1" />
       </geometry>
-      <material name="${base_color}"/> <!-- Colo que se visualiza en RViz-->
+      <material name="${base_color}" />
+      <!-- Colo que se visualiza en RViz-->
     </visual>
+
     <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.195 0.1 0.05"/> <!-- Tamaño del chasis (x: largo, y: ancho, z: alto) -->
+        <box size="0.195 0.1 0.05" />
       </geometry>
     </collision>
+
     <xacro:inertial_box mass="0.8" x="0.195" y="0.100" z="0.05">
-      <origin xyz="0 0 0.0525" rpy="0 0 0"/>
+      <origin xyz="0 0 0.0525" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
 
   <!-- ======================= -->
   <!-- === Macro para ruedas === -->
-  <!-- Macro reutilizable para definir una rueda y su joint asociado -->
-  <!-- Ruedas  MODIFICAR ,  Debe contener al menos un base_link asignado al chasis del robot y un link y un
-  joint por cada rueda, Debeestar parametrizado al menos el radio de las ruedas de tracción y la separación
-  de las mismas--> 
+  <!-- Macro reutilizable para definir una rueda y su joint asociado. Parametrizado por radio y
+  separación. -->
   <xacro:macro name="wheel" params="prefix xyz axis rpy">
-    <joint name="wheel_${prefix}_joint" type="continuous">
-      <parent link="base_link"/>
-      <child link="wheel_${prefix}_link"/>
-      <origin xyz="${xyz}" rpy="${rpy}"/>
-      <axis xyz="${axis}"/>
+
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link" />
+      <child link="${prefix}_wheel_link" />
+      <origin xyz="${xyz}" rpy="${rpy}" />
+      <axis xyz="${axis}" />
     </joint>
 
-    <link name="wheel_${prefix}_link">
+    <link name="${prefix}_wheel_link">
       <visual>
-        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <origin xyz="0 0 0" rpy="1.5708 0 0" />
         <geometry>
-          <mesh filename="file://$(find robot_description)/meshes/wheel.stl" scale="1 1 1"/>
+          <mesh filename="file://$(find robot_description)/meshes/wheel.stl" scale="1 1 1" />
         </geometry>
-        <material name="${wheel_color}"/> <!-- Colo que se visualiza en RViz-->
+        <material name="${wheel_color}" />
+        <!-- Colo que se visualiza en RViz-->
       </visual>
+
       <collision>
-        <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+        <origin xyz="0 0 0" rpy="1.5708 0 0" />
         <geometry>
           <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
+        <material name="${wheel_color}" />
       </collision>
+
       <xacro:inertial_cylinder mass="0.150" radius="${wheel_radius}" length="${wheel_width}">
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0" />
       </xacro:inertial_cylinder>
     </link>
+
   </xacro:macro>
 
   <!-- ======================= -->
   <!-- === Ruedas y motores === -->
-  <!-- Instanciación de las ruedas y motores usando las macros -->
-  <xacro:wheel prefix="left" xyz="0.0185  0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 0"/>
-  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 3.14159"/>
-
-  <xacro:motor prefix="left" chassis_width="0.1" reflect="false"/>
-  <xacro:motor prefix="right" chassis_width="0.1" reflect="true"/>
+  <!-- Instanciación de ruedas y motores usando las macros -->
+  <xacro:wheel prefix="left" xyz="0.0185  0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 0" />
+  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 3.14159" />
+  <!-- Motores -->
+  <xacro:motor prefix="left" chassis_width="0.1" reflect="false" />
+  <xacro:motor prefix="right" chassis_width="0.1" reflect="true" />
 
   <!-- ======================= -->
-  <!-- === Caster === -->
-  <!-- Definición del caster (rueda loca) y sus componentes -->
-  <!-- BASE FIJA  -->
+  <!-- === Caster (rueda loca) === -->
+  <!-- Definición del caster y sus componentes -->
+  <!-- BASE FIJA -->
 
   <joint name="caster_base_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="caster"/>
-    <origin xyz="${caster_origin_xyz}" rpy="0 0 0"/>
+    <parent link="base_link" />
+    <child link="caster" />
+    <origin xyz="${caster_origin_xyz}" rpy="0 0 0" />
   </joint>
 
   <!-- BASE FIJA  -->
   <link name="caster">
     <visual>
-      <origin xyz="0 0 0.0045" rpy="0 0 0"/>
+      <origin xyz="0 0 0.0045" rpy="0 0 0" />
       <geometry>
-        <mesh filename="file://$(find robot_description)/meshes/caster_base.stl"/>
+        <mesh filename="file://$(find robot_description)/meshes/caster_base.stl" />
       </geometry>
-      <material name="${caster_color}"/>
+      <material name="${caster_color}" />
     </visual>
+
     <collision>
-      <origin xyz="0 0 0.0045" rpy="0 0 0"/>
+      <origin xyz="0 0 0.0045" rpy="0 0 0" />
       <geometry>
-        <box size="0.05 0.05 0.01"/>
+        <!--<box
+        size="0.05 0.05 0.01"/>-->
+        <box size="0.033 0.039 0.016" />
       </geometry>
     </collision>
+
     <xacro:inertial_box mass="0.020" x="0.032" y="0.038" z="0.015">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
 
-  <!-- Rueda Loca -->
+  <!-- Rueda loca -->
   <joint name="caster_wheel_joint" type="continuous">
-    <parent link="caster_wheel_support"/>
-    <child link="caster_wheel"/>
-    <origin xyz="-0.015 0 -0.020" rpy="0 0 0"/>
-    <axis xyz="0 1 0"/>
+    <parent link="caster_wheel_support" />
+    <child link="caster_wheel" />
+    <origin xyz="-0.015 0 -0.020" rpy="0 0 0" />
+    <axis xyz="0 1 0" /><!-- Giro en el eje y para simular la misma velocidad de las otras ruedas -->
   </joint>
-  
+
   <!-- RUEDA MOVIL  -->
   <link name="caster_wheel">
     <visual>
       <!-- Rotamos el cilindro 90° alrededor del eje X para que su eje de giro sea el eje Y -->
-      <origin xyz="0 0 0" rpy="0 0 0"/> <!--1.5708-->
+      <origin xyz="0 0 0" rpy="0 0 0" /><!--1.5708-->
       <geometry>
-        <mesh filename="file://$(find robot_description)/meshes/caster_wheel.stl"/>
+        <mesh filename="file://$(find robot_description)/meshes/caster_wheel.stl" />
       </geometry>
-      <material name="${caster_color}"/>
+      <material name="${caster_color}" />
     </visual>
+
     <collision>
       <!-- Misma rotación para colisión -->
-      <origin xyz="0 0 -0.007" rpy="0 0 0"/>
+      <origin xyz="0 0 -0.007" rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.015" length="0.016"/>
+        <cylinder radius="0.015" length="0.016" />
       </geometry>
     </collision>
+
     <!-- Inercia orientada correctamente -->
     <xacro:inertial_cylinder mass="0.150" radius="0.015" length="0.016">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_cylinder>
   </link>
 
-  <!-- Soporte Rueda -->
+  <!-- Soporte de la rueda loca -->
   <joint name="caster_support_joint" type="continuous">
-    <parent link="base_link"/>
-    <child link="caster_wheel_support"/>
-    <origin xyz="-0.075 0 -0.018" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
+    <parent link="base_link" />
+    <child link="caster_wheel_support" />
+    <origin xyz="-0.075 0 -0.015" rpy="0 0 0" />
+    <axis xyz="0 0 1" />
   </joint>
 
   <link name="caster_wheel_support">
     <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="file://$(find robot_description)/meshes/caster_wheel_support.stl"/>
+        <mesh filename="file://$(find robot_description)/meshes/caster_wheel_support.stl" />
       </geometry>
-      <material name="${caster_color}"/>
+      <material name="${caster_color}" />
     </visual>
+
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.02 0.02 0.02"/>
+        <!--<box
+        size="0.02 0.02 0.02"/>-->
+        <box size="0.033 0.039 0.016" />
       </geometry>
     </collision>
-    <inertial>
-      <mass value="0.020"/>
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
-    </inertial>
+
+    <xacro:inertial_box mass="0.02" x="0.033" y="0.025" z="0.025">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </xacro:inertial_box>
   </link>
 
-  <!-- Configuración de ros2_control , pasar datos para calcualr la s otras cosas  --> 
+
+  <!-- Configuración de ros2_control , pasar datos para calcualr la s otras cosas  -->
   <ros2_control name="GazeboSystem" type="system">
     <hardware>
-        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
-    <joint name="wheel_left_joint">   <!-- Rueda LEFT , izq--> 
+    <joint name="left_wheel_joint"><!-- Rueda LEFT , izq-->
       <command_interface name="velocity">
-        <param name="min">-1.046198 </param>
-        <param name="max">1.046198 </param>
+        <param name="min">-1.046198</param>
+        <param name="max">1.046198</param>
       </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
+      <state_interface name="position" />
+      <state_interface name="velocity" />
     </joint>
-    <joint name="wheel_right_joint"> <!-- Rueda Right, der--> 
+    <joint name="right_wheel_joint"><!-- Rueda Right, der-->
       <command_interface name="velocity">
-        <param name="min">-1.046198 </param>
-        <param name="max">1.046198 </param>
+        <param name="min">-1.046198</param>
+        <param name="max">1.046198</param>
       </command_interface>
-      <state_interface name="position"/>
-      <state_interface name="velocity"/>
+      <state_interface name="position" />
+      <state_interface name="velocity" />
     </joint>
   </ros2_control>
 
   <gazebo>
-    <plugin filename="gz_ros2_control-system"
-            name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <parameters>$(find control_robot)/config/controllers.yaml</parameters>
     </plugin>
   </gazebo>
