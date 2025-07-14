@@ -1,0 +1,4 @@
+robot_twist_controller:
+  ros__parameters:
+    wheel_radius: 0.035 # Ajusta este valor al radio real de tus ruedas en metros
+    wheel_separation: 0.28 # Ajusta este valor a la separación real entre tus ruedas en metros
