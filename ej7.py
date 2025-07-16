@@ -263,8 +263,8 @@ def simular_trayectoria_completa(robot):
 # --- Main execution ---
 if __name__ == "__main__":
     # Propiedades del robot
-    radio_rueda_robot = 0.05  # metros
-    separacion_ruedas_robot = 0.2  # metros
+    radio_rueda_robot = 0.07  # metros
+    separacion_ruedas_robot = 0.135  # metros
 
     robot = RobotDiferencial(radio_rueda_robot, separacion_ruedas_robot)
 
