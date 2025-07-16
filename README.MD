@@ -16,9 +16,18 @@
 ```
 
 ## Carga los controladores definidos (si están configurados en el launch), Rviz (Ejecicio 2)
-```bash
-    source install/setup.bash && ros2 launch robot_description description.launch.py
-```
+    - Para lanzar con la GUI y RViz (modo de prueba):
+    ```bash
+        source install/setup.bash && ros2 launch robot_description description.launch.py testing:=True
+    ```
+    - Para lanzar sin la GUI y RViz (modo normal/producción):
+    ```bash
+        ros2 launch robot_description description.launch.py testing:=False
+    ```
+        - O simplemente:
+        ```bash
+            ros2 launch robot_description description.launch.py
+        ```
 
 ## Carga los controladores definidos (si están configurados en el launch), Gzbo (Ejercicio 3)
 ```bash
@@ -31,6 +40,21 @@
 ```bash
     source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 ```
+
+## (Ejercicio 8)
+### O el comando para tu archivo de lanzamiento si lo creaste
+```bash
+    source install/setup.bash && ros2 run gz_robot twist_controller
+```
+### 
+```bash
+    source install/setup.bash && ros2 launch gz_robot robot_control.launch.py
+```
+### 
+```bash
+    source install/setup.bash && ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.1}}"
+```
+___
 
 ## Ver la respuesta del controllers
 ```bash
