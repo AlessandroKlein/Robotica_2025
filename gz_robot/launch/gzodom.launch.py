@@ -28,6 +28,7 @@ def generate_launch_description():
     4. Configura el puente de reloj para usar el tiempo de simulación.
     5. Lanza el nodo del controller_manager de ROS 2 Control.
     6. Carga y activa los controladores de ROS 2 Control utilizando 'ros2 control load_controller'.
+    7. Lanza el nodo de odometría para calcular la pose del robot.
     """
 
     # Declaración de argumentos de lanzamiento
@@ -135,6 +136,22 @@ def generate_launch_description():
         output="screen",
     )
 
+    # --- Nodo de Odometría (Ejercicio 9) ---
+    odometry_node = Node(
+        package="control_robot",
+        executable="odometry_node",
+        parameters=[
+            {"wheel_radius": 0.05},  # Ajusta según el radio de tu rueda
+            {"track_width": 0.3},   # Ajusta según el ancho de vía de tu robot
+            {"left_wheel_joint_name": "left_wheel_joint"},
+            {"right_wheel_joint_name": "right_wheel_joint"},
+            {"odom_frame_id": "odom"},
+            {"base_link_frame_id": "base_link"},
+            {"use_sim_time": use_sim_time} # Es crucial que el nodo de odometría use el tiempo de simulación
+        ],
+        output="screen",
+    )
+
 
     # --- Comandos para cargar y activar los controladores de ROS 2 Control ---
     # Utilizamos TimerAction para asegurar que estos comandos se ejecuten
@@ -187,6 +204,7 @@ def generate_launch_description():
             spawn_entity,
             clock_bridge,
             controller_manager_node,
+            odometry_node, # ¡Añadido el nodo de odometría aquí!
             load_joint_state_broadcaster,
             load_velocity_controller_left,
             load_velocity_controller_right,

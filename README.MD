@@ -6,6 +6,8 @@
 ## BORRO VERSIONES ANTERIORES Y CONSTRUYO EL PAQUETE
 ```bash
     rm -rf {build,install,log} && colcon build --symlink-install && source install/setup.bash
+
+    rm -rf {build,install,log} && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release && source install/setup.bash
 ```
 ```bash
     rm -rf build/robot_description install/robot_description && colcon build --packages-select robot_description && source install/setup.bash
@@ -17,23 +19,21 @@
 
 ## Carga los controladores definidos (si están configurados en el launch), Rviz (Ejecicio 2)
     - Para lanzar con la GUI y RViz (modo de prueba):
-```bash
+    ```bash
         source install/setup.bash && ros2 launch robot_description description.launch.py testing:=True
-```
+    ```
     - Para lanzar sin la GUI y RViz (modo normal/producción):
-```bash
+    ```bash
         ros2 launch robot_description description.launch.py testing:=False
-```
+    ```
         - O simplemente:
-```bash
+        ```bash
             ros2 launch robot_description description.launch.py
-```
+        ```
 
 ## Carga los controladores definidos (si están configurados en el launch), Gzbo (Ejercicio 3)
 ```bash
     source install/setup.bash && ros2 launch gz_robot gazebo.launch.py
-    ros2 topic pub /velocity_controller_left/commands std_msgs/msg/Float64MultiArray "data: [2.0]"
-    ros2 topic pub /velocity_controller_right/commands std_msgs/msg/Float64MultiArray "data: [2.0]"
 ```
 
 ## (Ejercicio 4)
@@ -44,13 +44,23 @@
 ## (Ejercicio 8)
 ### O el comando para tu archivo de lanzamiento si lo creaste
 ```bash
-    source install/setup.bash && ros2 run gz_robot twist_controller
+    source install/setup.bash && ros2 launch gz_robot gztwist.launch.py
+    source install/setup.bash && ros2 run control_robot twist_to_wheels_node
+    source install/setup.bash && ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" -r 10
+    source install/setup.bash && ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.5}}" -r 10
+    source install/setup.bash && ros2 topic echo /left_wheel_cmd
+    source install/setup.bash && ros2 topic echo /right_wheel_cmd
 ```
-### 
+## (Ejercicio 9)
 ```bash
-    source install/setup.bash && ros2 launch gz_robot robot_control.launch.py
+    source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
+    source install/setup.bash && ros2 run control_robot odometry_node
+    source install/setup.bash && ros2 topic echo /odom
+
+    rviz2
 ```
-### 
+
+ 
 ```bash
     source install/setup.bash && ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.1}}"
 ```

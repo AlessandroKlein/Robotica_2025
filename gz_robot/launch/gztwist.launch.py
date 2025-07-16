@@ -28,6 +28,7 @@ def generate_launch_description():
     4. Configura el puente de reloj para usar el tiempo de simulación.
     5. Lanza el nodo del controller_manager de ROS 2 Control.
     6. Carga y activa los controladores de ROS 2 Control utilizando 'ros2 control load_controller'.
+    7. Lanza el nodo twist_to_wheels_node para convertir comandos Twist.
     """
 
     # Declaración de argumentos de lanzamiento
@@ -135,6 +136,18 @@ def generate_launch_description():
         output="screen",
     )
 
+    # --- Nodo Twist to Wheels (Ejercicio 8) ---
+    twist_to_wheels_node = Node(
+        package="control_robot",
+        executable="twist_to_wheels_node",
+        parameters=[
+            {"wheel_radius": 0.05},  # Ajusta según el radio de tu rueda (debe coincidir con URDF)
+            {"track_width": 0.3},   # Ajusta según el ancho de vía de tu robot (debe coincidir con URDF)
+            {"use_sim_time": use_sim_time} # Es crucial que el nodo use el tiempo de simulación
+        ],
+        output="screen",
+    )
+
 
     # --- Comandos para cargar y activar los controladores de ROS 2 Control ---
     # Utilizamos TimerAction para asegurar que estos comandos se ejecuten
@@ -187,6 +200,7 @@ def generate_launch_description():
             spawn_entity,
             clock_bridge,
             controller_manager_node,
+            twist_to_wheels_node, # ¡Añadido el nodo twist_to_wheels_node aquí!
             load_joint_state_broadcaster,
             load_velocity_controller_left,
             load_velocity_controller_right,

@@ -1,8 +1,6 @@
 from setuptools import find_packages, setup
-import os 
-from glob import glob
 
-package_name = 'control_robot'
+package_name = 'robot_bringup'
 
 setup(
     name=package_name,
@@ -12,7 +10,6 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join('share', package_name, 'config'), glob('config/*.yaml'))
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -23,8 +20,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'twist_to_wheels_node = control_robot.twist_to_wheels_node:main',
-            'odometry_node = control_robot.odometry_node:main',
         ],
     },
 )
