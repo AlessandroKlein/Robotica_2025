@@ -17,17 +17,17 @@
 
 ## Carga los controladores definidos (si están configurados en el launch), Rviz (Ejecicio 2)
     - Para lanzar con la GUI y RViz (modo de prueba):
-    ```bash
+```bash
         source install/setup.bash && ros2 launch robot_description description.launch.py testing:=True
-    ```
+```
     - Para lanzar sin la GUI y RViz (modo normal/producción):
-    ```bash
+```bash
         ros2 launch robot_description description.launch.py testing:=False
-    ```
+```
         - O simplemente:
-        ```bash
+```bash
             ros2 launch robot_description description.launch.py
-        ```
+```
 
 ## Carga los controladores definidos (si están configurados en el launch), Gzbo (Ejercicio 3)
 ```bash
