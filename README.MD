@@ -80,16 +80,26 @@ source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 
 -----
 
-### Archivos Relevantes del Proyecto
+## Uso
 
-Para una mejor comprensión, aquí se listan algunos de los archivos clave del proyecto:
+### Ejecución de Scripts de Simulación
+- Para ejecutar los scripts `ej5.py`, `ej6.py` o `ej7.py`:
+  ```bash
+  python3 ~/ros2_ws/src/Robotica_2025/ej5.py
+  ```
+  Estos scripts generan gráficos de trayectorias y muestran cálculos cinemáticos.
 
-  * `gz_robot/gztwist.launch.py`: Archivo de lanzamiento para enviar comandos de velocidad.
-  * `control_robot/config/controllers.yaml`: Configuración de los controladores del robot.
-  * `control_robot/cmd_vel_listener.py`: Nodo para escuchar comandos de velocidad.
-  * `control_robot/odometry_publisher.py`: Nodo para publicar la odometría del robot.
-  * `robot_description/urdf/diffbot.urdf.xacro`: Definición del modelo URDF del robot diferencial.
-  * `robot_description/rviz/diffbot.rviz`: Configuración de RViz para el robot.
+### Lanzamiento de la Simulación en Gazebo
+1. Lanza el sistema completo con visualización:
+   ```bash
+   ros2 launch robot_bringup display_robot_system.launch.py
+   ```
+   Esto inicia Gazebo, RViz, y los nodos de control.
+
+2. Para simulaciones específicas, usa los archivos de lanzamiento en `gz_robot/launch/`:
+   ```bash
+   ros2 launch gz_robot gazebo.launch.py
+   ```
 
 -----
 
