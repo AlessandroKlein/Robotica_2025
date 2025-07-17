@@ -24,7 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'cmd_vel_listener = control_robot.cmd_vel_listener:main',
-            'odometry_node = control_robot.odometry_node:main',
+            'odometry_publisher = control_robot.odometry_publisher:main',
         ],
     },
 )

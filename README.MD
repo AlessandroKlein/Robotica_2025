@@ -58,8 +58,9 @@
 ## (Ejercicio 9)
 ```bash
     source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
-    source install/setup.bash && ros2 run control_robot odometry_node
-    source install/setup.bash && ros2 topic echo /odom
+    ros2 topic echo /odom
+    ros2 run tf2_ros tf2_echo odom base_link
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 
     rviz2
 ```
