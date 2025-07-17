@@ -28,11 +28,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'teleop_twist_keyboard_node = robot_description.teleop_twist_keyboard_node:main',
-            'automatic_mover_node = robot_description.automatic_mover_node:main',
-            'inverse_kinematics_node = robot_description.inverse_kinematics_node:main',
-            'odometry_node = robot_description.odometry_node:main',
-            'tf_publisher_node = robot_description.tf_publisher_node:main',
         ],
     },
 )

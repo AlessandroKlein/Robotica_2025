@@ -31,6 +31,7 @@
 
 
   <link name="base_footprint" />
+
   <joint name="base_joint" type="fixed">
     <parent link="base_footprint" />
     <child link="base_link" />
@@ -149,7 +150,6 @@
     <child link="caster_wheel" />
     <origin xyz="-0.015 0 -0.020" rpy="0 0 0" />
     <axis xyz="0 1 0" />
-    <!-- Giro en el eje y para simular la misma velocidad de las otras ruedas -->
   </joint>
 
   <!-- RUEDA MOVIL  -->
@@ -250,6 +250,7 @@
   <!-- Este plugin conecta las interfaces de hardware del URDF con Gazebo. -->
   <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+
       <!-- Este parámetro le indica al plugin que cargue la descripción del robot desde el parámetro 'robot_description'. -->
       <!--<robot_param>robot_description</robot_param>-->
       <!-- ¡IMPORTANTE! Se ha ELIMINADO la línea <parameters>$(find control_robot)/config/controllers.yaml</parameters>

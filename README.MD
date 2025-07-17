@@ -47,6 +47,7 @@
 * control_robot/cmd_vel_listener.py
 * control_robot/odometry_publisher.py
 * robot_description/urdf/diffbot.urdf.xacro
+* robot_description/rviz/diffbot.rviz
 ```
 
 ## (Ejercicio 8)
@@ -54,7 +55,7 @@
 ```bash
     source install/setup.bash && ros2 launch gz_robot gztwist.launch.py
 
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}"
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
 
     ros2 topic echo /velocity_controller_left/commands
     ros2 topic echo /velocity_controller_right/commands
@@ -64,7 +65,7 @@
     source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
     ros2 topic echo /odom
     ros2 run tf2_ros tf2_echo odom base_link
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
 
     rviz2
 ```
@@ -75,7 +76,7 @@
 
     ros2 node list
     ros2 topic list
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}"
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
     ros2 topic echo /odom
 ```
 ### Ejemplo ejercicio 6
@@ -86,21 +87,23 @@
     ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3665, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
     ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
 ```
+
+## (Ejercicio 11)
+```bash
+    source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
+    ros2 topic echo /odom
+    ros2 run tf2_ros tf2_echo odom base_link
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+
+    rviz2
+```
+
+## (Ejercicio 12)
+```bash
+    source install/setup.bash && ros2 launch robot_bringup display_robot_system.launch.py
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
+    ros2 topic echo /odom
+```
 ___
-
-## Ver la respuesta del controllers
-```bash
-ros2 service call /controller_manager/list_controllers controller_manager_msgs/srv/ListControllers "{}"
-```
-
-## Listado de topic
-```bash
-ros2 topic list
-    ros2 topic echo /clock
-```
-
-```bash
-ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x:0.1, y: 0.1}, angular: {z:0.3}}"
-```
 
 ## Libreria de ros2 jazzy
