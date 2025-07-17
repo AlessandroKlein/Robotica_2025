@@ -41,12 +41,16 @@
     source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 ```
 
-## (Ejercicio 8)
-### O el comando para tu archivo de lanzamiento si lo creaste
+```
 * gz_robot/gztwist.launch.py
 * control_robot/config/controllers.yaml
-* control_robot/twist_to_wheels_node.py
+* control_robot/cmd_vel_listener.py
+* control_robot/odometry_publisher.py
 * robot_description/urdf/diffbot.urdf.xacro
+```
+
+## (Ejercicio 8)
+### O el comando para tu archivo de lanzamiento si lo creaste
 ```bash
     source install/setup.bash && ros2 launch gz_robot gztwist.launch.py
 
@@ -65,12 +69,23 @@
     rviz2
 ```
 
- 
+## (Ejercicio 10)
 ```bash
-    source install/setup.bash && ros2 topic pub -r 10 /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.1}}"
+    source install/setup.bash && ros2 launch robot_bringup robot_system.launch.py
+
+    ros2 node list
+    ros2 topic list
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}"
+    ros2 topic echo /odom
 ```
-
-
+### Ejemplo ejercicio 6
+```bash
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2885, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 1.154}}" --once
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3665, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2885, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: -1.154}}" --once
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3665, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+```
 ___
 
 ## Ver la respuesta del controllers
