@@ -6,8 +6,19 @@ from launch_ros.actions import Node as RosNode # Renombramos para evitar conflic
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.parameter_descriptions import ParameterValue
 
+# =========================================================
+#   Archivo: display_robot_system.launch.py
+#   Resumen:
+#   Este archivo lanza el sistema completo del robot (simulación, controladores, odometría, etc.)
+#   y además lanza RViz2 para visualizar el robot y su estado en ROS 2.
+#   - Incluye el launch principal del sistema del robot (robot_system.launch.py)
+#   - Lanza RViz2 con la configuración adecuada
+# =========================================================
+
 def generate_launch_description():
-    # Declarar los argumentos que se pasarán al launch del sistema del robot y a RViz
+    # -----------------------------------------------------
+    # 1. Declarar los argumentos que se pasarán al launch del sistema del robot y a RViz
+    # -----------------------------------------------------
     declare_use_sim_time = DeclareLaunchArgument(
         "use_sim_time",
         default_value="true",
@@ -20,7 +31,7 @@ def generate_launch_description():
     )
     declare_wheel_radius = DeclareLaunchArgument(
         "wheel_radius",
-        default_value="0.07",
+        default_value="0.035",
         description="Radio de las ruedas del robot",
     )
     declare_wheel_separation = DeclareLaunchArgument(
@@ -39,7 +50,9 @@ def generate_launch_description():
         description="Nombre de la junta de la rueda derecha",
     )
 
-    # Obtener los valores de los argumentos
+    # -----------------------------------------------------
+    # 2. Obtener los valores de los argumentos
+    # -----------------------------------------------------
     use_sim_time = LaunchConfiguration("use_sim_time")
     name = LaunchConfiguration("name")
     wheel_radius = LaunchConfiguration("wheel_radius")
@@ -47,9 +60,10 @@ def generate_launch_description():
     left_wheel_joint_name = LaunchConfiguration("left_wheel_joint_name")
     right_wheel_joint_name = LaunchConfiguration("right_wheel_joint_name")
 
-    # Incluir el archivo de lanzamiento del sistema del robot (Ejercicio 10)
-    # Este ya contiene el robot_state_publisher, los controladores y el odometry_publisher
-    # y el bridge del clock.
+    # -----------------------------------------------------
+    # 3. Incluir el archivo de lanzamiento del sistema del robot (robot_system.launch.py)
+    #    Este ya contiene el robot_state_publisher, los controladores, el odometry_publisher y el bridge del clock.
+    # -----------------------------------------------------
     robot_system_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
@@ -66,14 +80,18 @@ def generate_launch_description():
         }.items(),
     )
 
-    # Ruta al archivo de configuración de RViz
+    # -----------------------------------------------------
+    # 4. Ruta al archivo de configuración de RViz
+    # -----------------------------------------------------
     rviz_config_file = PathJoinSubstitution(
         [FindPackageShare("robot_description"), "rviz", "diffbot.rviz"]
     )
 
-    # Nodo de RViz2 con un retraso suficiente para asegurar que TODA la cadena TF esté publicada.
-    # El robot_system.launch.py ya tiene sus propios temporizadores internos,
-    # pero RViz es un consumidor final que necesita que todo esté listo.
+    # -----------------------------------------------------
+    # 5. Nodo de RViz2 con un retraso suficiente para asegurar que TODA la cadena TF esté publicada.
+    #    El robot_system.launch.py ya tiene sus propios temporizadores internos,
+    #    pero RViz es un consumidor final que necesita que todo esté listo.
+    # -----------------------------------------------------
     rviz_node = TimerAction(
         period=20.0, # Aumentado a 20s para mayor seguridad. Ajusta si es necesario.
         actions=[
@@ -90,15 +108,18 @@ def generate_launch_description():
         ]
     )
 
+    # -----------------------------------------------------
+    # 6. Retornar la descripción del lanzamiento, incluyendo todos los nodos y argumentos
+    # -----------------------------------------------------
     return LaunchDescription(
         [
-            declare_use_sim_time,
-            declare_robot_name,
-            declare_wheel_radius,
-            declare_wheel_separation,
-            declare_left_wheel_joint_name,
-            declare_right_wheel_joint_name,
-            robot_system_launch, # Lanza Gazebo, robot_state_publisher, controladores, etc.
-            rviz_node,           # Lanza RViz (con retraso)
+            declare_use_sim_time,            # Argumento: usar tiempo simulado
+            declare_robot_name,              # Argumento: nombre de la entidad
+            declare_wheel_radius,            # Argumento: radio de rueda
+            declare_wheel_separation,        # Argumento: separación de ruedas
+            declare_left_wheel_joint_name,   # Argumento: nombre de la junta izquierda
+            declare_right_wheel_joint_name,  # Argumento: nombre de la junta derecha
+            robot_system_launch,             # Lanza Gazebo, robot_state_publisher, controladores, etc.
+            rviz_node,                       # Lanza RViz (con retraso)
         ]
     )

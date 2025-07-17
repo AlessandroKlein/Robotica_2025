@@ -2,24 +2,30 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
+# ========================
+# Parámetros del robot diferencial
+# ========================
 # Datos del robot (obtenidos de la URL proporcionada)
 # Fuente: https://acapovilla.github.io/robotica-2025/clases/10/tres.html
-r = 0.07  # Radio de las ruedas [m]
+r = 0.035  # Radio de las ruedas [m]
 b = 0.135  # Separación entre las ruedas [m]
 
-# --- Función para simular y graficar el recorrido ---
+# ========================
+# Función para simular y graficar el recorrido del robot
+# ========================
 def simular_y_graficar_recorrido(x_dot, theta_dot, duracion_total, titulo="Recorrido del Robot"):
     """
-    Simula el recorrido del robot y lo grafica.
-    x_dot: Velocidad lineal del robot [m/s]
-    theta_dot: Velocidad angular del robot [rad/s]
-    duracion_total: Duración total de la trayectoria [s]
-    titulo: Título para el gráfico
+    Simula el recorrido del robot diferencial y lo grafica en 2D.
+    Args:
+        x_dot: Velocidad lineal del robot [m/s]
+        theta_dot: Velocidad angular del robot [rad/s]
+        duracion_total: Duración total de la trayectoria [s]
+        titulo: Título para el gráfico
     """
     dt = 0.01  # Paso de tiempo para la simulación [s]
     num_pasos = int(duracion_total / dt)
 
-    # Listas para almacenar la pose del robot
+    # Listas para almacenar la pose del robot en cada instante
     x_pos = [0.0]
     y_pos = [0.0]
     theta_orient = [0.0] # Orientación inicial del robot (apuntando a lo largo del eje X)
@@ -44,7 +50,7 @@ def simular_y_graficar_recorrido(x_dot, theta_dot, duracion_total, titulo="Recor
         global_x_dot = x_dot * math.cos(current_theta)
         global_y_dot = x_dot * math.sin(current_theta)
 
-        # Actualizar la pose
+        # Actualizar la pose integrando las velocidades
         new_x = x_pos[-1] + global_x_dot * dt
         new_y = y_pos[-1] + global_y_dot * dt
         new_theta = (current_theta + theta_dot * dt) # % (2 * math.pi) # Normalizar el ángulo si es necesario
@@ -73,10 +79,15 @@ def simular_y_graficar_recorrido(x_dot, theta_dot, duracion_total, titulo="Recor
     plt.legend()
     plt.show()
 
-# --- Cálculo para Trayectoria Recta de 1 metro en 10 segundos ---
+# ========================
+# Cálculo para Trayectoria Recta de 1 metro en 10 segundos
+# ========================
 print("--- Cálculo para Trayectoria Recta ---")
 
 # Datos de la trayectoria
+# Se desea que el robot avance 1 metro en 10 segundos en línea recta
+# Por lo tanto, la velocidad angular es cero
+
 distancia_recta = 1.0  # metros
 tiempo_recta = 10.0    # segundos
 
@@ -85,6 +96,8 @@ x_dot_recta = distancia_recta / tiempo_recta  # [m/s]
 theta_dot_recta = 0.0                      # [rad/s] (para movimiento recto)
 
 # Usando el modelo cinemático inverso para calcular las velocidades angulares de las ruedas:
+# phi_R_dot = (1/r) * (x_dot + (b/2)*theta_dot)
+# phi_L_dot = (1/r) * (x_dot - (b/2)*theta_dot)
 phi_R_dot_recta = (1 / r) * (x_dot_recta + (b / 2) * theta_dot_recta)  # [rad/s]
 phi_L_dot_recta = (1 / r) * (x_dot_recta - (b / 2) * theta_dot_recta)  # [rad/s]
 
@@ -97,11 +110,15 @@ print("\n")
 # Graficar el recorrido recto
 simular_y_graficar_recorrido(x_dot_recta, theta_dot_recta, tiempo_recta, "Recorrido Recto del Robot (1m en 10s)")
 
-
-# --- Trayectoria circular con un radio de 0.5 metros en sentido horario en 20 segundos ---
+# ========================
+# Cálculo para Trayectoria Circular (radio 0.5m, sentido horario, 20s)
+# ========================
 print("--- Cálculo para Trayectoria Circular (sentido horario) ---")
 
 # Datos de la trayectoria
+# Se desea que el robot complete una circunferencia de radio 0.5m en 20 segundos
+# El sentido es horario, por lo que la velocidad angular es negativa
+
 radio_circular = 0.5  # metros
 tiempo_circular = 20.0 # segundos
 

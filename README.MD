@@ -167,7 +167,7 @@ ros2 topic echo /odom
 
 -----
 
-### Ejemplo Ejercicio 6: Secuencia de Movimientos
+### Ejemplo Ejercicio 6-7: Secuencia de Movimientos
 
 Este ejemplo muestra cómo publicar una secuencia de comandos de velocidad para realizar un patrón de movimiento.
 

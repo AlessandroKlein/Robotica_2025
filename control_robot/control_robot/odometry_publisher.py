@@ -8,13 +8,21 @@ import math
 from rclpy.time import Time
 from rclpy.duration import Duration
 
+# =========================================================
+#   Nodo: OdometryPublisher
+#   Descripción:
+#   - Escucha el estado de las juntas (JointState) del robot diferencial
+#   - Calcula la odometría (posición y orientación) usando el modelo cinemático diferencial
+#   - Publica mensajes de Odometry y la transformación TF (odom -> base_link)
+# =========================================================
+
 class OdometryPublisher(Node):
     def __init__(self):
         super().__init__('odometry_publisher')
 
-        # Declare and get parameters for robot dimensions and joint names
-        self.declare_parameter('wheel_radius', 0.07) # Default value from URDF
-        self.declare_parameter('wheel_separation', 0.135) # Default value from URDF
+        # Declarar y obtener parámetros para dimensiones del robot y nombres de las juntas/frames
+        self.declare_parameter('wheel_radius', 0.07) # Valor por defecto del URDF
+        self.declare_parameter('wheel_separation', 0.135) # Valor por defecto del URDF
         self.declare_parameter('left_wheel_joint_name', 'left_wheel_joint')
         self.declare_parameter('right_wheel_joint_name', 'right_wheel_joint')
         self.declare_parameter('odom_frame_id', 'odom')
@@ -27,31 +35,31 @@ class OdometryPublisher(Node):
         self.odom_frame_id = self.get_parameter('odom_frame_id').get_parameter_value().string_value
         self.base_frame_id = self.get_parameter('base_frame_id').get_parameter_value().string_value
 
-        self.get_logger().info(f'OdometryPublisher initialized with r={self.r}, b={self.b}')
-        self.get_logger().info(f'Joints: Left="{self.left_wheel_joint_name}", Right="{self.right_wheel_joint_name}"')
+        self.get_logger().info(f'Odometría inicializada con r={self.r}, b={self.b}')
+        self.get_logger().info(f'Juntas: Izquierda="{self.left_wheel_joint_name}", Derecha="{self.right_wheel_joint_name}"')
         self.get_logger().info(f'Frames: Odom="{self.odom_frame_id}", Base="{self.base_frame_id}"')
 
-
-        # Subscribers
+        # Suscripción al tópico /joint_states publicado por JointStateBroadcaster
         self.joint_state_subscription = self.create_subscription(
             JointState,
-            '/joint_states', # Topic publicado por JointStateBroadcaster
+            '/joint_states', # Tópico publicado por JointStateBroadcaster
             self.joint_state_callback,
             10
         )
-        self.joint_state_subscription # Prevent unused variable warning
+        self.joint_state_subscription # Evita advertencia de variable no usada
 
-        # Publishers
+        # Publicador de mensajes de Odometry
         self.odom_publisher = self.create_publisher(Odometry, '/odom', 10)
+        # Broadcaster para publicar la transformación TF (odom -> base_link)
         self.tf_broadcaster = TransformBroadcaster(self)
 
-        # Odometry state variables
+        # Variables de estado de la odometría
         self.x = 0.0
         self.y = 0.0
         self.theta = 0.0
         self.last_time = None
         
-        # Store last wheel velocities to detect changes
+        # Almacena las últimas velocidades de las ruedas para promediar
         self.last_left_wheel_velocity = 0.0
         self.last_right_wheel_velocity = 0.0
         self.first_joint_state_received = False
@@ -62,44 +70,46 @@ class OdometryPublisher(Node):
         left_wheel_velocity = 0.0
         right_wheel_velocity = 0.0
         
-        # Find velocities for the specific joints
+        # Buscar las velocidades de las juntas específicas
         try:
             left_index = msg.name.index(self.left_wheel_joint_name)
             left_wheel_velocity = msg.velocity[left_index]
         except ValueError:
-            # self.get_logger().warn(f'Left wheel joint "{self.left_wheel_joint_name}" not found in JointState message.')
-            pass # Keep previous velocity if not found or warn once
+            # Si no se encuentra la junta, se mantiene la velocidad anterior
+            # self.get_logger().warn(f'No se encontró la junta izquierda "{self.left_wheel_joint_name}" en el mensaje JointState.')
+            pass
         
         try:
             right_index = msg.name.index(self.right_wheel_joint_name)
             right_wheel_velocity = msg.velocity[right_index]
         except ValueError:
-            # self.get_logger().warn(f'Right wheel joint "{self.right_wheel_joint_name}" not found in JointState message.')
-            pass # Keep previous velocity if not found or warn once
+            # Si no se encuentra la junta, se mantiene la velocidad anterior
+            # self.get_logger().warn(f'No se encontró la junta derecha "{self.right_wheel_joint_name}" en el mensaje JointState.')
+            pass
 
-        # Initialize last_time on the first callback
+        # Inicializar last_time en la primera recepción
         if not self.first_joint_state_received:
             self.last_time = current_time
             self.last_left_wheel_velocity = left_wheel_velocity
             self.last_right_wheel_velocity = right_wheel_velocity
             self.first_joint_state_received = True
-            return # Skip odometry calculation for the very first message
+            return # Saltar el cálculo de odometría en el primer mensaje
 
         dt_ns = (current_time - self.last_time).nanoseconds
-        dt = dt_ns / 1e9 # Convert nanoseconds to seconds
+        dt = dt_ns / 1e9 # Convertir nanosegundos a segundos
 
-        if dt <= 0.0: # Avoid division by zero or negative time
+        if dt <= 0.0: # Evitar división por cero o tiempo negativo
             return
 
-        # Calculate average velocities for better accuracy over the interval
+        # Calcular velocidades promedio para mayor precisión
         avg_left_wheel_velocity = (left_wheel_velocity + self.last_left_wheel_velocity) / 2.0
         avg_right_wheel_velocity = (right_wheel_velocity + self.last_right_wheel_velocity) / 2.0
 
-        # Kinematic model
-        v = self.r * (avg_right_wheel_velocity + avg_left_wheel_velocity) / 2.0
-        omega = self.r * (avg_right_wheel_velocity - avg_left_wheel_velocity) / self.b
+        # Modelo cinemático diferencial
+        v = self.r * (avg_right_wheel_velocity + avg_left_wheel_velocity) / 2.0 # Velocidad lineal
+        omega = self.r * (avg_right_wheel_velocity - avg_left_wheel_velocity) / self.b # Velocidad angular
 
-        # Update pose
+        # Actualizar la pose del robot
         delta_x = v * math.cos(self.theta) * dt
         delta_y = v * math.sin(self.theta) * dt
         delta_theta = omega * dt
@@ -108,10 +118,10 @@ class OdometryPublisher(Node):
         self.y += delta_y
         self.theta += delta_theta
         
-        # Normalize theta to be between -pi and pi
+        # Normalizar theta para que esté entre -pi y pi
         self.theta = math.atan2(math.sin(self.theta), math.cos(self.theta))
 
-        # Publish Odometry message
+        # Publicar mensaje de Odometry
         odom_msg = Odometry()
         odom_msg.header.stamp = current_time.to_msg()
         odom_msg.header.frame_id = self.odom_frame_id
@@ -121,7 +131,7 @@ class OdometryPublisher(Node):
         odom_msg.pose.pose.position.y = self.y
         odom_msg.pose.pose.position.z = 0.0
 
-        # Convert yaw to quaternion
+        # Convertir yaw a cuaternión
         quat_x = 0.0
         quat_y = 0.0
         quat_z = math.sin(self.theta / 2.0)
@@ -132,14 +142,14 @@ class OdometryPublisher(Node):
         odom_msg.pose.pose.orientation.z = quat_z
         odom_msg.pose.pose.orientation.w = quat_w
 
-        # Set velocities
+        # Establecer velocidades
         odom_msg.twist.twist.linear.x = v
         odom_msg.twist.twist.linear.y = 0.0
         odom_msg.twist.twist.angular.z = omega
 
         self.odom_publisher.publish(odom_msg)
 
-        # Publish TF transform (odom -> base_link)
+        # Publicar la transformación TF (odom -> base_link)
         t = TransformStamped()
         t.header.stamp = current_time.to_msg()
         t.header.frame_id = self.odom_frame_id
@@ -153,11 +163,14 @@ class OdometryPublisher(Node):
         t.transform.rotation.w = quat_w
         self.tf_broadcaster.sendTransform(t)
 
-        # Update last state
+        # Actualizar el estado anterior
         self.last_time = current_time
         self.last_left_wheel_velocity = left_wheel_velocity
         self.last_right_wheel_velocity = right_wheel_velocity
 
+# =========================================================
+#   Función principal: inicializa el nodo y mantiene el spin
+# =========================================================
 def main(args=None):
     rclpy.init(args=args)
     odometry_publisher = OdometryPublisher()

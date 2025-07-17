@@ -17,8 +17,23 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.actions import Node as RosNode
 from launch.actions import TimerAction
 
+# =========================================================
+#   Archivo: robot_system.launch.py
+#   Resumen:
+#   Este archivo lanza todos los nodos necesarios para simular y controlar el robot diffbot en Gazebo y ROS 2:
+#     - Publica la descripción del robot (URDF generado desde Xacro)
+#     - Lanza Gazebo (ros_gz_sim)
+#     - Spawnea la entidad en Gazebo
+#     - Puente de reloj entre Gazebo y ROS
+#     - Spawners de controladores (con temporización)
+#     - Nodo de cinemática inversa (cmd_vel_listener)
+#     - Nodo de odometría
+# =========================================================
 
 def generate_launch_description():
+    # -----------------------------------------------------
+    # 1. Declaración de argumentos de lanzamiento (Launch Arguments)
+    # -----------------------------------------------------
     declare_robot_name = DeclareLaunchArgument(
         "name",
         default_value="diffbot",
@@ -31,10 +46,10 @@ def generate_launch_description():
         description="Usar tiempo simulado (reloj de Gazebo)",
     )
 
-    # Declare parameters for wheel radius and wheel separation
+    # Parámetros para el radio y separación de ruedas (usados por nodos de control y odometría)
     declare_wheel_radius = DeclareLaunchArgument(
         "wheel_radius",
-        default_value="0.07",  # r = 0.07 m (from diffbot.urdf.xacro)
+        default_value="0.035",  # r = 0.035 m (from diffbot.urdf.xacro)
         description="Radio de las ruedas del robot",
     )
 
@@ -44,7 +59,7 @@ def generate_launch_description():
         description="Separación entre las ruedas del robot",
     )
 
-    # Declare parameters for joint names for odometry
+    # Nombres de las juntas para la odometría
     declare_left_wheel_joint_name = DeclareLaunchArgument(
         "left_wheel_joint_name",
         default_value="left_wheel_joint",
@@ -56,6 +71,9 @@ def generate_launch_description():
         description="Nombre de la junta de la rueda derecha",
     )
 
+    # -----------------------------------------------------
+    # 2. Configuración de variables de lanzamiento (LaunchConfiguration)
+    # -----------------------------------------------------
     name = LaunchConfiguration("name")
     use_sim_time = LaunchConfiguration("use_sim_time")
     wheel_radius = LaunchConfiguration("wheel_radius")
@@ -63,7 +81,9 @@ def generate_launch_description():
     left_wheel_joint_name = LaunchConfiguration("left_wheel_joint_name")
     right_wheel_joint_name = LaunchConfiguration("right_wheel_joint_name")
 
-
+    # -----------------------------------------------------
+    # 3. Procesar el archivo Xacro para obtener la descripción del robot (URDF)
+    # -----------------------------------------------------
     robot_description_content = ParameterValue(
         Command(
             [
@@ -81,6 +101,9 @@ def generate_launch_description():
         value_type=str,
     )
 
+    # -----------------------------------------------------
+    # 4. Nodo para publicar la descripción del robot (robot_state_publisher)
+    # -----------------------------------------------------
     robot_state_publisher = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
@@ -93,6 +116,9 @@ def generate_launch_description():
         output="screen",
     )
 
+    # -----------------------------------------------------
+    # 5. Lanzar Gazebo (ros_gz_sim) con un mundo vacío
+    # -----------------------------------------------------
     gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
@@ -100,11 +126,14 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "gz_args": "-r empty.sdf",
-            "on_exit_shutdown": "True",
+            "gz_args": "-r empty.sdf",  # Mundo vacío
+            "on_exit_shutdown": "True", # Apagar ROS si se cierra Gazebo
         }.items(),
     )
 
+    # -----------------------------------------------------
+    # 6. Nodo para spawnear la entidad del robot en Gazebo
+    # -----------------------------------------------------
     spawn_entity = Node(
         package="ros_gz_sim",
         executable="create",
@@ -112,6 +141,9 @@ def generate_launch_description():
         output="screen",
     )
 
+    # -----------------------------------------------------
+    # 7. Puente de reloj entre Gazebo y ROS (sincroniza el tiempo)
+    # -----------------------------------------------------
     clock_bridge = RosNode(
         package="ros_gz_bridge",
         executable="parameter_bridge",
@@ -119,7 +151,9 @@ def generate_launch_description():
         output="screen",
     )
 
-    # Spawners con retrasos para evitar llamadas simultáneas
+    # -----------------------------------------------------
+    # 8. Spawners de controladores (con temporización para evitar conflictos)
+    # -----------------------------------------------------
     # Los controladores se definen en control_robot/config/controllers.yaml
     # El JointStateBroadcaster debe cargarse primero
     joint_state_broadcaster_spawner = TimerAction(
@@ -161,8 +195,10 @@ def generate_launch_description():
         ],
     )
 
-    # Nodo de cinemática inversa
-    # Definido en control_robot/control_robot/cmd_vel_listener.py
+    # -----------------------------------------------------
+    # 9. Nodo de cinemática inversa (cmd_vel_listener)
+    #    Definido en control_robot/control_robot/cmd_vel_listener.py
+    # -----------------------------------------------------
     cmd_vel_listener_node = TimerAction(
         period=11.0, # Lanzar después de los controladores de velocidad
         actions=[
@@ -180,8 +216,10 @@ def generate_launch_description():
         ],
     )
 
-    # Nodo de odometría
-    # Definido en control_robot/control_robot/odometry_publisher.py
+    # -----------------------------------------------------
+    # 10. Nodo de odometría (odometry_publisher)
+    #     Definido en control_robot/control_robot/odometry_publisher.py
+    # -----------------------------------------------------
     odometry_publisher_node = TimerAction(
         period=13.0, # Lanzar después de que joint_state_broadcaster esté activo
         actions=[
@@ -201,22 +239,25 @@ def generate_launch_description():
         ],
     )
 
+    # -----------------------------------------------------
+    # 11. Retornar la descripción del lanzamiento, incluyendo todos los nodos y argumentos
+    # -----------------------------------------------------
     return LaunchDescription(
         [
-            declare_robot_name,
-            declare_use_sim_time,
-            declare_wheel_radius,
-            declare_wheel_separation,
-            declare_left_wheel_joint_name,
-            declare_right_wheel_joint_name,
-            robot_state_publisher,
-            gz_sim,
-            spawn_entity,
-            clock_bridge,
-            joint_state_broadcaster_spawner,
-            velocity_controller_l_spawner,
-            velocity_controller_r_spawner,
-            cmd_vel_listener_node,
-            odometry_publisher_node,
+            declare_robot_name,              # Argumento: nombre de la entidad
+            declare_use_sim_time,            # Argumento: usar tiempo simulado
+            declare_wheel_radius,            # Argumento: radio de rueda
+            declare_wheel_separation,        # Argumento: separación de ruedas
+            declare_left_wheel_joint_name,   # Argumento: nombre de la junta izquierda
+            declare_right_wheel_joint_name,  # Argumento: nombre de la junta derecha
+            robot_state_publisher,           # Nodo: publica la descripción del robot
+            gz_sim,                         # Nodo: lanza Gazebo
+            spawn_entity,                   # Nodo: spawnea el robot en Gazebo
+            clock_bridge,                   # Nodo: puente de reloj
+            joint_state_broadcaster_spawner,# Nodo: spawner de joint_state_broadcaster
+            velocity_controller_l_spawner,  # Nodo: spawner de controlador izquierdo
+            velocity_controller_r_spawner,  # Nodo: spawner de controlador derecho
+            cmd_vel_listener_node,          # Nodo: cinemática inversa
+            odometry_publisher_node,        # Nodo: odometría
         ]
     )

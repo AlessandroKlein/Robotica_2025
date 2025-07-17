@@ -24,8 +24,6 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            # Define el ejecutable para tu nodo de control de Twist
-            'twist_controller = control_robot.robot_twist_controller:main', # <--- REEMPLAZA 'control_robot' CON EL NOMBRE REAL DE TU PAQUETE
         ],
     },
 )
