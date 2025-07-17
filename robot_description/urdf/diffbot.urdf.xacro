@@ -7,11 +7,12 @@
   <!-- === Propiedades === -->
   <!-- Definición de propiedades reutilizables: masas, colores, dimensiones de ruedas y caster -->
   <xacro:property name="chassis_mass" value="0.800" />
-  <xacro:property name="wheel_radius" value="0.035" />
   <!-- Radio de la rueda en metros -->
-  <xacro:property name="wheel_width" value="0.025" />
+  <xacro:property name="wheel_radius" value="0.035" />
   <!-- Ancho de la rueda en metros -->
-  <xacro:property name="wheel_separation" value="0.16" />
+  <xacro:property name="wheel_width" value="0.025" />
+  <!-- Ancho entre ruedas en metros -->
+  <xacro:property name="wheel_separation" value="0.135" />
   <!-- Separación entre ruedas en metros -->
   <xacro:property name="caster_origin_xyz" value="-0.075 0 -0.0075" />
   <!-- Posición del caster respecto al chasis -->
@@ -45,7 +46,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="file://$(find robot_description)/meshes/chassis.stl" scale="1 1 1" />
+        <mesh filename="file://$(find robot_description)/meshes/chassis.stl"/>
       </geometry>
       <material name="${base_color}" />
       <!-- Colo que se visualiza en RViz-->
@@ -80,7 +81,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="1.5708 0 0" />
         <geometry>
-          <mesh filename="file://$(find robot_description)/meshes/wheel.stl" scale="1 1 1" />
+          <mesh filename="file://$(find robot_description)/meshes/wheel.stl"/>
         </geometry>
         <material name="${wheel_color}" />
         <!-- Colo que se visualiza en RViz-->
@@ -104,8 +105,8 @@
   <!-- ======================= -->
   <!-- === Ruedas y motores === -->
   <!-- Instanciación de ruedas y motores usando las macros -->
-  <xacro:wheel prefix="left" xyz="0.0185  0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 0" />
-  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 3.14159" />
+  <xacro:wheel prefix="left" xyz="0.0185  0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 0"/>
+  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 3.14159"/>
   <!-- Motores -->
   <xacro:motor prefix="left" chassis_width="0.1" reflect="false" />
   <xacro:motor prefix="right" chassis_width="0.1" reflect="true" />

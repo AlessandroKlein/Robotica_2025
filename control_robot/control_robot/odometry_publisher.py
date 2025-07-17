@@ -21,7 +21,7 @@ class OdometryPublisher(Node):
         super().__init__('odometry_publisher')
 
         # Declarar y obtener parámetros para dimensiones del robot y nombres de las juntas/frames
-        self.declare_parameter('wheel_radius', 0.07) # Valor por defecto del URDF
+        self.declare_parameter('wheel_radius', 0.035) # Valor por defecto del URDF
         self.declare_parameter('wheel_separation', 0.135) # Valor por defecto del URDF
         self.declare_parameter('left_wheel_joint_name', 'left_wheel_joint')
         self.declare_parameter('right_wheel_joint_name', 'right_wheel_joint')
