@@ -211,7 +211,7 @@
 
   <!-- Configuración de ros2_control para la interfaz de hardware -->
   <!-- El nombre "GazeboSystem" y el tipo "system" son estándar para la integración con Gazebo. -->
-  <ros2_control name="GazeboSystem" type="system">
+  <ros2_control name="GazeboSystem" type="gz_ros2_control/GazeboSimSystem">
     <hardware>
       <!-- El plugin `gz_ros2_control/GazeboSimSystem` es el puente entre Gazebo y ROS 2 Control. -->
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
@@ -222,8 +222,8 @@
       <!-- Interfaz de comando de velocidad: permite enviar comandos de velocidad a la junta. -->
       <command_interface name="velocity">
         <!-- Parámetros opcionales para límites de velocidad. Ajusta estos valores según tu robot. -->
-        <param name="min">-10.0</param>        <!-- Velocidad mínima (rad/s) -->
-        <param name="max">10.0</param>        <!-- Velocidad máxima (rad/s) -->
+        <param name="min">-1.046198</param>        <!-- Velocidad mínima (rad/s) -->
+        <param name="max">1.046198</param>        <!-- Velocidad máxima (rad/s) -->
       </command_interface>
       <!-- Interfaz de estado de posición: permite leer la posición actual de la junta. -->
       <state_interface name="position"/>
@@ -236,8 +236,8 @@
       <!-- Interfaz de comando de velocidad: permite enviar comandos de velocidad a la junta. -->
       <command_interface name="velocity">
         <!-- Parámetros opcionales para límites de velocidad. Ajusta estos valores según tu robot. -->
-        <param name="min">-10.0</param>        <!-- Velocidad mínima (rad/s) -->
-        <param name="max">10.0</param>        <!-- Velocidad máxima (rad/s) -->
+        <param name="min">-1.046198</param>        <!-- Velocidad mínima (rad/s) -->
+        <param name="max">1.046198</param>        <!-- Velocidad máxima (rad/s) -->
       </command_interface>
       <!-- Interfaz de estado de posición: permite leer la posición actual de la junta. -->
       <state_interface name="position"/>

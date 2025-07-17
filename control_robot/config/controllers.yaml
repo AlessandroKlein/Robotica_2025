@@ -2,7 +2,7 @@
 controller_manager:
   ros__parameters:
     update_rate: 30  # Frecuencia de actualización del controlador en Hz
-    use_sim_time: true # Indica que se debe usar el tiempo de simulación de Gazebo.
+    use_sim_time: true""" # Indica que se debe usar el tiempo de simulación de Gazebo.
 
 # Definición del controlador 'joint_state_broadcaster'
 # Este controlador publica el estado (posición y velocidad) de las juntas especificadas.

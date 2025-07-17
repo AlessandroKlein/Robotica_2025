@@ -3,6 +3,7 @@ from launch.actions import (
     DeclareLaunchArgument,
     IncludeLaunchDescription,
     ExecuteProcess,
+    TimerAction,  # Importar TimerAction
 )
 from launch.substitutions import (
     LaunchConfiguration,
@@ -14,9 +15,9 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.parameter_descriptions import ParameterValue
-from launch.actions import TimerAction
-import yaml # Necesario para cargar el archivo YAML
-import os   # Necesario para obtener la ruta del paquete
+import yaml  # Necesario para cargar el archivo YAML
+import os  # Necesario para obtener la ruta del paquete
+
 
 def generate_launch_description():
     """
@@ -62,7 +63,8 @@ def generate_launch_description():
                         "diffbot.urdf.xacro",
                     ]
                 ),
-                " use_sim_time:=", use_sim_time # Pasar use_sim_time al xacro si es necesario para el plugin de Gazebo
+                " use_sim_time:=",
+                use_sim_time,  # Pasar use_sim_time al xacro si es necesario para el plugin de Gazebo
             ]
         ),
         value_type=str,
@@ -89,7 +91,7 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "gz_args": "-r empty.sdf", # Usamos empty.sdf para que Gazebo inicie vacío
+            "gz_args": "-r empty.sdf",  # Usamos empty.sdf para que Gazebo inicie vacío
             "on_exit_shutdown": "True",
         }.items(),
     )
@@ -98,7 +100,18 @@ def generate_launch_description():
     spawn_entity = Node(
         package="ros_gz_sim",
         executable="create",
-        arguments=["-entity", name, "-topic", "robot_description", "-x", "0", "-y", "0", "-z", "0.5"], # Añadimos posición inicial
+        arguments=[
+            "-entity",
+            name,
+            "-topic",
+            "robot_description",
+            "-x",
+            "0",
+            "-y",
+            "0",
+            "-z",
+            "0.5",
+        ],  # Añadimos posición inicial
         output="screen",
     )
 
@@ -115,12 +128,14 @@ def generate_launch_description():
     # Ruta al archivo de configuración de los controladores
     # Usamos os.path.join y FindPackageShare para construir la ruta absoluta.
     pkg_share_dir = FindPackageShare("control_robot").find("control_robot")
-    controllers_config_file_path = os.path.join(pkg_share_dir, "config", "controllers.yaml")
+    controllers_config_file_path = os.path.join(
+        pkg_share_dir, "config", "controllers.yaml"
+    )
 
     # Cargar el contenido del archivo YAML como un diccionario
     # Esto evita que el controller_manager intente cargar el archivo con --params-file
     # y en su lugar le pasa los parámetros directamente.
-    with open(controllers_config_file_path, 'r') as f:
+    with open(controllers_config_file_path, "r") as f:
         controllers_config = yaml.safe_load(f)
 
     # Nodo del controller_manager
@@ -130,24 +145,11 @@ def generate_launch_description():
         executable="ros2_control_node",
         parameters=[
             {"robot_description": robot_description_content},
-            controllers_config, # ¡PASAMOS EL DICCIONARIO CARGADO!
-            {"use_sim_time": use_sim_time}
+            controllers_config,  # ¡PASAMOS EL DICCIONARIO CARGADO!
+            {"use_sim_time": use_sim_time},
         ],
         output="screen",
     )
-
-    # --- Nodo Twist to Wheels (Ejercicio 8) ---
-    twist_to_wheels_node = Node(
-        package="control_robot",
-        executable="twist_to_wheels_node",
-        parameters=[
-            {"wheel_radius": 0.05},  # Ajusta según el radio de tu rueda (debe coincidir con URDF)
-            {"track_width": 0.3},   # Ajusta según el ancho de vía de tu robot (debe coincidir con URDF)
-            {"use_sim_time": use_sim_time} # Es crucial que el nodo use el tiempo de simulación
-        ],
-        output="screen",
-    )
-
 
     # --- Comandos para cargar y activar los controladores de ROS 2 Control ---
     # Utilizamos TimerAction para asegurar que estos comandos se ejecuten
@@ -159,9 +161,16 @@ def generate_launch_description():
         period=7.0,  # Retraso para dar tiempo a Gazebo y al robot a inicializarse
         actions=[
             ExecuteProcess(
-                cmd=["ros2", "control", "load_controller", "joint_state_broadcaster", "--set-state", "active"],
+                cmd=[
+                    "ros2",
+                    "control",
+                    "load_controller",
+                    "joint_state_broadcaster",
+                    "--set-state",
+                    "active",
+                ],
                 output="screen",
-                shell=True
+                shell=True,
             )
         ],
     )
@@ -171,9 +180,16 @@ def generate_launch_description():
         period=9.0,  # Retraso adicional para el siguiente controlador
         actions=[
             ExecuteProcess(
-                cmd=["ros2", "control", "load_controller", "velocity_controller_left", "--set-state", "active"],
+                cmd=[
+                    "ros2",
+                    "control",
+                    "load_controller",
+                    "velocity_controller_left",
+                    "--set-state",
+                    "active",
+                ],
                 output="screen",
-                shell=True
+                shell=True,
             )
         ],
     )
@@ -183,9 +199,39 @@ def generate_launch_description():
         period=11.0,  # Retraso adicional para el último controlador
         actions=[
             ExecuteProcess(
-                cmd=["ros2", "control", "load_controller", "velocity_controller_right", "--set-state", "active"],
+                cmd=[
+                    "ros2",
+                    "control",
+                    "load_controller",
+                    "velocity_controller_right",
+                    "--set-state",
+                    "active",
+                ],
                 output="screen",
-                shell=True
+                shell=True,
+            )
+        ],
+    )
+
+    # --- Nodo Twist to Wheels (Ejercicio 8) ---
+    # Envuelto en un TimerAction para asegurar que los controladores de velocidad estén activos
+    # antes de que este nodo comience a publicar comandos.
+    twist_to_wheels_node = TimerAction(
+        period=13.0,  # Asegura que este nodo se inicie después de la activación de los controladores
+        actions=[
+            Node(
+                package="control_robot",
+                executable="twist_to_wheels_node",
+                parameters=[
+                    {"wheel_radius": 0.05},
+                    {"track_width": 0.3},
+                    {"use_sim_time": use_sim_time},
+                ],
+                remappings=[
+                    ("left_wheel_cmd", "/velocity_controller_left/commands"),
+                    ("right_wheel_cmd", "/velocity_controller_right/commands"),
+                ],
+                output="screen",
             )
         ],
     )
@@ -200,9 +246,9 @@ def generate_launch_description():
             spawn_entity,
             clock_bridge,
             controller_manager_node,
-            twist_to_wheels_node, # ¡Añadido el nodo twist_to_wheels_node aquí!
             load_joint_state_broadcaster,
             load_velocity_controller_left,
             load_velocity_controller_right,
+            twist_to_wheels_node,  # ¡Ahora envuelto en TimerAction y colocado después de la activación de controladores!
         ]
     )
