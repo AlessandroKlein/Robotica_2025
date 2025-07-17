@@ -80,7 +80,7 @@ source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 
 -----
 
-## Uso
+## Uso Ejercicios 5 - 6 - 7
 
 ### Ejecución de Scripts de Simulación
 - Para ejecutar los scripts `ej5.py`, `ej6.py` o `ej7.py`:
