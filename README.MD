@@ -1,109 +1,222 @@
-### 🔧 **Construcción del paquete**
+# Cinemática de un robot diferencial con ROS2
+
+**Guía de trabajos prácticos 2025 - Entregable 1**
+
+Este repositorio contiene los paquetes y configuraciones necesarios para los ejercicios de cinemática de un robot diferencial utilizando ROS2.
+
+-----
+
+## 🚀 Puesta en Marcha
+
+Para trabajar con los paquetes de este proyecto, sigue los siguientes pasos:
+
+### 🛠️ Construcción del Proyecto
+
+Primero, asegúrate de tener todas las dependencias necesarias:
+
 ```bash
-    rosdep install -i --from-path src -y
+rosdep install -i --from-path src -y
 ```
 
-## BORRO VERSIONES ANTERIORES Y CONSTRUYO EL PAQUETE
-```bash
-    rm -rf {build,install,log} && colcon build --symlink-install && source install/setup.bash
+Para construir todos los paquetes del proyecto, puedes usar los siguientes comandos. Es recomendable limpiar las versiones anteriores para evitar conflictos:
 
-    rm -rf {build,install,log} && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release && source install/setup.bash
-```
 ```bash
-    rm -rf build/robot_description install/robot_description && colcon build --packages-select robot_description && source install/setup.bash
+# Limpia y construye todos los paquetes en modo debug (útil para desarrollo)
+rm -rf {build,install,log} && colcon build --symlink-install && source install/setup.bash
 
-    rm -rf build/gz_robot install/gz_robot  && colcon build --packages-select gz_robot  && source install/setup.bash
-    
-    rm -rf build/control_robot install/control_robot  && colcon build --packages-select control_robot  && source install/setup.bash
+# O, limpia y construye todos los paquetes en modo release (optimizado para rendimiento)
+rm -rf {build,install,log} && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release && source install/setup.bash
 ```
 
-## Carga los controladores definidos (si están configurados en el launch), Rviz (Ejecicio 2)
-    - Para lanzar con la GUI y RViz (modo de prueba):
+Si necesitas reconstruir un paquete específico, usa el siguiente formato:
+
+```bash
+# Reconstruir el paquete 'robot_description'
+rm -rf build/robot_description install/robot_description && colcon build --packages-select robot_description && source install/setup.bash
+
+# Reconstruir el paquete 'gz_robot'
+rm -rf build/gz_robot install/gz_robot && colcon build --packages-select gz_robot && source install/setup.bash
+
+# Reconstruir el paquete 'control_robot'
+rm -rf build/control_robot install/control_robot && colcon build --packages-select control_robot && source install/setup.bash
+```
+
+-----
+
+## 📋 Ejecución de los Ejercicios
+
+A continuación, se detallan los comandos para ejecutar los distintos ejercicios propuestos. Recuerda **siempre ejecutar `source install/setup.bash` en cada nueva terminal** antes de lanzar cualquier comando de ROS2 para asegurar que el entorno esté configurado correctamente.
+
+### Ejercicio 2: Visualización del Robot en RViz
+
+Este ejercicio permite visualizar el modelo del robot en RViz, con o sin la interfaz gráfica.
+
+  * **Lanzar con GUI y RViz (modo de prueba):**
     ```bash
-        source install/setup.bash && ros2 launch robot_description description.launch.py testing:=True
+    source install/setup.bash && ros2 launch robot_description description.launch.py testing:=True
     ```
-    - Para lanzar sin la GUI y RViz (modo normal/producción):
+  * **Lanzar sin GUI y RViz (modo normal/producción):**
     ```bash
-        ros2 launch robot_description description.launch.py testing:=False
+    ros2 launch robot_description description.launch.py testing:=False
     ```
-        - O simplemente:
+      * O simplemente:
         ```bash
-            ros2 launch robot_description description.launch.py
+        ros2 launch robot_description description.launch.py
         ```
 
-## Carga los controladores definidos (si están configurados en el launch), Gzbo (Ejercicio 3)
+### Ejercicio 3: Simulación en Gazebo
+
+Este comando inicia la simulación del robot en Gazebo.
+
 ```bash
-    source install/setup.bash && ros2 launch gz_robot gazebo.launch.py
+source install/setup.bash && ros2 launch gz_robot gazebo.launch.py
 ```
 
-## (Ejercicio 4)
+### Ejercicio 4: Control Básico del Robot en Gazebo
+
 ```bash
-    source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
+source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 ```
 
-```
-* gz_robot/gztwist.launch.py
-* control_robot/config/controllers.yaml
-* control_robot/cmd_vel_listener.py
-* control_robot/odometry_publisher.py
-* robot_description/urdf/diffbot.urdf.xacro
-* robot_description/rviz/diffbot.rviz
-```
+-----
 
-## (Ejercicio 8)
-### O el comando para tu archivo de lanzamiento si lo creaste
+### Archivos Relevantes del Proyecto
+
+Para una mejor comprensión, aquí se listan algunos de los archivos clave del proyecto:
+
+  * `gz_robot/gztwist.launch.py`: Archivo de lanzamiento para enviar comandos de velocidad.
+  * `control_robot/config/controllers.yaml`: Configuración de los controladores del robot.
+  * `control_robot/cmd_vel_listener.py`: Nodo para escuchar comandos de velocidad.
+  * `control_robot/odometry_publisher.py`: Nodo para publicar la odometría del robot.
+  * `robot_description/urdf/diffbot.urdf.xacro`: Definición del modelo URDF del robot diferencial.
+  * `robot_description/rviz/diffbot.rviz`: Configuración de RViz para el robot.
+
+-----
+
+### Ejercicio 8: Publicación de Comandos de Velocidad
+
 ```bash
-    source install/setup.bash && ros2 launch gz_robot gztwist.launch.py
+# Lanza el nodo que maneja los comandos de velocidad
+source install/setup.bash && ros2 launch gz_robot gztwist.launch.py
 
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
+# Publica un comando de velocidad lineal (0.5 m/s) y angular (0.2 rad/s)
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
 
-    ros2 topic echo /velocity_controller_left/commands
-    ros2 topic echo /velocity_controller_right/commands
+# Monitorea los comandos enviados a los controladores de las ruedas
+ros2 topic echo /velocity_controller_left/commands
+ros2 topic echo /velocity_controller_right/commands
 ```
-## (Ejercicio 9)
+
+### Ejercicio 9: Visualización de Odometría en RViz
+
 ```bash
-    source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
-    ros2 topic echo /odom
-    ros2 run tf2_ros tf2_echo odom base_link
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+# Lanza la simulación con el publicador de odometría
+source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
 
-    rviz2
+# Muestra los datos de odometría
+ros2 topic echo /odom
+
+# Verifica la transformación entre 'odom' y 'base_link'
+ros2 run tf2_ros tf2_echo odom base_link
+
+# Publica un comando de velocidad para mover el robot
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+
+# Abre RViz2 para visualizar la odometría
+rviz2
 ```
 
-## (Ejercicio 10)
+### Ejercicio 10: Sistema de Robot Completo
+
+Este comando lanza un sistema completo con múltiples nodos relacionados con el robot.
+
 ```bash
-    source install/setup.bash && ros2 launch robot_bringup robot_system.launch.py
+source install/setup.bash && ros2 launch robot_bringup robot_system.launch.py
 
-    ros2 node list
-    ros2 topic list
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
-    ros2 topic echo /odom
+# Lista los nodos activos
+ros2 node list
+
+# Lista los tópicos disponibles
+ros2 topic list
+
+# Publica un comando de velocidad
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
+
+# Muestra los datos de odometría
+ros2 topic echo /odom
 ```
-### Ejemplo ejercicio 6
+
+-----
+
+### Ejemplo Ejercicio 6: Secuencia de Movimientos
+
+Este ejemplo muestra cómo publicar una secuencia de comandos de velocidad para realizar un patrón de movimiento.
+
 ```bash
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2885, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 1.154}}" --once
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3665, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2885, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: -1.154}}" --once
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3665, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+# Mueve el robot hacia adelante y gira a la izquierda
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2885, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 1.154}}" --once
+
+# Mueve el robot hacia adelante
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3665, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+
+# Mueve el robot hacia adelante y gira a la derecha
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2885, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: -1.154}}" --once
+
+# Mueve el robot hacia adelante
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3665, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+
+# Detiene el robot
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
 ```
 
-## (Ejercicio 11)
+### Ejercicio 11: Odometría con Visualización Avanzada
+
+Similar al Ejercicio 9, pero puede implicar configuraciones más avanzadas o escenarios específicos del ejercicio.
+
 ```bash
-    source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
-    ros2 topic echo /odom
-    ros2 run tf2_ros tf2_echo odom base_link
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+# Lanza la simulación con el publicador de odometría
+source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
 
-    rviz2
+# Muestra los datos de odometría
+ros2 topic echo /odom
+
+# Verifica la transformación entre 'odom' y 'base_link'
+ros2 run tf2_ros tf2_echo odom base_link
+
+# Publica un comando de velocidad para mover el robot
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+
+# Abre RViz2 para visualizar la odometría
+rviz2
 ```
 
-## (Ejercicio 12)
+### Ejercicio 12: Demostración del Sistema de Visualización
+
 ```bash
-    source install/setup.bash && ros2 launch robot_bringup display_robot_system.launch.py
-    ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
-    ros2 topic echo /odom
-```
-___
+source install/setup.bash && ros2 launch robot_bringup display_robot_system.launch.py
 
-## Libreria de ros2 jazzy
+# Publica un comando de velocidad
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
+
+# Muestra los datos de odometría
+ros2 topic echo /odom
+```
+
+-----
+
+## ⚙️ Generación del URDF
+
+Si necesitas generar el archivo URDF a partir del XACRO, puedes usar el siguiente comando:
+
+```bash
+cd ~/tp-1 # Asegúrate de estar en el directorio raíz de tu proyecto
+ros2 run xacro xacro --inorder src/robot_description/urdf/diffbot.urdf.xacro > generated_robot.urdf
+```
+
+-----
+
+## ⚠️ Nota sobre la Versión de ROS2
+
+Este proyecto ha sido desarrollado y probado con **ROS2 Jazzy**. Asegúrate de que tu entorno ROS2 sea compatible para evitar posibles problemas.
+
+-----
