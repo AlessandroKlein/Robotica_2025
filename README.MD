@@ -1,3 +1,7 @@
+Looks like a comprehensive `README.md`\! To add the information about the code sources and licensing, you can include a new section. Here's how you can integrate it, along with some minor formatting suggestions for consistency and clarity:
+
+-----
+
 # Cinemática de un robot diferencial con ROS2
 
 **Guía de trabajos prácticos 2025 - Entregable 1**
@@ -115,11 +119,18 @@ source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 source install/setup.bash && ros2 launch gz_robot gztwist.launch.py
 
 # Publica un comando de velocidad lineal (0.5 m/s) y angular (0.2 rad/s)
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 10.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 00.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.157, y: 0.0, z: 0.3}, angular: {x: 0.0, y: 0.0, z: 0.314}}" --once
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.157, y: 10.0, z: 0.3}, angular: {x: 0.0, y: 0.0, z: 0.314}}" --once
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 00.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
 
 # Monitorea los comandos enviados a los controladores de las ruedas
 ros2 topic echo /velocity_controller_left/commands
 ros2 topic echo /velocity_controller_right/commands
+
+ros2 param set /cmd_vel_listener invert_polarity true
+ros2 param set /cmd_vel_listener swap_wheels true
 ```
 
 ### Ejercicio 9: Visualización de Odometría en RViz
@@ -135,7 +146,7 @@ ros2 topic echo /odom
 ros2 run tf2_ros tf2_echo odom base_link
 
 # Publica un comando de velocidad para mover el robot
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.1}}" --once
 
 # Abre RViz2 para visualizar la odometría
 rviz2
