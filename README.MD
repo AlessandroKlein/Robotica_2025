@@ -1,3 +1,7 @@
+Looks like a comprehensive `README.md`\! To add the information about the code sources and licensing, you can include a new section. Here's how you can integrate it, along with some minor formatting suggestions for consistency and clarity:
+
+-----
+
 # Cinemática de un robot diferencial con ROS2
 
 **Guía de trabajos prácticos 2025 - Entregable 1**
@@ -83,23 +87,28 @@ source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 ## Uso Ejercicios 5 - 6 - 7
 
 ### Ejecución de Scripts de Simulación
-- Para ejecutar los scripts `ej5.py`, `ej6.py` o `ej7.py`:
-  ```bash
-  python3 ~/ros2_ws/src/Robotica_2025/ej5.py
-  ```
-  Estos scripts generan gráficos de trayectorias y muestran cálculos cinemáticos.
+
+  * Para ejecutar los scripts `ej5.py`, `ej6.py` o `ej7.py`:
+    ```bash
+    python3 ~/ros2_ws/src/Robotica_2025/ej5.py
+    ```
+    Estos scripts generan gráficos de trayectorias y muestran cálculos cinemáticos.
 
 ### Lanzamiento de la Simulación en Gazebo
-1. Lanza el sistema completo con visualización:
-   ```bash
-   ros2 launch robot_bringup display_robot_system.launch.py
-   ```
-   Esto inicia Gazebo, RViz, y los nodos de control.
 
-2. Para simulaciones específicas, usa los archivos de lanzamiento en `gz_robot/launch/`:
-   ```bash
-   ros2 launch gz_robot gazebo.launch.py
-   ```
+1.  Lanza el sistema completo con visualización:
+
+    ```bash
+    ros2 launch robot_bringup display_robot_system.launch.py
+    ```
+
+    Esto inicia Gazebo, RViz, y los nodos de control.
+
+2.  Para simulaciones específicas, usa los archivos de lanzamiento en `gz_robot/launch/`:
+
+    ```bash
+    ros2 launch gz_robot gazebo.launch.py
+    ```
 
 -----
 
@@ -230,3 +239,7 @@ ros2 run xacro xacro --inorder src/robot_description/urdf/diffbot.urdf.xacro > g
 Este proyecto ha sido desarrollado y probado con **ROS2 Jazzy**. Asegúrate de que tu entorno ROS2 sea compatible para evitar posibles problemas.
 
 -----
+
+## 📄 Fuentes y Licencias
+
+Algunos archivos y fragmentos de código de este repositorio han sido extraídos o adaptados de las páginas oficiales de **ROS2** y **Gazebo**, así como de la guía de la asignatura disponible en [https://acapovilla.github.io/robotica-2025/](https://acapovilla.github.io/robotica-2025/). La mayoría de estos ejemplos y códigos están sujetos a licencias de código abierto, lo que permite su uso y modificación sin fines de lucro.
