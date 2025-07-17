@@ -211,7 +211,7 @@
 
   <!-- Configuración de ros2_control para la interfaz de hardware -->
   <!-- El nombre "GazeboSystem" y el tipo "system" son estándar para la integración con Gazebo. -->
-  <ros2_control name="GazeboSystem" type="gz_ros2_control/GazeboSimSystem">
+  <ros2_control name="GazeboSystem" type="system">
     <hardware>
       <!-- El plugin `gz_ros2_control/GazeboSimSystem` es el puente entre Gazebo y ROS 2 Control. -->
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
@@ -251,12 +251,12 @@
   <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <!-- Este parámetro le indica al plugin que cargue la descripción del robot desde el parámetro 'robot_description'. -->
-      <robot_param>robot_description</robot_param>
+      <!--<robot_param>robot_description</robot_param>-->
       <!-- ¡IMPORTANTE! Se ha ELIMINADO la línea <parameters>$(find control_robot)/config/controllers.yaml</parameters>
            Esta línea es la que causa que Gazebo intente parsear el archivo YAML de controladores,
            lo cual no es su función y genera el error "Cannot have a value before ros__parameters".
            El archivo controllers.yaml es cargado por el nodo ros2_control_node en el launch file. -->
-      <!-- <parameters>$(find control_robot)/config/controllers.yaml</parameters> -->
+      <parameters>$(find control_robot)/config/controllers.yaml</parameters>
     </plugin>
   </gazebo>
 

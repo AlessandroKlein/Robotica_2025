@@ -23,7 +23,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'twist_to_wheels_node = control_robot.twist_to_wheels_node:main',
+            'cmd_vel_listener = control_robot.cmd_vel_listener:main',
             'odometry_node = control_robot.odometry_node:main',
         ],
     },

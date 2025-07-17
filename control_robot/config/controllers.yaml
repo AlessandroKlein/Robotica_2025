@@ -1,37 +1,39 @@
-# Configuración global del controller_manager
 controller_manager:
   ros__parameters:
-    update_rate: 30  # Frecuencia de actualización del controlador en Hz
-    use_sim_time: true""" # Indica que se debe usar el tiempo de simulación de Gazebo.
+    update_rate: 30
+    use_sim_time: true"""
 
-# Definición del controlador 'joint_state_broadcaster'
-# Este controlador publica el estado (posición y velocidad) de las juntas especificadas.
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    velocity_controller_right:
+      type: velocity_controllers/JointGroupVelocityController
+
+    velocity_controller_left:
+      type: velocity_controllers/JointGroupVelocityController
+
+
 joint_state_broadcaster:
-  type: joint_state_broadcaster/JointStateBroadcaster
   ros__parameters:
     joints:
-      - left_wheel_joint  # Nombre de la junta de la rueda izquierda
-      - right_wheel_joint # Nombre de la junta de la rueda derecha
+      - left_wheel_joint
+      - right_wheel_joint
     state_interfaces:
-      - velocity # Se publicará la velocidad de estas juntas
-      - position # Se publicará la posición de estas juntas
+      - velocity
+      - position
 
-# Definición del controlador de velocidad para la rueda derecha
-# Este controlador permite enviar comandos de velocidad a la junta 'right_wheel_joint'.
+
 velocity_controller_right:
-  type: velocity_controllers/JointGroupVelocityController
   ros__parameters:
     joints:
-      - right_wheel_joint # La junta que será controlada por este controlador
+      - right_wheel_joint
     command_interfaces:
-      - velocity # La interfaz de comando que este controlador utilizará (velocidad)
+      - velocity
 
-# Definición del controlador de velocidad para la rueda izquierda
-# Similar al anterior, pero para la rueda izquierda.
+
 velocity_controller_left:
-  type: velocity_controllers/JointGroupVelocityController
   ros__parameters:
     joints:
-      - left_wheel_joint # La junta que será controlada por este controlador
+      - left_wheel_joint
     command_interfaces:
-      - velocity # La interfaz de comando que este controlador utilizará (velocidad)
+      - velocity
