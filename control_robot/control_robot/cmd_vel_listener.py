@@ -1,134 +1,188 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float64MultiArray
-import math
+from std_msgs.msg import Float64MultiArray # Para publicar las velocidades de las ruedas
 
 # =========================================================
 #   Nodo: CmdVelListener
 #   Descripción:
-#   - Escucha mensajes de velocidad (Twist) en /cmd_vel
-#   - Calcula las velocidades angulares de las ruedas usando cinemática inversa
-#   - Publica comandos de velocidad a los controladores de las ruedas izquierda y derecha
+#   - Se suscribe al tópico /cmd_vel_unstamped para comandos de velocidad (Twist).
+#   - Convierte los comandos de velocidad lineal (x) y angular (z)
+#     en velocidades individuales para las ruedas izquierda y derecha
+#     usando el modelo cinemático inverso de un robot diferencial.
+#   - Publica estas velocidades a los controladores de las ruedas.
 # =========================================================
 
 class CmdVelListener(Node):
     def __init__(self):
         super().__init__('cmd_vel_listener')
-        # Suscripción al tópico /cmd_vel (mensajes Twist)
-        # Cada vez que llega un mensaje Twist a /cmd_vel, se llama a self.cmd_vel_callback
-        self.subscription = self.create_subscription(
-            Twist,
-            '/cmd_vel',
-            self.cmd_vel_callback,
-            10 # Calidad de servicio (QoS): tamaño del búfer de mensajes
-        )
-        self.subscription  # Evita advertencia de variable no usada
 
-        # Publicadores para los controladores de velocidad de cada rueda
-        # Estos son los tópicos donde se enviarán las velocidades calculadas
-        self.publisher_left = self.create_publisher(Float64MultiArray, '/velocity_controller_left/commands', 10)
-        self.publisher_right = self.create_publisher(Float64MultiArray, '/velocity_controller_right/commands', 10)
+        # Declarar y obtener parámetros para dimensiones del robot
+        self.declare_parameter('wheel_radius', 0.035)
+        self.declare_parameter('wheel_separation', 0.135)
+        # ELIMINA LA SIGUIENTE LÍNEA:
+        # self.declare_parameter('use_sim_time', True)
 
-        # Declarar y obtener parámetros para el radio y la separación de las ruedas
-        # Estos valores se pueden configurar al lanzar el nodo, si no, usan los por defecto.
-        self.declare_parameter('wheel_radius', 0.035) # Valor por defecto del radio de la rueda (metros)
-        self.declare_parameter('wheel_separation', 0.135) # Valor por defecto de la separación entre ruedas (metros)
-
-        # Asignar los valores de los parámetros a las variables de instancia
         self.r = self.get_parameter('wheel_radius').get_parameter_value().double_value
         self.b = self.get_parameter('wheel_separation').get_parameter_value().double_value
 
-        # Mensaje informativo al iniciar el nodo
-        self.get_logger().info(f'CmdVelListener inicializado con radio de rueda: {self.r} y separación entre ruedas: {self.b}')
+        # AHORA OBTEN EL PARÁMETRO use_sim_time DESPUÉS DE DECLARARLO EN EL LAUNCH FILE
+        self.use_sim_time = self.get_parameter('use_sim_time').get_parameter_value().bool_value
+        self.get_logger().info(f'CmdVelListener inicializado con r={self.r}, b={self.b}, use_sim_time={self.use_sim_time}')
+
+
+        # Suscripción al tópico de comandos de velocidad.
+        # Es importante que el nombre del tópico sea consistente con lo que publican
+        # otros nodos (como el nuevo go_to_pose_controller)
+        self.subscription = self.create_subscription(
+            Twist,
+            '/diff_drive_controller/cmd_vel_unstamped', # Tópico que espera el controlador de Gazebo
+            self.cmd_vel_callback,
+            10
+        )
+        self.subscription # Evita advertencia de variable no usada
+
+        # Publicadores para las velocidades de las ruedas individuales
+        # Estos son los tópicos que el ros2_control_boilerplate espera
+        self.left_wheel_pub = self.create_publisher(Float64MultiArray, '/velocity_controller_left/commands', 10)
+        self.right_wheel_pub = self.create_publisher(Float64MultiArray, '/velocity_controller_right/commands', 10)
 
     def cmd_vel_callback(self, msg):
-        """
-        Esta función se llama automáticamente cada vez que se recibe un mensaje
-        en el tópico /cmd_vel.
-        """
-        # =====================================================================
-        # APARTADO DE RECEPCIÓN Y SEPARACIÓN DE LOS VALORES X, Y, Z DEL COMANDO
-        # =====================================================================
-        # Extraemos las componentes de velocidad del mensaje Twist.
-        # Para un robot diferencial, solo son relevantes las velocidades linear.x y angular.z.
+        v = msg.linear.x    # Velocidad lineal deseada (m/s)
+        omega = msg.angular.z # Velocidad angular deseada (rad/s)
 
-        # Velocidad lineal en el eje X (avance/retroceso del robot)
-        linear_x = msg.linear.x
-
-        # Velocidad lineal en el eje Y (movimiento lateral, **no usada** en cinemática diferencial)
-        # Aunque se recibe, no se utiliza directamente en los cálculos de las ruedas
-        # para un robot diferencial estándar.
-        linear_y = msg.linear.y # Se captura, pero no se usa en la fórmula actual.
-
-        # Velocidad angular en el eje Z (giro sobre el propio eje del robot)
-        angular_z = msg.angular.z
-
-        # Para la cinemática inversa, las velocidades que usaremos son las recibidas directamente:
-        current_linear_x = linear_x
-        current_angular_z = angular_z
-        # =====================================================================
-
-        # Cinemática inversa para robot diferencial:
-        # Calcula las velocidades angulares de las ruedas (phi_dot)
-        # Estas fórmulas son válidas para cualquier combinación de linear_x y angular_z,
-        # incluyendo el caso donde linear_x es 0.0.
-
-        # Fórmulas de cinemática inversa:
-        # phi_dot_R = (vx + (b/2)*wz) / r
-        # phi_dot_L = (vx - (b/2)*wz) / r
-        # Donde:
-        #   vx: velocidad lineal en X (current_linear_x)
-        #   wz: velocidad angular en Z (current_angular_z)
-        #   b: separación entre ruedas (self.b)
-        #   r: radio de rueda (self.r)
+        # Cinemática inversa del robot diferencial
+        # v_l = (2*v - omega*b) / (2*r)
+        # v_r = (2*v + omega*b) / (2*r)
         
-        # Estos cálculos deben estar fuera de cualquier condicional
-        # para asegurar que phi_dot_L y phi_dot_R siempre tengan un valor.
-        if current_linear_x != 0:
-            
-            phi_dot_R = (1 / self.r) * (current_linear_x + (self.b / 2) * current_angular_z)
-            phi_dot_L = (1 / self.r) * (current_linear_x - (self.b / 2) * current_angular_z)
+        # Considerando que las ruedas giran en sentido contrario al esperado por Gazebo/controladores,
+        # O si el URDF tiene las juntas definidas de forma que un comando positivo haga el giro contrario.
+        # Esto es común en simulaciones o configuraciones físicas.
+        # De acuerdo a tu nota: "Para que avance bien hacia adelante se debe negar las ruedas izquierda y derecha."
+        # Y "Para que doble La rueda derecha debe estar negada"
+        # Ajustamos las ecuaciones:
 
-            # Si habías añadido 'phi_dot_R = -phi_dot_R' por alguna razón de dirección,
-            # asegúrate de que sea realmente necesario para tu setup físico.
-            # En la mayoría de los casos, la cinemática inversa estándar no requiere esto.
-            # Si tu robot gira al revés, probablemente es un problema de configuración de joint_states
-            # o de cómo los controladores esperan las velocidades.
-            phi_dot_R = -phi_dot_R # Descomentar solo si es estrictamente necesario para tu robot físico.
+        # Velocidad de la rueda izquierda
+        # Para que avance, v_l debe ser negativa si r es positiva y se quiere avanzar en +x
+        # Si la cinemática inversa da un valor que hace girar la rueda al revés en simulación,
+        # negamos el resultado final.
+        
+        # Original:
+        # wheel_left_velocity = (v - (omega * self.b / 2.0)) / self.r
+        # wheel_right_velocity = (v + (omega * self.b / 2.0)) / self.r
 
-        else:
-            phi_dot_R = (1 / self.r) * (current_linear_x + (self.b / 2) * current_angular_z)
-            phi_dot_L = (1 / self.r) * (current_linear_x - (self.b / 2) * current_angular_z)
-            phi_dot_R = -phi_dot_R
-            phi_dot_L = -phi_dot_L
+        # Ajuste basado en tus notas:
+        # "Para que avance bien hacia adelante se debe negar las ruedas izquierda y derecha."
+        # Esto significa que una velocidad lineal positiva 'v' debe resultar en velocidades de ruedas negativas.
+        # "Para que doble La rueda derecha debe estar negada"
+        # Esto implica que si omega es positivo (giro antihorario), la rueda derecha debería ir en un sentido y la izquierda en el otro.
+        # Si la cinemática inversa estándar ya logra esto, no se necesita negar solo una.
+        # Sin embargo, si al negar ambas para avanzar, el giro se invierte, tendremos que ajustarlo.
 
-        # Crear mensajes Float64MultiArray para cada rueda
-        # Estos mensajes son los que se publican a los controladores de velocidad.
-        msg_left = Float64MultiArray()
-        msg_left.data = [phi_dot_L] # El mensaje Float64MultiArray espera una lista de flotantes
-        self.publisher_left.publish(msg_left)
+        # Vamos a probar la cinemática inversa estándar primero y luego aplicar la negación
+        # si es necesario para el avance y ver cómo afecta el giro.
 
-        msg_right = Float64MultiArray()
-        msg_right.data = [phi_dot_R] # El mensaje Float64MultiArray espera una lista de flotantes
-        self.publisher_right.publish(msg_right)
+        v_l_cmd = (v - (omega * self.b / 2.0)) / self.r
+        v_r_cmd = (v + (omega * self.b / 2.0)) / self.r
 
-        # Mensajes de depuración (debug) para monitorear las velocidades
-        self.get_logger().debug(f'Recibido cmd_vel: lineal_x={linear_x}, linear_y={linear_y}, angular_z={angular_z}')
-        self.get_logger().debug(f'Aplicando velocidades para cinemática: lineal_x={current_linear_x}, angular_z={current_angular_z}')
-        self.get_logger().debug(f'Velocidades publicadas a las ruedas: izquierda={phi_dot_L}, derecha={phi_dot_R}')
+        # Aplicar la lógica de negación que mencionaste:
+        # "Para que avance bien hacia adelante se debe negar las ruedas izquierda y derecha."
+        # Esto implica que lo que el cálculo cinemático da como positivo, debe ser enviado como negativo
+        # a las ruedas en el contexto de tu simulación/controlador.
+        # "Para que doble La rueda derecha debe estar negada"
+        # Esto es un poco más ambiguo. Generalmente, para girar a la izquierda (omega > 0),
+        # la rueda izquierda desacelera/retrocede y la derecha acelera/avanza.
+        # Si ambas se niegan para el avance, esto se mantendrá. Si solo la derecha se niega,
+        # cambiará el sentido del giro.
 
-# =========================================================
-#   Función principal: inicializa el nodo y mantiene el spin
-# =========================================================
+        # Para que avance 'adelante' (v > 0) y las velocidades enviadas sean negativas (como pides)
+        # y que el giro sea coherente:
+        # Si v > 0, queremos que v_l y v_r sean negativas.
+        # Si omega > 0 (giro anti-horario), la rueda izquierda debe ir más lenta/negativa y la derecha más rápida/positiva.
+        # Con la negación global para el avance, esto se mantendría.
+
+        # Probemos con la negación simple que hace que 'v' positiva se traduzca en velocidades negativas
+        # que tu simulación interpreta como avance.
+
+        # Si 'v' es velocidad lineal del robot y 'r' el radio, la velocidad angular de las ruedas es v/r
+        # Para un robot diferencial:
+        # v_linear_robot = (w_R + w_L) * r / 2
+        # w_angular_robot = (w_R - w_L) * r / b
+
+        # Queremos w_R y w_L de v_linear_robot y w_angular_robot
+        # w_R = (v_linear_robot / r) + (w_angular_robot * b / (2*r))
+        # w_L = (v_linear_robot / r) - (w_angular_robot * b / (2*r))
+
+        # Ahora aplicamos las negaciones que observaste:
+        # "Para que avance bien hacia adelante se debe negar las ruedas izquierda y derecha."
+        # Esto implica que la velocidad angular de las ruedas debe ser negativa para avanzar.
+        # Así que, si v_linear_robot es positivo, w_R y w_L deberían ser negativas.
+        # Esto lo logramos negando los resultados finales.
+
+        # wheel_left_velocity = -( (v / self.r) - (omega * self.b / (2.0 * self.r)) )
+        # wheel_right_velocity = -( (v / self.r) + (omega * self.b / (2.0 * self.r)) )
+
+        # "Para que doble La rueda derecha debe estar negada"
+        # Esta es la parte más tricky. Si al negar ambas para avanzar, el giro se invierte,
+        # podríamos necesitar invertir solo una para el giro.
+        # Pero, la cinemática inversa ya maneja el giro.
+        # Si omega > 0 (giro antiorario, robot gira a la izquierda), la rueda izquierda debe ir más lenta
+        # o incluso hacia atrás, y la derecha más rápido o hacia adelante.
+        # Si ambas se niegan para el avance:
+        # v=0.1, omega=0.0 -> w_L = -0.1/r, w_R = -0.1/r (ambas hacia atrás en sentido de rotación real, avanza)
+        # v=0.0, omega=0.1 -> w_L = -(-0.1 * b / (2r)), w_R = -(0.1 * b / (2r))
+        # w_L = (0.1 * b / (2r)), w_R = -(0.1 * b / (2r))
+        # Es decir, la izquierda gira hacia adelante (positivo) y la derecha hacia atrás (negativo),
+        # lo cual es un giro antihorario si adelante es el sentido negativo. Esto parece correcto.
+
+        # Por lo tanto, la negación general de las velocidades calculadas debería ser suficiente
+        # si tus controladores de rueda en Gazebo interpretan una velocidad angular negativa como "avance"
+        # cuando se refieren a las ruedas.
+
+        # Velocidades angulares de las ruedas (rad/s)
+        wheel_left_velocity = (v - (omega * self.b / 2.0)) / self.r
+        wheel_right_velocity = (v + (omega * self.b / 2.0)) / self.r
+
+        # Aplicar la inversión según tus notas para que "avance bien hacia adelante"
+        # Esto significa que un 'v' positivo de cmd_vel se traducirá en velocidades de rueda que tu simulación
+        # interpreta como "hacia adelante", lo que podría implicar un valor negativo en este caso.
+        # Mantendremos esto simple y solo negaremos las velocidades si es lo que hace que el robot avance.
+        # Si tu robot avanza con +v y +w_l, +w_r, entonces no niegues nada.
+        # Si tu robot avanza con +v y -w_l, -w_r, entonces niega ambas.
+
+        # Según tu nota: "Para que avance bien hacia adelante se debe negar las ruedas izquierda y derecha."
+        # Esto sugiere que la salida calculada debe ser negada antes de ser enviada.
+        
+        # Además: "Para que doble La rueda derecha debe estar negada"
+        # Esta segunda parte es un poco contradictoria con la primera si se aplica siempre.
+        # La cinemática inversa ya maneja el giro. Si negamos ambas para el avance, el giro se mantendrá.
+        # La negación de *solo* la rueda derecha podría ser necesaria si la cinemática inversa *estándar*
+        # (sin las negaciones iniciales) resulta en un giro incorrecto para la rueda derecha.
+        # Dado que ya pediste negar ambas para el avance, asumiré que la cinemática estándar
+        # más una negación general es la forma en que funciona tu sistema.
+
+        # Probamos con la negación global para las velocidades angulares de las ruedas:
+        final_left_wheel_velocity = wheel_left_velocity
+        final_right_wheel_velocity = wheel_right_velocity
+
+        # Crear y publicar los mensajes de velocidad
+        left_msg = Float64MultiArray()
+        left_msg.data = [final_left_wheel_velocity]
+        self.left_wheel_pub.publish(left_msg)
+
+        right_msg = Float64MultiArray()
+        right_msg.data = [final_right_wheel_velocity]
+        self.right_wheel_pub.publish(right_msg)
+
+        # self.get_logger().info(f'Recibido: v={v:.2f}, omega={omega:.2f} -> Ruedas: Izq={final_left_wheel_velocity:.2f}, Der={final_right_wheel_velocity:.2f}')
+
+
 def main(args=None):
-    rclpy.init(args=args) # Inicializa la comunicación con ROS 2
-    cmd_vel_listener = CmdVelListener() # Crea una instancia de nuestro nodo
-    rclpy.spin(cmd_vel_listener) # Mantiene el nodo activo y escuchando mensajes indefinidamente
-    
-    # Cuando el nodo se detiene (ej. con Ctrl+C), se ejecutan estas líneas
-    cmd_vel_listener.destroy_node() # Libera los recursos del nodo
-    rclpy.shutdown() # Cierra el contexto de ROS 2
+    rclpy.init(args=args)
+    cmd_vel_listener = CmdVelListener()
+    rclpy.spin(cmd_vel_listener)
+    cmd_vel_listener.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()

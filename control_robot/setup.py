@@ -25,6 +25,7 @@ setup(
         'console_scripts': [
             'cmd_vel_listener = control_robot.cmd_vel_listener:main',
             'odometry_publisher = control_robot.odometry_publisher:main',
+            'go_to_pose_controller = control_robot.go_to_pose_controller:main',
         ],
     },
 )

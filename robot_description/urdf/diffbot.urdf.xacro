@@ -106,7 +106,7 @@
   <!-- === Ruedas y motores === -->
   <!-- Instanciación de ruedas y motores usando las macros -->
   <xacro:wheel prefix="left" xyz="0.0185  0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 0"/>
-  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 3.14159"/>
+  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 -1 0" rpy="0 1.5708 3.14159"/>
   <!-- Motores -->
   <xacro:motor prefix="left" chassis_width="0.1" reflect="false" />
   <xacro:motor prefix="right" chassis_width="0.1" reflect="true" />
@@ -230,6 +230,7 @@
       <state_interface name="position"/>
       <!-- Interfaz de estado de velocidad: permite leer la velocidad actual de la junta. -->
       <state_interface name="velocity"/>
+      <state_interface name="effort" />
     </joint>
 
     <!-- Definición de la junta de la rueda derecha -->
@@ -244,6 +245,7 @@
       <state_interface name="position"/>
       <!-- Interfaz de estado de velocidad: permite leer la velocidad actual de la junta. -->
       <state_interface name="velocity"/>
+      <state_interface name="effort" />
     </joint>
   </ros2_control>
 
