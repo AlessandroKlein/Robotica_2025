@@ -119,6 +119,8 @@ source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 source install/setup.bash && ros2 launch gz_robot gztwist.launch.py
 
 # Publica un comando de velocidad lineal (0.5 m/s) y angular (0.2 rad/s)
+ros2 topic pub /diff_drive_controller/cmd_vel_unstamped geometry_msgs/msg/Twist "{linear: {x: 1.0, y: 1.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
+
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 10.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 00.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.157, y: 0.0, z: 0.3}, angular: {x: 0.0, y: 0.0, z: 0.314}}" --once
