@@ -4,10 +4,10 @@
        
     <xacro:macro name="motor" params="prefix chassis_width:=0 reflect:=false">
         <!-- Parámetros -->
-        <xacro:property name="motor_mass" value="0.1"/>
-        <xacro:property name="motor_x_size" value="0.07"/>
-        <xacro:property name="motor_y_size" value="0.0188"/>
-        <xacro:property name="motor_z_size" value="0.0225"/>
+        <xacro:property name="motor_mass" value="0.1"/> <!-- 100g -->
+        <xacro:property name="motor_x_size" value="0.07"/> <!-- 70mm -->
+        <xacro:property name="motor_y_size" value="0.0188"/> <!-- 18.8mm -->
+        <xacro:property name="motor_z_size" value="0.0225"/> <!-- 22.5mm -->
 
         <xacro:property name="motor_x_offset" value="0.0015"/>
         <xacro:property name="motor_y_offset" value="0.0216"/>

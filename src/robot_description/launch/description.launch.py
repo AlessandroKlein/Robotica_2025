@@ -64,13 +64,14 @@ def generate_launch_description():
 
     # -----------------------------------------------------
     # 6. Nodo para publicar los estados articulares (joint_state_publisher)
-    #    Siempre se lanza para que el robot_state_publisher tenga información de los joints.
+    #    Solo se lanza cuando 'testing' es True
     # -----------------------------------------------------
     joint_state_publisher_node = Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
         name='joint_state_publisher',
-        output='screen'
+        output='screen',
+        condition=IfCondition(testing_param) # Condición para lanzar solo en testing
     )
 
     # -----------------------------------------------------

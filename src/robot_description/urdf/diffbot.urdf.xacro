@@ -6,15 +6,15 @@
   <!-- ======================= -->
   <!-- === Propiedades === -->
   <!-- Definición de propiedades reutilizables: masas, colores, dimensiones de ruedas y caster -->
-  <xacro:property name="chassis_mass" value="0.800" />
+  <xacro:property name="chassis_mass" value="0.800" /> <!-- 800g -->
   <!-- Radio de la rueda en metros -->
-  <xacro:property name="wheel_radius" value="0.035" />
+  <xacro:property name="wheel_radius" value="0.035" /> <!-- 70mm de diámetro = 35mm de radio -->
   <!-- Ancho de la rueda en metros -->
-  <xacro:property name="wheel_width" value="0.025" />
+  <xacro:property name="wheel_width" value="0.025" /> <!-- 25mm de ancho -->
   <!-- Ancho entre ruedas en metros -->
-  <xacro:property name="wheel_separation" value="0.135" />
+  <xacro:property name="wheel_separation" value="0.100" /> <!-- 100mm de ancho del chasis -->
   <!-- Separación entre ruedas en metros -->
-  <xacro:property name="caster_origin_xyz" value="-0.075 0 -0.0075" />
+  <xacro:property name="caster_origin_xyz" value="-0.075 0 -0.0075" /> <!-- Posición del caster respecto al chasis -->
   <!-- Posición del caster respecto al chasis -->
 
   <xacro:property name="base_elevation" value="0.055" />
@@ -22,7 +22,6 @@
   <xacro:property name="wheel_color" value="silver" />
   <xacro:property name="caster_color" value="orange" />
 
-  <xacro:property name="wheelSeparation" value="0.13" />
 
   <!-- ======================= -->
   <!-- === Includes === -->
@@ -55,11 +54,11 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.195 0.1 0.05" />
+        <box size="0.195 0.1 0.005" />
       </geometry>
     </collision>
 
-    <xacro:inertial_box mass="0.8" x="0.195" y="0.100" z="0.05">
+    <xacro:inertial_box mass="0.8" x="0.195" y="0.100" z="0.005">
       <origin xyz="0 0 0.0525" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
@@ -95,7 +94,7 @@
         <material name="${wheel_color}" />
       </collision>
 
-      <xacro:inertial_cylinder mass="0.150" radius="${wheel_radius}" length="${wheel_width}">
+      <xacro:inertial_cylinder mass="0.150" radius="${wheel_radius}" length="${wheel_width}"> <!-- 150g -->
         <origin xyz="0 0 0" rpy="0 0 0" />
       </xacro:inertial_cylinder>
     </link>
@@ -105,8 +104,8 @@
   <!-- ======================= -->
   <!-- === Ruedas y motores === -->
   <!-- Instanciación de ruedas y motores usando las macros -->
-  <xacro:wheel prefix="left" xyz="0.0185  0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 0"/>
-  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 -1 0" rpy="0 1.5708 3.14159"/>
+  <xacro:wheel prefix="left" xyz="0.0185  0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 0"/> <!-- Posición rueda izquierda -->
+  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 -1 0" rpy="0 1.5708 3.14159"/> <!-- Posición rueda derecha -->
   <!-- Motores -->
   <xacro:motor prefix="left" chassis_width="0.1" reflect="false" />
   <xacro:motor prefix="right" chassis_width="0.1" reflect="true" />
@@ -135,12 +134,11 @@
     <collision>
       <origin xyz="0 0 0.0045" rpy="0 0 0" />
       <geometry>
-        <!--<box size="0.05 0.05 0.01"/>-->
-        <box size="0.033 0.039 0.016" />
+        <box size="0.032 0.038 0.015" />
       </geometry>
     </collision>
 
-    <xacro:inertial_box mass="0.020" x="0.032" y="0.038" z="0.015">
+    <xacro:inertial_box mass="0.020" x="0.032" y="0.038" z="0.015"> <!-- 20g -->
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
@@ -149,7 +147,7 @@
   <joint name="caster_wheel_joint" type="continuous">
     <parent link="caster_wheel_support" />
     <child link="caster_wheel" />
-    <origin xyz="-0.015 0 -0.020" rpy="0 0 0" />
+    <origin xyz="-0.015 0 -0.020" rpy="0 0 0" /> <!-- Posición de la rueda giratoria respecto al soporte -->
     <axis xyz="0 1 0" />
   </joint>
 
@@ -169,12 +167,12 @@
       <!-- Misma rotación para colisión -->
       <origin xyz="0 0 -0.007" rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.015" length="0.016" />
+        <cylinder radius="0.0075" length="0.015" />
       </geometry>
     </collision>
 
     <!-- Inercia orientada correctamente -->
-    <xacro:inertial_cylinder mass="0.150" radius="0.015" length="0.016">
+    <xacro:inertial_cylinder mass="0.010" radius="0.0075" length="0.015"> <!-- 10g, 15mm diámetro = 7.5mm radio -->
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_cylinder>
   </link>
@@ -183,7 +181,7 @@
   <joint name="caster_support_joint" type="continuous">
     <parent link="base_link" />
     <child link="caster_wheel_support" />
-    <origin xyz="-0.075 0 -0.015" rpy="0 0 0" />
+    <origin xyz="-0.075 0 -0.015" rpy="0 0 0" /> <!-- Posición del soporte de la rueda giratoria -->
     <axis xyz="0 0 1" />
   </joint>
 
@@ -199,12 +197,11 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <!--<box size="0.02 0.02 0.02"/>-->
-        <box size="0.033 0.039 0.016" />
+        <box size="0.033 0.025 0.025" />
       </geometry>
     </collision>
 
-    <xacro:inertial_box mass="0.02" x="0.033" y="0.025" z="0.025">
+    <xacro:inertial_box mass="0.020" x="0.033" y="0.025" z="0.025"> <!-- 20g -->
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
