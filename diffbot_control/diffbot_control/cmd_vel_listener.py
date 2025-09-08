@@ -14,122 +14,73 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 import math
 
-class CmdVelListener(Node):
+class DiffbotControl(Node):
     """
     Nodo que convierte comandos Twist a velocidades angulares de ruedas
     usando el modelo cinemático inverso del robot diferencial.
     """
     
     def __init__(self):
-        super().__init__('cmd_vel_listener')
+        super().__init__('diffbot_control_node')
         
-        # Declarar parámetros del robot (obtenidos del URDF)
-        self.declare_parameter('wheel_radius', 0.035)  # Radio de rueda en metros
-        self.declare_parameter('wheel_separation', 0.100)  # Separación entre ruedas en metros
-        self.declare_parameter('invert_polarity', False)  # Invertir polaridad de motores
-        self.declare_parameter('swap_wheels', False)  # Intercambiar ruedas izquierda/derecha
+        # Parámetro de separación de ruedas
+        self.declare_parameter('wheel_separation', 0.135)
+        # Parámetro de radio de rueda
+        self.declare_parameter('wheel_radius', 0.07/2)
+
+        # Obtener los parámetros
+        self.wheel_sep = self.get_parameter('wheel_separation').get_parameter_value().double_value
+        self.wheel_r = self.get_parameter('wheel_radius').get_parameter_value().double_value
         
-        # Obtener valores de parámetros
-        self.wheel_radius = self.get_parameter('wheel_radius').get_parameter_value().double_value
-        self.wheel_separation = self.get_parameter('wheel_separation').get_parameter_value().double_value
-        self.invert_polarity = self.get_parameter('invert_polarity').get_parameter_value().bool_value
-        self.swap_wheels = self.get_parameter('swap_wheels').get_parameter_value().bool_value
+        # Creación de suscriptor
+        self.sub = self.create_subscription(Twist, 'cmd_vel', self.sub_callback, 10)
         
-        # Log de inicialización
-        self.get_logger().info(f'CmdVelListener inicializado:')
-        self.get_logger().info(f'  - Radio de rueda: {self.wheel_radius} m')
-        self.get_logger().info(f'  - Separación de ruedas: {self.wheel_separation} m')
-        self.get_logger().info(f'  - Invertir polaridad: {self.invert_polarity}')
-        self.get_logger().info(f'  - Intercambiar ruedas: {self.swap_wheels}')
-        
-        # Suscriptor al topic cmd_vel (según consigna)
-        self.cmd_vel_subscription = self.create_subscription(
-            Twist,
-            'cmd_vel',
-            self.cmd_vel_callback,
-            10
-        )
-        
-        # Publishers a los topics de comandos de ruedas (según consigna)
-        self.left_wheel_pub = self.create_publisher(
-            Float64MultiArray,
-            'left_wheel_cmd',
-            10
-        )
-        
-        self.right_wheel_pub = self.create_publisher(
-            Float64MultiArray,
-            'right_wheel_cmd',
-            10
-        )
+        # Crear los dos publisher a los topics de cada rueda
+        self.pub_lwheel = self.create_publisher(Float64MultiArray,
+            'left_wheel_velocity_controller/commands', 10)
+        self.pub_rwheel = self.create_publisher(Float64MultiArray,
+            'right_wheel_velocity_controller/commands', 10)
         
         self.get_logger().info('Nodo cmd_vel_listener listo. Esperando comandos en /cmd_vel...')
     
-    def cmd_vel_callback(self, msg):
+    def sub_callback(self, msg: Twist):
         """
         Callback que procesa comandos Twist y calcula velocidades angulares de ruedas.
         
         Args:
             msg (Twist): Comando de velocidad lineal y angular
         """
-        # Extraer velocidades del mensaje Twist
-        linear_x = msg.linear.x  # Velocidad lineal hacia adelante (m/s)
-        angular_z = msg.angular.z  # Velocidad angular (rad/s)
+        # Obtengo la velocidad lineal y angular deseada
+        x_dot = msg.linear.x
+        w_dot = msg.angular.z
         
-        # Cinemática inversa para robot diferencial
-        # v_left = (2*v - w*L) / (2*R)
-        # v_right = (2*v + w*L) / (2*R)
-        # donde: v = velocidad lineal, w = velocidad angular, L = separación, R = radio
+        # Modelo cinemático inverso
+        phi_dot_lwheel = (x_dot - ((self.wheel_sep/2) * w_dot)) / self.wheel_r
+        phi_dot_rwheel = (x_dot + ((self.wheel_sep/2) * w_dot)) / self.wheel_r
+
+        # Crear los mensajes y publicar
+        lwheel_msg = Float64MultiArray()
+        lwheel_msg.data = [phi_dot_lwheel]
+        self.pub_lwheel.publish(lwheel_msg)
+
+        rwheel_msg = Float64MultiArray()
+        rwheel_msg.data = [phi_dot_rwheel]
+        self.pub_rwheel.publish(rwheel_msg)
         
-        omega_left = (2.0 * linear_x - angular_z * self.wheel_separation) / (2.0 * self.wheel_radius)
-        omega_right = (2.0 * linear_x + angular_z * self.wheel_separation) / (2.0 * self.wheel_radius)
-        
-        # Aplicar configuraciones de parámetros
-        if self.invert_polarity:
-            omega_left = -omega_left
-            omega_right = -omega_right
-            
-        if self.swap_wheels:
-            omega_left, omega_right = omega_right, omega_left
-        
-        # Crear mensajes Float64MultiArray
-        left_msg = Float64MultiArray()
-        left_msg.data = [omega_left]
-        
-        right_msg = Float64MultiArray()
-        right_msg.data = [omega_right]
-        
-        # Publicar comandos
-        self.left_wheel_pub.publish(left_msg)
-        self.right_wheel_pub.publish(right_msg)
-        
-        # Log de debug
-        self.get_logger().debug(
-            f'Cmd: v={linear_x:.3f} m/s, w={angular_z:.3f} rad/s -> '
-            f'ωL={omega_left:.3f} rad/s, ωR={omega_right:.3f} rad/s'
-        )
+
 
 def main(args=None):
-    """
-    Función principal del nodo.
-    
-    Args:
-        args: Argumentos de línea de comandos
-    """
-    # Inicializar ROS 2
+    # 1. Inicialización
     rclpy.init(args=args)
-    
-    # Crear instancia del nodo
-    node = CmdVelListener()
-    
+    # 2. Creación de nodo
+    nodo = DiffbotControl()
     try:
-        # Mantener el nodo ejecutándose
-        rclpy.spin(node)
+        # 3. Procesamiento de mensajes y callback
+        rclpy.spin(nodo)
     except KeyboardInterrupt:
-        node.get_logger().info('Nodo interrumpido por el usuario')
+        pass
     finally:
-        # Limpiar recursos
-        node.destroy_node()
+        # 4. Finalización
         rclpy.shutdown()
 
 if __name__ == '__main__':
