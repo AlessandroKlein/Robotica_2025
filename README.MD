@@ -194,26 +194,43 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.3665, y: 0.0, z:
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
 ```
 
-### Ejercicio 11: Odometría con Visualización Avanzada
+### Ejercicio 11: Odometría con Transformaciones tf2
 
-Similar al Ejercicio 9, pero puede implicar configuraciones más avanzadas o escenarios específicos del ejercicio.
+Este ejercicio implementa un sistema de odometría avanzado que incluye la publicación de transformaciones tf2 entre los frames 'odom' y 'base_link'. El nodo `odometry_publisher` ahora cuenta con funcionalidades mejoradas:
+
+**Características implementadas:**
+- ✅ Parámetro `publish_tf` para controlar la publicación de transformaciones tf2
+- ✅ Método `send_tf()` que publica transformaciones entre frames 'odom' y 'base_link'
+- ✅ Integración completa con el sistema de transformaciones de ROS2
+- ✅ Headers correctos en mensajes de odometría con frame_id apropiados
 
 ```bash
-# Lanza la simulación con el publicador de odometría
+# Lanza la simulación con el publicador de odometría mejorado
 source install/setup.bash && ros2 launch diffbot_gz gzodom.launch.py
 
-# Muestra los datos de odometría
+# Muestra los datos de odometría (ahora con frame_id correctos)
 ros2 topic echo /odom
 
-# Verifica la transformación entre 'odom' y 'base_link'
+# Verifica las transformaciones tf2 en tiempo real
 ros2 run tf2_ros tf2_echo odom base_link
 
-# Publica un comando de velocidad para mover el robot
+# Publica un comando de velocidad para probar el sistema
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
 
-# Abre RViz2 para visualizar la odometría
+# Configura el parámetro publish_tf (opcional - por defecto es True)
+ros2 param set /odometry_publisher publish_tf false  # Desactiva tf2
+ros2 param set /odometry_publisher publish_tf true   # Reactiva tf2
+
+# Abre RViz2 para visualizar la odometría y transformaciones
 rviz2
 ```
+
+**Parámetros del nodo odometry_publisher:**
+- `publish_tf` (bool, default: True): Controla si se publican las transformaciones tf2
+- `left_wheel_name` (string): Nombre de la junta de la rueda izquierda
+- `right_wheel_name` (string): Nombre de la junta de la rueda derecha
+- `wheel_separation` (double): Separación entre ruedas
+- `wheel_radius` (double): Radio de las ruedas
 
 ### Ejercicio 12: Demostración del Sistema de Visualización
 
