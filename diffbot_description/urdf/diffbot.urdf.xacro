@@ -29,15 +29,6 @@
   <xacro:include filename="$(find diffbot_description)/urdf/inertial_macros.xacro" />
   <xacro:include filename="$(find diffbot_description)/urdf/motor.xacro" />
 
-
-  <link name="base_footprint" />
-
-  <joint name="base_joint" type="fixed">
-    <parent link="base_footprint" />
-    <child link="base_link" />
-    <origin xyz="0 0 ${base_elevation}" rpy="0 0 0" />
-  </joint>
-
   <!-- ======================= -->
   <!-- === Chasis del robot === -->
   <!-- Link principal del robot: el chasis -->

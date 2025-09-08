@@ -234,15 +234,37 @@ rviz2
 
 ### Ejercicio 12: Demostración del Sistema de Visualización
 
+Este ejercicio extiende el ejercicio 10 (gazebo.launch.py) y añade RViz2 para visualizar el robot en el frame 'odom' con todas las transformaciones URDF. La implementación ha sido corregida para eliminar parámetros no solicitados y TimerAction innecesarios.
+
+**Características implementadas:**
+- ✅ Extiende el ejercicio 10 (gazebo.launch.py)
+- ✅ Añade nodos de control y odometría con tf2
+- ✅ RViz2 con configuración personalizada (odom.rviz)
+- ✅ Visualización en frame 'odom' con todas las transformaciones
+- ✅ Sin parámetros adicionales ni delays innecesarios
+
 ```bash
+# Lanza el sistema completo con visualización
 source install/setup.bash && ros2 launch diffbot_bringup display_robot_system.launch.py
 
-# Publica un comando de velocidad
+# Publica un comando de velocidad para probar el sistema
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
 
-# Muestra los datos de odometría
+# Muestra los datos de odometría con frame IDs correctos
 ros2 topic echo /odom
+
+# Verifica las transformaciones tf2
+ros2 run tf2_ros tf2_echo odom base_link
+
+# Detiene el robot
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
 ```
+
+**Configuración RViz incluida:**
+- Archivo: `src/diffbot_bringup/rviz/odom.rviz`
+- Frame fijo: `odom`
+- Visualizaciones: Grid, RobotModel, TF (todas las transformaciones)
+- Árbol TF: `odom` → `base_link` → `left_wheel`, `right_wheel`
 
 -----
 
