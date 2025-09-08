@@ -168,6 +168,10 @@ def simular_trayectoria_completa(robot):
     # --- Impresión de cálculos y comandos para cada segmento ---
     print("\n--- CÁLCULOS Y COMANDOS geometry_msgs/Twist PARA CADA SEGMENTO ---")
     print("------------------------------------------------------------------")
+    
+    # Lista para almacenar los comandos Float64MultiArray
+    joint_velocity_commands = []
+    
     for i, seg in enumerate(segments_data):
         phi_dot_R_seg, phi_dot_L_seg = robot.cinematica_inversa(seg['linear_x'], seg['angular_z'])
         print(f"\nSEGMENTO {i+1}: {seg['nombre']}")
@@ -176,6 +180,16 @@ def simular_trayectoria_completa(robot):
         print(f"  Velocidad angular deseada (robot): {seg['angular_z']:.4f} rad/s")
         print(f"  Velocidad angular rueda derecha (phi_dot_R): {phi_dot_R_seg:.4f} rad/s")
         print(f"  Velocidad angular rueda izquierda (phi_dot_L): {phi_dot_L_seg:.4f} rad/s")
+        
+        # Almacenar comando para JointGroupVelocityController
+        # Formato: [rueda_izquierda, rueda_derecha] según configuración típica
+        joint_velocity_commands.append({
+            'segment': i+1,
+            'duration': seg['duracion'],
+            'left_wheel_vel': phi_dot_L_seg,
+            'right_wheel_vel': phi_dot_R_seg
+        })
+        
         print("\n  Comando geometry_msgs/Twist (Python pseudo-código):")
         print(f"  cmd_vel_msg = Twist()")
         print(f"  cmd_vel_msg.linear.x = {seg['linear_x']:.4f}")
@@ -185,6 +199,34 @@ def simular_trayectoria_completa(robot):
         print(f"  #     pub.publish(cmd_vel_msg)")
         print(f"  #     rate.sleep()")
         print("------------------------------------------------------------------")
+    
+    # --- Impresión de comandos JointGroupVelocityController ---
+    print("\n--- COMANDOS std_msgs/Float64MultiArray PARA JointGroupVelocityController ---")
+    print("==============================================================================")
+    print("\nDefinición del mensaje:")
+    print("  Tipo: std_msgs/msg/Float64MultiArray")
+    print("  Topic: ~/commands (ej: /velocity_controller_left/commands, /velocity_controller_right/commands)")
+    print("  Formato: data: [velocidad_angular_rad_s]")
+    print("\nSecuencia de comandos para cada segmento:")
+    print("\n" + "="*80)
+    
+    for cmd in joint_velocity_commands:
+         print(f"\nSEGMENTO {cmd['segment']} - Duración: {cmd['duration']:.2f}s")
+         print(f"  Rueda Izquierda:")
+         print(f"    ros2 topic pub /velocity_controller_left/commands std_msgs/msg/Float64MultiArray \\")
+         print(f"      'data: [{cmd['left_wheel_vel']:.4f}]'")
+         print(f"  Rueda Derecha:")
+         print(f"    ros2 topic pub /velocity_controller_right/commands std_msgs/msg/Float64MultiArray \\")
+         print(f"      'data: [{cmd['right_wheel_vel']:.4f}]'")
+         print(f"\n  Comando Python (ejemplo con rclpy):")
+         print(f"    # Publicar durante {cmd['duration']:.2f} segundos")
+         print(f"    left_msg = Float64MultiArray()")
+         print(f"    left_msg.data = [{cmd['left_wheel_vel']:.4f}]")
+         print(f"    right_msg = Float64MultiArray()")
+         print(f"    right_msg.data = [{cmd['right_wheel_vel']:.4f}]")
+         print(f"    # pub_left.publish(left_msg)")
+         print(f"    # pub_right.publish(right_msg)")
+         print("\n" + "-"*80)
     # --- Simulación y recolección de datos para graficar la trayectoria ---
     current_x, current_y = 0.0, 0.0
     current_theta = 0.0 # El robot inicia apuntando a lo largo del eje X

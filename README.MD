@@ -35,14 +35,17 @@ rm -rf {build,install,log} && colcon build --symlink-install --cmake-args -DCMAK
 Si necesitas reconstruir un paquete específico, usa el siguiente formato:
 
 ```bash
-# Reconstruir el paquete 'robot_description'
-rm -rf build/robot_description install/robot_description && colcon build --packages-select robot_description && source install/setup.bash
+# Reconstruir el paquete 'diffbot_description'
+rm -rf build/diffbot_description install/diffbot_description && colcon build --packages-select diffbot_description && source install/setup.bash
 
-# Reconstruir el paquete 'gz_robot'
-rm -rf build/gz_robot install/gz_robot && colcon build --packages-select gz_robot && source install/setup.bash
+# Reconstruir el paquete 'diffbot_gz'
+rm -rf build/diffbot_gz install/diffbot_gz && colcon build --packages-select diffbot_gz && source install/setup.bash
 
-# Reconstruir el paquete 'control_robot'
-rm -rf build/control_robot install/control_robot && colcon build --packages-select control_robot && source install/setup.bash
+# Reconstruir el paquete 'diffbot_control'
+rm -rf build/diffbot_control install/diffbot_control && colcon build --packages-select diffbot_control && source install/setup.bash
+
+# Reconstruir el paquete 'diffbot_bringup'
+rm -rf build/diffbot_bringup install/diffbot_bringup && colcon build --packages-select diffbot_bringup && source install/setup.bash
 ```
 
 -----
@@ -57,15 +60,15 @@ Este ejercicio permite visualizar el modelo del robot en RViz, con o sin la inte
 
   * **Lanzar con GUI y RViz (modo de prueba):**
     ```bash
-    source install/setup.bash && ros2 launch robot_description description.launch.py testing:=True
+    source install/setup.bash && ros2 launch diffbot_description description.launch.py testing:=True
     ```
   * **Lanzar sin GUI y RViz (modo normal/producción):**
     ```bash
-    ros2 launch robot_description description.launch.py testing:=False
+    ros2 launch diffbot_description description.launch.py testing:=False
     ```
       * O simplemente:
         ```bash
-        ros2 launch robot_description description.launch.py
+        ros2 launch diffbot_description description.launch.py
         ```
 
 ### Ejercicio 3: Simulación en Gazebo
@@ -73,13 +76,13 @@ Este ejercicio permite visualizar el modelo del robot en RViz, con o sin la inte
 Este comando inicia la simulación del robot en Gazebo.
 
 ```bash
-source install/setup.bash && ros2 launch gz_robot gazebo.launch.py
+source install/setup.bash && ros2 launch diffbot_gz gazebo.launch.py
 ```
 
 ### Ejercicio 4: Control Básico del Robot en Gazebo
 
 ```bash
-source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
+source install/setup.bash && ros2 launch diffbot_gz gzbt.launch.py
 ```
 
 -----
@@ -90,7 +93,7 @@ source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 
   * Para ejecutar los scripts `ej5.py`, `ej6.py` o `ej7.py`:
     ```bash
-    python3 ~/ros2_ws/src/Robotica_2025/ej5.py
+    python3 ~/tp-1/ej5.py
     ```
     Estos scripts generan gráficos de trayectorias y muestran cálculos cinemáticos.
 
@@ -99,15 +102,15 @@ source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 1.  Lanza el sistema completo con visualización:
 
     ```bash
-    ros2 launch robot_bringup display_robot_system.launch.py
+    ros2 launch diffbot_bringup display_robot_system.launch.py
     ```
 
     Esto inicia Gazebo, RViz, y los nodos de control.
 
-2.  Para simulaciones específicas, usa los archivos de lanzamiento en `gz_robot/launch/`:
+2.  Para simulaciones específicas, usa los archivos de lanzamiento en `diffbot_gz/launch/`:
 
     ```bash
-    ros2 launch gz_robot gazebo.launch.py
+    ros2 launch diffbot_gz gazebo.launch.py
     ```
 
 -----
@@ -116,21 +119,19 @@ source install/setup.bash && ros2 launch gz_robot gzbt.launch.py
 
 ```bash
 # Lanza el nodo que maneja los comandos de velocidad
-source install/setup.bash && ros2 launch gz_robot gztwist.launch.py
+source install/setup.bash && ros2 launch diffbot_gz gztwist.launch.py
 
 # Publica un comando de velocidad lineal (0.5 m/s) y angular (0.2 rad/s)
-ros2 topic pub /diff_drive_controller/cmd_vel_unstamped geometry_msgs/msg/Twist "{linear: {x: 1.0, y: 1.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
 
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 10.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 00.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.157, y: 0.0, z: 0.3}, angular: {x: 0.0, y: 0.0, z: 0.314}}" --once
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.157, y: 10.0, z: 0.3}, angular: {x: 0.0, y: 0.0, z: 0.314}}" --once
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 00.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
+# Detiene el robot
+ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}" --once
 
 # Monitorea los comandos enviados a los controladores de las ruedas
-ros2 topic echo /velocity_controller_left/commands
-ros2 topic echo /velocity_controller_right/commands
+ros2 topic echo /left_wheel_cmd
+ros2 topic echo /right_wheel_cmd
 
+# Configura parámetros del nodo cmd_vel_listener
 ros2 param set /cmd_vel_listener invert_polarity true
 ros2 param set /cmd_vel_listener swap_wheels true
 ```
@@ -139,7 +140,7 @@ ros2 param set /cmd_vel_listener swap_wheels true
 
 ```bash
 # Lanza la simulación con el publicador de odometría
-source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
+source install/setup.bash && ros2 launch diffbot_gz gzodom.launch.py
 
 # Muestra los datos de odometría
 ros2 topic echo /odom
@@ -159,7 +160,7 @@ rviz2
 Este comando lanza un sistema completo con múltiples nodos relacionados con el robot.
 
 ```bash
-source install/setup.bash && ros2 launch robot_bringup robot_system.launch.py
+source install/setup.bash && ros2 launch diffbot_bringup robot_system.launch.py
 
 # Lista los nodos activos
 ros2 node list
@@ -203,7 +204,7 @@ Similar al Ejercicio 9, pero puede implicar configuraciones más avanzadas o esc
 
 ```bash
 # Lanza la simulación con el publicador de odometría
-source install/setup.bash && ros2 launch gz_robot gzodom.launch.py
+source install/setup.bash && ros2 launch diffbot_gz gzodom.launch.py
 
 # Muestra los datos de odometría
 ros2 topic echo /odom
@@ -221,7 +222,7 @@ rviz2
 ### Ejercicio 12: Demostración del Sistema de Visualización
 
 ```bash
-source install/setup.bash && ros2 launch robot_bringup display_robot_system.launch.py
+source install/setup.bash && ros2 launch diffbot_bringup display_robot_system.launch.py
 
 # Publica un comando de velocidad
 ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.2}}" --once
@@ -238,7 +239,7 @@ Si necesitas generar el archivo URDF a partir del XACRO, puedes usar el siguient
 
 ```bash
 cd ~/tp-1 # Asegúrate de estar en el directorio raíz de tu proyecto
-ros2 run xacro xacro --inorder src/robot_description/urdf/diffbot.urdf.xacro > generated_robot.urdf
+ros2 run xacro xacro --inorder src/diffbot_description/urdf/diffbot.urdf.xacro > generated_robot.urdf
 ```
 
 -----

@@ -24,10 +24,10 @@
                 <origin xyz="0 0 0" rpy="0 0 0"/>
                 <geometry>
                     <xacro:if value="${reflect}">
-                        <mesh filename="file://$(find robot_description)/meshes/motor.stl" scale="1 -1 1"/>
+                        <mesh filename="file://$(find diffbot_description)/meshes/motor.stl" scale="1 -1 1"/>
                     </xacro:if>
                     <xacro:unless value="${reflect}">
-                        <mesh filename="file://$(find robot_description)/meshes/motor.stl"/>
+                        <mesh filename="file://$(find diffbot_description)/meshes/motor.stl"/>
                     </xacro:unless>
                 </geometry>
                 <material name="blue"/>

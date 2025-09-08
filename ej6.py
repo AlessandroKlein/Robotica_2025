@@ -121,10 +121,10 @@ def simular_trayectoria_completa(robot):
     # La velocidad lineal necesaria para mantener un radio R está relacionada con la velocidad angular theta_dot
     # R = x_dot / theta_dot
     # x_dot = R * theta_dot
-    # Para 180 grados (pi radianes)
-    radio_giro_1 = 0.5 # metros
+    # Para 180 grados (pi radianes) con radio de giro de 0.25m
+    radio_giro_1 = 0.25 # metros (radio de giro especificado)
     angulo_giro_1 = np.pi # 180 grados
-    duracion_giro_1 = 5.0 # segundos
+    duracion_giro_1 = 6.0 # segundos (aumentado para reducir velocidades angulares)
     # Calcular velocidad angular del robot para el giro
     theta_dot_giro_1 = angulo_giro_1 / duracion_giro_1
     # Calcular velocidad lineal del robot para el giro manteniendo el radio
@@ -138,7 +138,7 @@ def simular_trayectoria_completa(robot):
     })
     # Segmento 2: Recta 1m
     distancia_recta_1 = 1.0 # metros
-    velocidad_recta_1 = 0.2 # m/s
+    velocidad_recta_1 = 0.18 # m/s (reducida para respetar límite de 50 RPM)
     duracion_recta_1 = distancia_recta_1 / velocidad_recta_1
     segments.append({
         'nombre': 'Recta 1m',
@@ -148,9 +148,9 @@ def simular_trayectoria_completa(robot):
         'color': 'green'
     })
     # Segmento 3: Giro a la derecha (180°)
-    radio_giro_2 = 0.5 # metros
+    radio_giro_2 = 0.25 # metros (radio de giro especificado)
     angulo_giro_2 = -np.pi # 180 grados a la derecha
-    duracion_giro_2 = 5.0 # segundos
+    duracion_giro_2 = 6.0 # segundos (aumentado para reducir velocidades angulares)
     theta_dot_giro_2 = angulo_giro_2 / duracion_giro_2
     x_dot_giro_2 = radio_giro_2 * abs(theta_dot_giro_2) # Velocidad lineal siempre positiva
     segments.append({
@@ -162,7 +162,7 @@ def simular_trayectoria_completa(robot):
     })
     # Segmento 4: Recta 1m final
     distancia_recta_2 = 1.0 # metros
-    velocidad_recta_2 = 0.2 # m/s
+    velocidad_recta_2 = 0.18 # m/s (reducida para respetar límite de 50 RPM)
     duracion_recta_2 = distancia_recta_2 / velocidad_recta_2
     segments.append({
         'nombre': 'Recta 1m Final',
@@ -186,6 +186,17 @@ def simular_trayectoria_completa(robot):
         print(f"  Velocidad angular deseada: {seg['angular_z']:.4f} rad/s")
         print(f"  Duración del segmento: {seg['duracion']:.2f} s")
         print(f"  Phi_dot_R: {phi_dot_R_seg:.4f} rad/s, Phi_dot_L: {phi_dot_L_seg:.4f} rad/s")
+        
+        # Verificar límites de velocidad angular (50 RPM = 5.236 rad/s)
+        max_phi_dot = 50.0 * (2 * np.pi / 60)  # 50 RPM en rad/s
+        if abs(phi_dot_R_seg) > max_phi_dot or abs(phi_dot_L_seg) > max_phi_dot:
+            print(f"  ⚠️  ADVERTENCIA: Velocidad angular excede el límite de 50 RPM ({max_phi_dot:.4f} rad/s)")
+            print(f"     Rueda derecha: {abs(phi_dot_R_seg):.4f} rad/s ({abs(phi_dot_R_seg) * 60 / (2 * np.pi):.2f} RPM)")
+            print(f"     Rueda izquierda: {abs(phi_dot_L_seg):.4f} rad/s ({abs(phi_dot_L_seg) * 60 / (2 * np.pi):.2f} RPM)")
+        else:
+            print(f"  ✓ Velocidades dentro del límite de 50 RPM")
+            print(f"     Rueda derecha: {abs(phi_dot_R_seg) * 60 / (2 * np.pi):.2f} RPM")
+            print(f"     Rueda izquierda: {abs(phi_dot_L_seg) * 60 / (2 * np.pi):.2f} RPM")
         # Simular el segmento
         seg_x, seg_y, seg_theta, final_point, final_theta = robot.simular_movimiento(
             [current_x, current_y], current_theta, seg['duracion'], seg['linear_x'], seg['angular_z']

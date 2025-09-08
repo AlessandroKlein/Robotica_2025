@@ -101,10 +101,16 @@ theta_dot_recta = 0.0                      # [rad/s] (para movimiento recto)
 phi_R_dot_recta = (1 / r) * (x_dot_recta + (b / 2) * theta_dot_recta)  # [rad/s]
 phi_L_dot_recta = (1 / r) * (x_dot_recta - (b / 2) * theta_dot_recta)  # [rad/s]
 
+# Velocidades lineales de las ruedas (v = ω × r)
+v_R_recta = phi_R_dot_recta * r  # [m/s]
+v_L_recta = phi_L_dot_recta * r  # [m/s]
+
 print(f"Velocidad lineal del robot (x_dot): {x_dot_recta:.4f} [m/s]")
 print(f"Velocidad angular del robot (theta_dot): {theta_dot_recta:.4f} [rad/s]")
 print(f"Velocidad angular rueda derecha (phi_R_dot): {phi_R_dot_recta:.4f} [rad/s]")
 print(f"Velocidad angular rueda izquierda (phi_L_dot): {phi_L_dot_recta:.4f} [rad/s]")
+print(f"Velocidad lineal rueda derecha (v_R): {v_R_recta:.4f} [m/s]")
+print(f"Velocidad lineal rueda izquierda (v_L): {v_L_recta:.4f} [m/s]")
 print("\n")
 
 # Graficar el recorrido recto
@@ -133,10 +139,16 @@ theta_dot_circular = - (2 * math.pi / tiempo_circular) # [rad/s] (negativo para 
 phi_R_dot_circular = (1 / r) * (x_dot_circular + (b / 2) * theta_dot_circular)  # [rad/s]
 phi_L_dot_circular = (1 / r) * (x_dot_circular - (b / 2) * theta_dot_circular)  # [rad/s]
 
+# Velocidades lineales de las ruedas (v = ω × r)
+v_R_circular = phi_R_dot_circular * r  # [m/s]
+v_L_circular = phi_L_dot_circular * r  # [m/s]
+
 print(f"Velocidad lineal del robot (x_dot): {x_dot_circular:.4f} [m/s]")
 print(f"Velocidad angular del robot (theta_dot): {theta_dot_circular:.4f} [rad/s]")
 print(f"Velocidad angular rueda derecha (phi_R_dot): {phi_R_dot_circular:.4f} [rad/s]")
 print(f"Velocidad angular rueda izquierda (phi_L_dot): {phi_L_dot_circular:.4f} [rad/s]")
+print(f"Velocidad lineal rueda derecha (v_R): {v_R_circular:.4f} [m/s]")
+print(f"Velocidad lineal rueda izquierda (v_L): {v_L_circular:.4f} [m/s]")
 
 # Graficar el recorrido circular
 simular_y_graficar_recorrido(x_dot_circular, theta_dot_circular, tiempo_circular, "Recorrido Circular Horario del Robot (Radio 0.5m en 20s)")

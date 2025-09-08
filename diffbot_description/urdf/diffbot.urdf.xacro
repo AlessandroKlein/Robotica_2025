@@ -26,8 +26,8 @@
   <!-- ======================= -->
   <!-- === Includes === -->
   <!-- Inclusión de archivos xacro auxiliares para macros de inercia y motor -->
-  <xacro:include filename="$(find robot_description)/urdf/inertial_macros.xacro" />
-  <xacro:include filename="$(find robot_description)/urdf/motor.xacro" />
+  <xacro:include filename="$(find diffbot_description)/urdf/inertial_macros.xacro" />
+  <xacro:include filename="$(find diffbot_description)/urdf/motor.xacro" />
 
 
   <link name="base_footprint" />
@@ -45,7 +45,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="file://$(find robot_description)/meshes/chassis.stl"/>
+        <mesh filename="file://$(find diffbot_description)/meshes/chassis.stl"/>
       </geometry>
       <material name="${base_color}" />
       <!-- Colo que se visualiza en RViz-->
@@ -80,7 +80,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="1.5708 0 0" />
         <geometry>
-          <mesh filename="file://$(find robot_description)/meshes/wheel.stl"/>
+          <mesh filename="file://$(find diffbot_description)/meshes/wheel.stl"/>
         </geometry>
         <material name="${wheel_color}" />
         <!-- Colo que se visualiza en RViz-->
@@ -126,7 +126,7 @@
     <visual>
       <origin xyz="0 0 0.0045" rpy="0 0 0" />
       <geometry>
-        <mesh filename="file://$(find robot_description)/meshes/caster_base.stl" />
+        <mesh filename="file://$(find diffbot_description)/meshes/caster_base.stl" />
       </geometry>
       <material name="${caster_color}" />
     </visual>
@@ -158,7 +158,7 @@
       <origin xyz="0 0 0" rpy="0 0 0" />
       <!--1.5708-->
       <geometry>
-        <mesh filename="file://$(find robot_description)/meshes/caster_wheel.stl" />
+        <mesh filename="file://$(find diffbot_description)/meshes/caster_wheel.stl" />
       </geometry>
       <material name="${caster_color}" />
     </visual>
@@ -189,7 +189,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="file://$(find robot_description)/meshes/caster_wheel_support.stl" />
+        <mesh filename="file://$(find diffbot_description)/meshes/caster_wheel_support.stl" />
       </geometry>
       <material name="${caster_color}" />
     </visual>
