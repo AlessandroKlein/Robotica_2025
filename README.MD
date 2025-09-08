@@ -1,7 +1,3 @@
-Looks like a comprehensive `README.md`\! To add the information about the code sources and licensing, you can include a new section. Here's how you can integrate it, along with some minor formatting suggestions for consistency and clarity:
-
------
-
 # Cinemática de un robot diferencial con ROS2
 
 **Guía de trabajos prácticos 2025 - Entregable 1**
