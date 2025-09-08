@@ -1,8 +1,8 @@
-from setuptools import find_packages, setup
-import os
-from glob import glob
+from setuptools import find_packages, setup  # Herramientas de setuptools para distribución 
+import os  # Manipulación de rutas del sistema
+from glob import glob  # Búsqueda de archivos con patrones
 
-package_name = 'diffbot_control'
+package_name = 'diffbot_bringup'
 
 setup(
     name=package_name,
@@ -12,20 +12,17 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='ale',
     maintainer_email='ale@todo.todo',
-    description='Control configuration for diffbot robot',
+    description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'cmd_vel_listener = diffbot_control.cmd_vel_listener:main',
-            'odometry_publisher = diffbot_control.odometry_publisher:main',
-            'go_to_pose_controller = diffbot_control.go_to_pose_controller:main',
         ],
     },
 )
