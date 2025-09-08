@@ -26,16 +26,25 @@ def generate_launch_description():
     pkg_share = FindPackageShare('robot_description')
 
     # -----------------------------------------------------
-    # 2. Declarar argumento 'testing' para activar/desactivar GUI y RViz
+    # 2. Declarar argumentos de lanzamiento
     # -----------------------------------------------------
+    # Argumento 'testing' para activar/desactivar GUI y RViz
     declare_testing_arg = DeclareLaunchArgument(
         'testing',
         default_value='False', # Valor por defecto
         description='Set to "True" to launch joint_state_publisher_gui and RViz for testing.'
     )
+    
+    # Argumento 'use_sim_time' para usar el reloj de simulación
+    declare_use_sim_time_arg = DeclareLaunchArgument(
+        'use_sim_time',
+        default_value='false',
+        description='Use simulation (Gazebo) clock if true'
+    )
 
-    # Obtener el valor del argumento 'testing' en tiempo de ejecución
+    # Obtener los valores de los argumentos en tiempo de ejecución
     testing_param = LaunchConfiguration('testing')
+    use_sim_time_param = LaunchConfiguration('use_sim_time')
 
     # -----------------------------------------------------
     # 3. Ruta al archivo Xacro principal que define el robot
@@ -58,7 +67,8 @@ def generate_launch_description():
         name='robot_state_publisher',
         output='screen',
         parameters=[{
-            'robot_description': ParameterValue(robot_description_content, value_type=str)
+            'robot_description': ParameterValue(robot_description_content, value_type=str),
+            'use_sim_time': use_sim_time_param  # Usar el reloj de simulación si es true
         }]
     )
 
@@ -107,6 +117,7 @@ def generate_launch_description():
     # El orden es importante: primero el argumento, luego los nodos
     return LaunchDescription([
         declare_testing_arg, # Primero declaramos el argumento
+        declare_use_sim_time_arg,
         robot_state_publisher_node,
         joint_state_publisher_node,
         joint_state_publisher_gui_node, # Estos se lanzan condicionalmente

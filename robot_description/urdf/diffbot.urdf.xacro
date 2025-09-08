@@ -211,53 +211,26 @@
   <!-- El nombre "GazeboSystem" y el tipo "system" son estándar para la integración con Gazebo. -->
   <ros2_control name="GazeboSystem" type="system">
     <hardware>
-      <!-- El plugin `gz_ros2_control/GazeboSimSystem` es el puente entre Gazebo y ROS 2 Control. -->
+      <!-- Plugin de Gazebo para ROS 2 Control -->
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
 
-    <!-- Definición de la junta de la rueda izquierda -->
     <joint name="left_wheel_joint">
-      <!-- Interfaz de comando de velocidad: permite enviar comandos de velocidad a la junta. -->
-      <command_interface name="velocity">
-        <!-- Parámetros opcionales para límites de velocidad. Ajusta estos valores según tu robot. -->
-        <param name="min">-1.046198</param>        <!-- Velocidad mínima (rad/s) -->
-        <param name="max">1.046198</param>        <!-- Velocidad máxima (rad/s) -->
-      </command_interface>
-      <!-- Interfaz de estado de posición: permite leer la posición actual de la junta. -->
-      <state_interface name="position"/>
-      <!-- Interfaz de estado de velocidad: permite leer la velocidad actual de la junta. -->
-      <state_interface name="velocity"/>
-      <state_interface name="effort" />
+      <command_interface name="velocity" />
+      <state_interface name="position" />
+      <state_interface name="velocity" />
     </joint>
 
-    <!-- Definición de la junta de la rueda derecha -->
     <joint name="right_wheel_joint">
-      <!-- Interfaz de comando de velocidad: permite enviar comandos de velocidad a la junta. -->
-      <command_interface name="velocity">
-        <!-- Parámetros opcionales para límites de velocidad. Ajusta estos valores según tu robot. -->
-        <param name="min">-1.046198</param>        <!-- Velocidad mínima (rad/s) -->
-        <param name="max">1.046198</param>        <!-- Velocidad máxima (rad/s) -->
-      </command_interface>
-      <!-- Interfaz de estado de posición: permite leer la posición actual de la junta. -->
-      <state_interface name="position"/>
-      <!-- Interfaz de estado de velocidad: permite leer la velocidad actual de la junta. -->
-      <state_interface name="velocity"/>
-      <state_interface name="effort" />
+      <command_interface name="velocity" />
+      <state_interface name="position" />
+      <state_interface name="velocity" />
     </joint>
   </ros2_control>
 
-  <!-- Configuración del plugin de Gazebo para ROS 2 Control -->
-  <!-- Este plugin conecta las interfaces de hardware del URDF con Gazebo. -->
   <gazebo>
     <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
-
-      <!-- Este parámetro le indica al plugin que cargue la descripción del robot desde el parámetro 'robot_description'. -->
-      <!--<robot_param>robot_description</robot_param>-->
-      <!-- ¡IMPORTANTE! Se ha ELIMINADO la línea <parameters>$(find control_robot)/config/controllers.yaml</parameters>
-           Esta línea es la que causa que Gazebo intente parsear el archivo YAML de controladores,
-           lo cual no es su función y genera el error "Cannot have a value before ros__parameters".
-           El archivo controllers.yaml es cargado por el nodo ros2_control_node en el launch file. -->
-      <parameters>$(find control_robot)/config/controllers.yaml</parameters>
+      <parameters>$(find diffbot_control)/config/controllers.yaml</parameters>
     </plugin>
   </gazebo>
 
