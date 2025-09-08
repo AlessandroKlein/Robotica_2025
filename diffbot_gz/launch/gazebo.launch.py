@@ -10,12 +10,12 @@ def generate_launch_description():
     Lanza Gazebo, procesa la descripción del robot y spawna el robot.
     """
 
-    # Incluir el archivo description.launch.py del paquete robot_description
+    # Incluir el archivo description.launch.py del paquete diffbot_description
     # con testing=False para no lanzar joint_state_publisher_gui ni RViz
     robot_description_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
-                [FindPackageShare("robot_description"), "launch", "description.launch.py"]
+                [FindPackageShare("diffbot_description"), "launch", "description.launch.py"]
             )
         ),
         launch_arguments={
@@ -47,9 +47,18 @@ def generate_launch_description():
         output="screen",
     )
 
+    # Bridge manual para /clock
+    clock_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock'],
+        output='screen'
+    )
+
     return LaunchDescription([
         robot_description_launch,
         gz_sim,
         spawn_entity,
+        clock_bridge,
     ])
 
