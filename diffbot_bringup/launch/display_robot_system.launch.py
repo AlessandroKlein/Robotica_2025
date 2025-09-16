@@ -35,6 +35,20 @@ def generate_launch_description():
         parameters=[{'publish_tf': True}]
     )
     
+    # Go to pose controller for position control
+    node_go_to_pose_controller = Node(
+        package='diffbot_control',
+        executable='go_to_pose_controller',
+        output='screen',
+        parameters=[
+            {'use_sim_time': True},
+            {'linear_tolerance': 0.05},
+            {'angular_tolerance': 0.05},
+            {'max_linear_speed': 0.5},
+            {'max_angular_speed': 1.0}
+        ]
+    )
+    
     # RViz2 node with odom configuration
     node_rviz = Node(
         package='rviz2',
@@ -48,5 +62,6 @@ def generate_launch_description():
     return LaunchDescription([
         simulation,
         node_diffbot_odometry,
+        node_go_to_pose_controller,
         node_rviz
     ])

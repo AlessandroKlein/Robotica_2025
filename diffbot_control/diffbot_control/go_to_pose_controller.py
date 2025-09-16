@@ -99,10 +99,17 @@ class GoToPoseController(Node):
         delta_y_rel = msg.linear.y
         delta_theta_rel = msg.angular.z
 
-        # Transformar el desplazamiento relativo a coordenadas globales
-        # Esto asume que linear.x es hacia adelante y linear.y es hacia un lado en el marco del robot
-        self.target_x = self.current_x + delta_x_rel * math.cos(self.current_theta) - delta_y_rel * math.sin(self.current_theta)
-        self.target_y = self.current_y + delta_x_rel * math.sin(self.current_theta) + delta_y_rel * math.cos(self.current_theta)
+        # Solo transformar coordenadas si hay movimiento lineal
+        if abs(delta_x_rel) > 0.001 or abs(delta_y_rel) > 0.001:
+            # Transformar el desplazamiento relativo a coordenadas globales
+            # Esto asume que linear.x es hacia adelante y linear.y es hacia un lado en el marco del robot
+            self.target_x = self.current_x + delta_x_rel * math.cos(self.current_theta) - delta_y_rel * math.sin(self.current_theta)
+            self.target_y = self.current_y + delta_x_rel * math.sin(self.current_theta) + delta_y_rel * math.cos(self.current_theta)
+        else:
+            # Si no hay movimiento lineal, mantener la posición actual
+            self.target_x = self.current_x
+            self.target_y = self.current_y
+            
         self.target_theta = self.current_theta + delta_theta_rel
         self.target_theta = math.atan2(math.sin(self.target_theta), math.cos(self.target_theta)) # Normalizar
 

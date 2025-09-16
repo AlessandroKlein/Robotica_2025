@@ -167,8 +167,9 @@
     </visual>
 
     <collision>
-      <!-- Misma rotación para colisión -->
-      <origin xyz="0 0 -0.007" rpy="0 0 0" />
+      <!-- Ajustado para evitar que la rueda esté por debajo del suelo -->
+      <!-- -0.007 -->
+      <origin xyz="0 0 -0.0075" rpy="0 0 0" />
       <geometry>
         <cylinder radius="0.0075" length="0.015" />
       </geometry>
