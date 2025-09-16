@@ -23,49 +23,41 @@ class DiffbotControl(Node):
     def __init__(self):
         super().__init__('diffbot_control_node')
         
-        # Parámetro de separación de ruedas
+        # Declarar parámetros (se pueden cargar desde robot_description vía launch)
+        self.declare_parameter('wheel_radius', 0.035)
         self.declare_parameter('wheel_separation', 0.135)
-        # Parámetro de radio de rueda
-        self.declare_parameter('wheel_radius', 0.07/2)
 
-        # Obtener los parámetros
-        self.wheel_sep = self.get_parameter('wheel_separation').get_parameter_value().double_value
-        self.wheel_r = self.get_parameter('wheel_radius').get_parameter_value().double_value
+        # Leer parámetros
+        self.wheel_radius = self.get_parameter('wheel_radius').get_parameter_value().double_value
+        self.wheel_separation = self.get_parameter('wheel_separation').get_parameter_value().double_value
         
-        # Creación de suscriptor
-        self.sub = self.create_subscription(Twist, 'cmd_vel', self.sub_callback, 10)
+        # Suscriptor a cmd_vel
+        self.create_subscription(Twist, 'cmd_vel', self.cmd_vel_callback, 10)
         
-        # Crear los dos publisher a los topics de cada rueda
-        self.pub_lwheel = self.create_publisher(Float64MultiArray,
-            'left_wheel_velocity_controller/commands', 10)
-        self.pub_rwheel = self.create_publisher(Float64MultiArray,
-            'right_wheel_velocity_controller/commands', 10)
+        # Publicadores a los topics solicitados
+        self.left_pub  = self.create_publisher(Float64MultiArray, '/velocity_controller_l/commands', 10)
+        self.right_pub = self.create_publisher(Float64MultiArray, '/velocity_controller_r/commands', 10)
         
-        self.get_logger().info('Nodo cmd_vel_listener listo. Esperando comandos en /cmd_vel...')
+        self.get_logger().info(f"Parámetros: radio={self.wheel_radius} m, separación={self.wheel_separation} m")
     
-    def sub_callback(self, msg: Twist):
-        """
-        Callback que procesa comandos Twist y calcula velocidades angulares de ruedas.
-        
-        Args:
-            msg (Twist): Comando de velocidad lineal y angular
-        """
-        # Obtengo la velocidad lineal y angular deseada
-        x_dot = msg.linear.x
-        w_dot = msg.angular.z
-        
-        # Modelo cinemático inverso
-        phi_dot_lwheel = (x_dot - ((self.wheel_sep/2) * w_dot)) / self.wheel_r
-        phi_dot_rwheel = (x_dot + ((self.wheel_sep/2) * w_dot)) / self.wheel_r
+    def cmd_vel_callback(self, msg: Twist):
+        v = msg.linear.x      # m/s
+        omega = msg.angular.z # rad/s
 
-        # Crear los mensajes y publicar
-        lwheel_msg = Float64MultiArray()
-        lwheel_msg.data = [phi_dot_lwheel]
-        self.pub_lwheel.publish(lwheel_msg)
+        # Modelo cinemático inverso → velocidades angulares de ruedas (rad/s)
+        w_r = (v + (omega * self.wheel_separation / 2.0)) / self.wheel_radius
+        w_l = (v - (omega * self.wheel_separation / 2.0)) / self.wheel_radius
 
-        rwheel_msg = Float64MultiArray()
-        rwheel_msg.data = [phi_dot_rwheel]
-        self.pub_rwheel.publish(rwheel_msg)
+        # Publicar
+        left_msg = Float64MultiArray()
+        right_msg = Float64MultiArray()
+        left_msg.data = [w_l]
+        right_msg.data = [w_r]
+
+        self.left_pub.publish(left_msg)
+        self.right_pub.publish(right_msg)
+
+        self.get_logger().info(f"cmd_vel: v={v:.2f} m/s, ω={omega:.2f} rad/s → wl={w_l:.2f} rad/s, wr={w_r:.2f} rad/s")
         
 
 

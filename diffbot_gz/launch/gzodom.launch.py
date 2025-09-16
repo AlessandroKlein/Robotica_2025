@@ -175,7 +175,7 @@ def generate_launch_description():
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=["velocity_controller_left"],
+                arguments=["velocity_controller_l"],
                 parameters=[{"use_sim_time": use_sim_time}],
                 output="screen",
             )
@@ -188,7 +188,7 @@ def generate_launch_description():
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=["velocity_controller_right"],
+                arguments=["velocity_controller_r"],
                 parameters=[{"use_sim_time": use_sim_time}],
                 output="screen",
             )

@@ -62,12 +62,12 @@ def generate_launch_description():
     )
 
     load_velocity_controller_left = ExecuteProcess(
-        cmd=["ros2", "control", "load_controller", "velocity_controller_left"],
+        cmd=["ros2", "control", "load_controller", "velocity_controller_l"],
         output="screen"
     )
 
     load_velocity_controller_right = ExecuteProcess(
-        cmd=["ros2", "control", "load_controller", "velocity_controller_right"],
+        cmd=["ros2", "control", "load_controller", "velocity_controller_r"],
         output="screen"
     )
 

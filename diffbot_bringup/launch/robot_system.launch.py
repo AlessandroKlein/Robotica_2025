@@ -49,7 +49,7 @@ def generate_launch_description():
             Node(
                 package='controller_manager',
                 executable='spawner',
-                arguments=['velocity_controller_left'],
+                arguments=['velocity_controller_l'],
                 output='screen'
             )
         ]
@@ -61,7 +61,7 @@ def generate_launch_description():
             Node(
                 package='controller_manager',
                 executable='spawner',
-                arguments=['velocity_controller_right'],
+                arguments=['velocity_controller_r'],
                 output='screen'
             )
         ]

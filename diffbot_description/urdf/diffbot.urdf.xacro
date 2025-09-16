@@ -18,15 +18,17 @@
   <!-- Posición del caster respecto al chasis -->
 
   <xacro:property name="base_elevation" value="0.055" />
-  <xacro:property name="base_color" value="green" />
+  <!-- Colores definidos en materials.xacro -->
+  <!-- <xacro:property name="base_color" value="green" />
   <xacro:property name="wheel_color" value="silver" />
-  <xacro:property name="caster_color" value="orange" />
+  <xacro:property name="caster_color" value="orange" /> -->
 
 
   <!-- ======================= -->
   <!-- === Includes === -->
   <!-- Inclusión de archivos xacro auxiliares para macros de inercia y motor -->
   <xacro:include filename="$(find diffbot_description)/urdf/inertial_macros.xacro" />
+  <!-- <xacro:include filename="$(find diffbot_description)/urdf/materials.xacro" /> -->
   <xacro:include filename="$(find diffbot_description)/urdf/motor.xacro" />
 
   <!-- ======================= -->
@@ -38,8 +40,10 @@
       <geometry>
         <mesh filename="file://$(find diffbot_description)/meshes/chassis.stl"/>
       </geometry>
-      <material name="${base_color}" />
-      <!-- Colo que se visualiza en RViz-->
+      <material name="chassis_green">
+        <color rgba="0.0 0.8 0.0 1.0"/>
+      </material>
+      <!-- Color que se visualiza en RViz-->
     </visual>
 
     <collision>
@@ -73,8 +77,10 @@
         <geometry>
           <mesh filename="file://$(find diffbot_description)/meshes/wheel.stl"/>
         </geometry>
-        <material name="${wheel_color}" />
-        <!-- Colo que se visualiza en RViz-->
+        <material name="wheel_silver">
+          <color rgba="0.79 0.82 0.93 1"/>
+        </material>
+        <!-- Color que se visualiza en RViz-->
       </visual>
 
       <collision>
@@ -82,7 +88,9 @@
         <geometry>
           <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
         </geometry>
-        <material name="${wheel_color}" />
+        <material name="wheel_silver_collision">
+          <color rgba="0.79 0.82 0.93 1"/>
+        </material>
       </collision>
 
       <xacro:inertial_cylinder mass="0.150" radius="${wheel_radius}" length="${wheel_width}"> <!-- 150g -->
@@ -119,7 +127,9 @@
       <geometry>
         <mesh filename="file://$(find diffbot_description)/meshes/caster_base.stl" />
       </geometry>
-      <material name="${caster_color}" />
+      <material name="caster_orange">
+        <color rgba="1 0.3 0.1 1"/>
+      </material>
     </visual>
 
     <collision>
@@ -151,7 +161,9 @@
       <geometry>
         <mesh filename="file://$(find diffbot_description)/meshes/caster_wheel.stl" />
       </geometry>
-      <material name="${caster_color}" />
+      <material name="caster_wheel_orange">
+        <color rgba="1 0.3 0.1 1"/>
+      </material>
     </visual>
 
     <collision>
@@ -169,7 +181,7 @@
   </link>
 
   <!-- Soporte de la rueda loca -->
-  <joint name="caster_support_joint" type="continuous">
+  <joint name="caster_wheel_support_joint" type="continuous">
     <parent link="base_link" />
     <child link="caster_wheel_support" />
     <origin xyz="-0.075 0 -0.015" rpy="0 0 0" /> <!-- Posición del soporte de la rueda giratoria -->
@@ -182,7 +194,9 @@
       <geometry>
         <mesh filename="file://$(find diffbot_description)/meshes/caster_wheel_support.stl" />
       </geometry>
-      <material name="${caster_color}" />
+      <material name="caster_support_orange">
+        <color rgba="1 0.3 0.1 1"/>
+      </material>
     </visual>
 
     <collision>
@@ -217,6 +231,14 @@
       <state_interface name="position" />
       <state_interface name="velocity" />
     </joint>
+
+    <joint name="caster_wheel_joint">
+      <state_interface name="position" />
+    </joint>
+
+    <joint name="caster_wheel_support_joint">
+      <state_interface name="position" />
+    </joint>
   </ros2_control>
 
   <gazebo>
@@ -225,4 +247,13 @@
     </plugin>
   </gazebo>
 
+  <!-- Plugin de Lidar para gazebo
+  <gazebo>
+    <plugin
+      filename="gz-sim-sensors-system"
+      name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+  </gazebo>
+  -->
 </robot>

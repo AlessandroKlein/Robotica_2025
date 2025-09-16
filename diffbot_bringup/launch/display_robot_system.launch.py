@@ -16,21 +16,16 @@ from launch_ros.substitutions import FindPackageShare
 # =========================================================
 
 def generate_launch_description():
-    # Launch simulation (ejercicio 10)
+    # Launch simulation with controllers (ejercicio 11)
     simulation = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
-                [FindPackageShare('diffbot_gz'), 'launch', 'gazebo.launch.py']
+                [FindPackageShare('diffbot_gz'), 'launch', 'gztwist.launch.py']
             )
         )
     )
 
-    # Controller node (ejercicio 8)
-    node_diffbot_controller = Node(
-        package='diffbot_control',
-        executable='cmd_vel_listener',
-        output='screen'
-    )
+    # Note: cmd_vel_listener is already included in gzodom.launch.py
     
     # Odometry node with tf2 transformations (ejercicio 11)
     node_diffbot_odometry = Node(
@@ -52,7 +47,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         simulation,
-        node_diffbot_controller,
         node_diffbot_odometry,
         node_rviz
     ])

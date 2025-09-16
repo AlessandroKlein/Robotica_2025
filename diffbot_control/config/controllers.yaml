@@ -1,14 +1,22 @@
+# =========================================================
+# Archivo: controllers.yaml
+# Descripción:
+#   Configuración de controladores para ros2_control y Gazebo
+#   - Define el controller_manager y los controladores de velocidad y estado articular
+#   - Especifica las interfaces y las juntas que controla cada controlador
+# =========================================================
+
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Hz
+    update_rate: 30
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
-    velocity_controller_left:
+    velocity_controller_l:
       type: velocity_controllers/JointGroupVelocityController
 
-    velocity_controller_right:
+    velocity_controller_r:
       type: velocity_controllers/JointGroupVelocityController
 
 joint_state_broadcaster:
@@ -16,15 +24,30 @@ joint_state_broadcaster:
     joints:
       - left_wheel_joint
       - right_wheel_joint
+      - caster_wheel_support
+      - caster_wheel
+    state_interfaces:
+      - position
+      - velocity
 
-velocity_controller_left:
+
+velocity_controller_l:
   ros__parameters:
     joints:
       - left_wheel_joint
-    interface_name: velocity
+    command_interfaces:
+      - velocity
+    state_interfaces:
+      - position
+      - velocity
 
-velocity_controller_right:
+
+velocity_controller_r:
   ros__parameters:
     joints:
       - right_wheel_joint
-    interface_name: velocity
+    command_interfaces:
+      - velocity
+    state_interfaces:
+      - position
+      - velocity

@@ -160,25 +160,15 @@ def generate_launch_description():
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=["velocity_controller_left"],
+                arguments=["velocity_controller_l"],
                 parameters=[{"use_sim_time": use_sim_time}],
                 output="screen",
             )
         ],
     )
 
-    velocity_controller_r_spawner = TimerAction(
-        period=9.0,  # 2s después del anterior
-        actions=[
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=["velocity_controller_right"],
-                parameters=[{"use_sim_time": use_sim_time}],
-                output="screen",
-            )
-        ],
-    )
+    # velocity_controller_r_spawner eliminado para evitar duplicación
+    # El controlador se carga automáticamente al inicio
 
     # -----------------------------------------------------
     # 9. Nodo de cinemática inversa (cmd_vel_listener)
@@ -216,7 +206,7 @@ def generate_launch_description():
             clock_bridge,                   # Nodo: puente de reloj
             joint_state_broadcaster_spawner,# Nodo: spawner de joint_state_broadcaster
             velocity_controller_l_spawner,  # Nodo: spawner de controlador izquierdo
-            velocity_controller_r_spawner,  # Nodo: spawner de controlador derecho
+            # velocity_controller_r_spawner eliminado para evitar duplicación
             cmd_vel_listener_node,           # Nodo: cinemática inversa
         ]
     )

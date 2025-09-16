@@ -30,7 +30,9 @@
                         <mesh filename="file://$(find diffbot_description)/meshes/motor.stl"/>
                     </xacro:unless>
                 </geometry>
-                <material name="blue"/>
+                <material name="motor_blue">
+                    <color rgba="0.0 0.0 0.8 1.0"/>
+                </material>
             </visual>
 
             <!-- Colisión -->
