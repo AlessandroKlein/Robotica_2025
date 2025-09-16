@@ -248,7 +248,89 @@
     </plugin>
   </gazebo>
 
-  <!-- Plugin de Lidar para gazebo
+  <!-- ================================== SENSORES =============================================-->
+
+    <!-- ================= IMU COMENTADA =================
+  <link name="imu_link">
+    <xacro:dummy_inertial />
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="imu_link">
+    <sensor name="imu" type="imu">
+      <plugin name="gz::sim::systems::Imu" filename="gz-sim-imu-system">
+        <always_on>true</always_on>
+        <update_rate>100</update_rate>
+        <topic>/imu/data</topic>
+        <visualize>true</visualize>
+      </plugin>
+
+      <imu>
+        <linear_acceleration>
+          <x>
+            <noise type="gaussian">
+              <mean>0.020</mean>
+              <stddev>0.0016</stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.020</mean>
+              <stddev>0.0016</stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.020</mean>
+              <stddev>0.0019</stddev>
+            </noise>
+          </z>
+        </linear_acceleration>
+
+        <angular_velocity>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0174533</mean>
+              <stddev>0.00174533</stddev>
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0174533</mean>
+              <stddev>0.00174533</stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0174533</mean>
+              <stddev>0.00174533</stddev>
+            </noise>
+          </z>
+        </angular_velocity>
+      </imu>
+    </sensor>
+  </gazebo>
+================= FIN IMU COMENTADA ================= -->
+
+  <!-- Link del sensor LiDAR -->
+  <link name="lidar_link">
+    <!-- Inercial ,no funciona dummy -->
+    <xacro:dummy_inertial />
+  </link>
+
+  <!-- Joint fijo entre base_link y lidar_link -->
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 0.15" rpy="0 0 0"/>
+  </joint>
+
+  <!-- PLUGGIN VALIDO PARA LIDAR Y OTROS SENSORES, SIN COSAS RARAS-->
   <gazebo>
     <plugin
       filename="gz-sim-sensors-system"
@@ -256,5 +338,36 @@
       <render_engine>ogre2</render_engine>
     </plugin>
   </gazebo>
-  -->
+
+<!-- Sensor LiDAR en Gazebo -->
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>
+      <topic>/scan</topic>
+      <visualize>true</visualize>
+    
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>3200</samples>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+            <resolution>1</resolution>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.05</min>
+          <max>15.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.03</stddev>
+        </noise>
+      </lidar>
+    </sensor>
+  </gazebo>
+
 </robot>
