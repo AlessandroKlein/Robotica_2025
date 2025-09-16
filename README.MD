@@ -267,6 +267,58 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.
 - Árbol TF: `odom` → `base_link` → `left_wheel`, `right_wheel`
 
 -----
+## Ejecuta el nodo de deteccion lidar
+```bash
+source install/setup.bash && ros2 run diffbot_control detector_lidar
+
+source install/setup.bash && ros2 launch diffbot_gz gzlidar.launch.py 
+```
+
+### Ejercicio 13: Sistema de Detección de Líneas con Cámara
+
+Este ejercicio implementa un sistema completo de detección de líneas utilizando una cámara simulada en Gazebo. El robot puede detectar líneas en el suelo y navegar autónomamente siguiendo estas líneas.
+
+**Características implementadas:**
+- ✅ Cámara simulada integrada en el URDF del robot
+- ✅ Puente ROS-Gazebo para transmisión de imágenes
+- ✅ Nodo detector de líneas con procesamiento OpenCV
+- ✅ Modo headless para ejecución sin interfaz gráfica
+- ✅ Control automático de velocidad basado en detección de líneas
+
+```bash
+# Lanza el sistema completo de detección de líneas
+source install/setup.bash && ros2 launch diffbot_control camera_line_detector.launch.py
+
+# Verifica los tópicos disponibles del sistema
+ros2 topic list
+
+# Monitorea las imágenes de la cámara
+ros2 topic echo /camera --once
+
+# Monitorea la información de la cámara
+ros2 topic echo /camera_info --once
+
+# Verifica los comandos de velocidad generados por el detector
+ros2 topic echo /cmd_vel
+
+# Monitorea el estado de las juntas del robot
+ros2 topic echo /joint_states
+
+# Para ejecutar en modo headless (sin interfaz gráfica)
+export LIBGL_ALWAYS_SOFTWARE=1 && export GZ_SIM_RENDER_ENGINE=ogre && export DISPLAY= && source install/setup.bash && ros2 launch diffbot_control camera_line_detector.launch.py
+```
+
+**Componentes del sistema:**
+- `sim_camera.xacro`: Definición URDF de la cámara con sensor Gazebo
+- `gz_bridge.yaml`: Configuración del puente ROS-Gazebo para temas de cámara
+- `line_detector.py`: Nodo detector de líneas con procesamiento de imágenes
+- `camera_line_detector.launch.py`: Archivo de lanzamiento completo del sistema
+
+**Parámetros configurables:**
+- Resolución de cámara: 640x480
+- Frecuencia de actualización: 30 Hz
+- Campo de visión: 1.3962634 radianes (80 grados)
+- Rango de detección: 0.1 a 300 metros
 
 ## ⚙️ Generación del URDF
 

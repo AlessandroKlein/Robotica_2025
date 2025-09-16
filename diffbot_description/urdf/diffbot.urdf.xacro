@@ -30,6 +30,7 @@
   <xacro:include filename="$(find diffbot_description)/urdf/inertial_macros.xacro" />
   <!-- <xacro:include filename="$(find diffbot_description)/urdf/materials.xacro" /> -->
   <xacro:include filename="$(find diffbot_description)/urdf/motor.xacro" />
+  <xacro:include filename="$(find diffbot_description)/urdf/sim_camera.xacro" />
 
   <!-- ======================= -->
   <!-- === Chasis del robot === -->
@@ -243,7 +244,8 @@
   </ros2_control>
 
   <gazebo>
-    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+    <!--<plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">-->
+    <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
       <parameters>$(find diffbot_control)/config/controllers.yaml</parameters>
     </plugin>
   </gazebo>

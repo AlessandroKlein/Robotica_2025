@@ -13,6 +13,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
     ],
     install_requires=[
         'setuptools',
@@ -22,6 +23,8 @@ setup(
         'sensor_msgs',
         'tf2_ros',
         'std_msgs',
+        'cv_bridge',
+        'opencv-python',
     ],
     zip_safe=True,
     maintainer='ale',
@@ -35,6 +38,7 @@ setup(
             'odometry_publisher = diffbot_control.odometry_publisher:main',
             'go_to_pose_controller = diffbot_control.go_to_pose_controller:main',
             'detector_lidar = diffbot_control.detector_lidar:main',
+            'line_detector = diffbot_control.line_detector:main',
         ],
     },
 )
