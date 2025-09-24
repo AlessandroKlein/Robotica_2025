@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-Sistema Completo de Lanzamiento para Robot DiffBot
+Sistema de Lanzamiento para Robot DiffBot - Clase 13
 
-Este archivo de lanzamiento integra todos los componentes necesarios para el
-funcionamiento completo del robot DiffBot, incluyendo:
+Este archivo de lanzamiento integra los componentes necesarios para el
+ejercicio de la Clase 13, incluyendo:
 - Simulación en Gazebo
 - Controladores de movimiento
-- Sensores (LiDAR, cámara, IMU)
-- Nodos de procesamiento (detección de líneas, obstáculos)
+- Sensores IMU y LiDAR
+- Detector de obstáculos con LiDAR
 - Herramientas de visualización
 
 Autor: Sistema de Integración DiffBot
 Fecha: 2025
-Versión: 1.0
+Versión: 1.0 - Clase 13 (IMU y LiDAR)
 """
 
 from launch import LaunchDescription
@@ -28,18 +28,18 @@ from launch.substitutions import Command, FindExecutable
 
 def generate_launch_description():
     """
-    Genera la descripción completa del lanzamiento del sistema DiffBot.
+    Genera la descripción del lanzamiento del sistema DiffBot para Clase 13.
     
-    Configura y lanza todos los nodos necesarios para el funcionamiento completo
-    del robot, incluyendo simulación, control, sensores y procesamiento.
+    Configura y lanza los nodos necesarios para el ejercicio de sensores
+    IMU y LiDAR, incluyendo simulación, control y procesamiento de obstáculos.
     
     Returns:
-        LaunchDescription: Descripción completa del sistema a lanzar
+        LaunchDescription: Descripción del sistema a lanzar
     """
     # Argumento para activar herramientas de desarrollo y prueba
     declare_testing_arg = DeclareLaunchArgument(
         'testing',
-        default_value='false',
+        default_value='true',
         description='Activa herramientas de desarrollo: joint_state_publisher_gui y RViz'
     )
     testing = LaunchConfiguration('testing')
@@ -52,8 +52,8 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Puente de comunicación entre Gazebo y ROS2 para todos los sensores
-    # Configura la comunicación bidireccional para LiDAR, cámara, IMU y comandos
+    # Puente de comunicación entre Gazebo y ROS2 para sensores IMU y LiDAR
+    # Configura la comunicación bidireccional para IMU, LiDAR y comandos de control
     bridge_node = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -118,28 +118,6 @@ def generate_launch_description():
         ]
     )
     
-    # Detector de líneas basado en visión por computadora
-    # Procesa imágenes de la cámara para seguimiento de líneas usando filtros HSV
-    line_detector_node = Node(
-        package='diffbot_control',
-        executable='line_detector',
-        name='line_detector',
-        output='screen',
-        parameters=[{
-            'use_sim_time': True,
-            # Parámetros HSV para detección de líneas negras (rango de colores)
-            'hsv_lower_h': 0,      # Matiz mínimo
-            'hsv_lower_s': 0,      # Saturación mínima
-            'hsv_lower_v': 0,      # Valor mínimo (negro)
-            'hsv_upper_h': 180,    # Matiz máximo
-            'hsv_upper_s': 255,    # Saturación máxima
-            'hsv_upper_v': 30,     # Valor máximo (negro hasta gris oscuro)
-            # Parámetros de control
-            'linear_speed': 0.25,  # Velocidad lineal base (m/s)
-            'angular_gain': 1.0    # Ganancia para corrección angular
-        }]
-    )
-    
     # Detector de obstáculos basado en LiDAR
     # Analiza datos del sensor láser para detectar obstáculos en zonas específicas
     lidar_detector_node = Node(
@@ -153,16 +131,6 @@ def generate_launch_description():
             {'zone_angle': 30.0}          # Ángulo de cada zona de detección (grados)
         ]
     )
-    
-    # Visualizador de imágenes de la cámara
-    # Proporciona interfaz gráfica para monitorear el stream de video en tiempo real
-    camera_viewer = Node(
-        package='rqt_image_view',
-        executable='rqt_image_view',
-        name='camera_viewer',
-        output='screen',
-        parameters=[{'use_sim_time': True}]
-    )
 
     return LaunchDescription([
         declare_testing_arg,
@@ -172,7 +140,5 @@ def generate_launch_description():
         bridge_node,
         nodo_control,
         nodo_odometria,
-        line_detector_node,
-        lidar_detector_node,
-        camera_viewer
+        lidar_detector_node
     ])

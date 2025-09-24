@@ -68,8 +68,8 @@ def generate_launch_description():
             'hsv_upper_v': 50,     # Valor máximo aumentado para mejor detección
             # Parámetros de control optimizados para curvas cerradas
             'linear_speed': 0.15,  # Velocidad lineal reducida para curvas
-            'angular_gain': 2.5,   # Ganancia angular aumentada para respuesta más rápida
-            'search_angular_speed': 0.8,   # Velocidad de búsqueda aumentada
+            'angular_gain': 1.25,  # Ganancia angular reducida a la mitad
+            'search_angular_speed': 0.4,   # Velocidad de búsqueda reducida a la mitad
             'min_line_area': 80    # Área mínima reducida para detectar líneas más delgadas
         }]
     )
