@@ -48,7 +48,7 @@ def generate_launch_description():
         }.items(),
     )
 
-    # Lanzar Gazebo con mundo vacío
+    # Launch Gazebo with the custom sensor test world
     gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
@@ -56,7 +56,11 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "gz_args": "-r empty.sdf",
+            "gz_args": ["-r ", PathJoinSubstitution([
+                FindPackageShare("diffbot_gz"),
+                "worlds",
+                "sensor_test_world.sdf"
+            ])],
         }.items(),
     )
 

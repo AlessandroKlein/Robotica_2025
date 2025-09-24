@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-
+  
   <!-- Link de la cámara -->
   <link name="cam_link">
     <visual>
@@ -9,7 +9,7 @@
         <!-- Usar una caja simple si no hay mesh disponible -->
         <box size="0.025 0.024 0.009"/> <!-- 25mm x 24mm x 9mm -->
       </geometry>
-      <material name="red" />
+      <material name="red"/>
     </visual>
 
     <collision>

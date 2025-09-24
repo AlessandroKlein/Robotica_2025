@@ -14,6 +14,21 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*')), # rutas de los archivos 
         (os.path.join('share', package_name, 'config'), glob('config/*')),
+        #  Mundo obstaculos.sdf
+        (os.path.join('share', package_name, 'models'), [
+            'models/obstaculos.sdf'
+        ]),
+        #  Modelo LineTrack incluido en la instalación
+        (os.path.join('share', package_name, 'models', 'LineTrack'), [
+            'models/LineTrack/model.config',
+            'models/LineTrack/model.sdf'
+        ]),
+        #ruta mallas
+        (os.path.join('share', package_name, 'models', 'LineTrack', 'meshes'), 
+            glob('models/LineTrack/meshes/*')),
+        #ruta materiales
+        (os.path.join('share', package_name, 'models', 'LineTrack', 'materials'), 
+        glob('models/LineTrack/materials/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

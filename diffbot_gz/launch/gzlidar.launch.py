@@ -48,7 +48,7 @@ def generate_launch_description():
         }.items(),
     )
 
-    # Lanzar Gazebo con mundo de obstáculos
+    # Lanzar Gazebo con mundo personalizado de sensores
     gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
@@ -56,7 +56,7 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "gz_args": "/home/ale/tp-1/Tp1_robotica-main/robot_gz/worlds/obstaculos.sdf",
+            "gz_args": "-r empty.sdf",
         }.items(),
     )
 
@@ -72,19 +72,17 @@ def generate_launch_description():
         output="screen",
     )
 
-    # Bridge manual para /clock
-    clock_bridge = Node(
+    # Bridge usando archivo de configuración
+    gz_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
-        arguments=['/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock'],
-        output='screen'
-    )
-
-    # Bridge para el LiDAR
-    lidar_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        arguments=['/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan'],
+        parameters=[{
+            'config_file': PathJoinSubstitution([
+                FindPackageShare('diffbot_gz'),
+                'config',
+                'gz_bridge.yaml'
+            ])
+        }],
         output='screen'
     )
 
@@ -130,9 +128,8 @@ def generate_launch_description():
         robot_description_launch,
         gz_sim,
         spawn_entity,
-        clock_bridge,
-        lidar_bridge,
-        #joint_state_broadcaster_spawner,
-        #velocity_controller_spawner,
+        gz_bridge,
+        # joint_state_broadcaster_spawner,  # Comentado temporalmente
+        # velocity_controller_spawner,      # Comentado temporalmente
         detector_lidar_node,
     ])

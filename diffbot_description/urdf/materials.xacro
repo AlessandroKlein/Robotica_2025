@@ -2,9 +2,19 @@
 <robot xmlns:xacro= "http://www.ros.org/wiki/xacro" >
      <!-- RVIZ material RGBA definition -->
 
-    <!-- <material name="red">
+    <material name="red">
         <color rgba="0.8 0.0 0.0 1.0"/>
-    </material> -->
+    </material>
+    
+    <!-- Sensor-specific materials -->
+    <material name="imu_color">
+        <color rgba="0.2 0.2 0.8 1.0"/>
+    </material>
+    
+    <material name="lidar_color">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+    </material>
+    
     <material name="green">
         <color rgba="0.0 0.8 0.0 1.0"/>
     </material>

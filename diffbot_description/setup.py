@@ -28,7 +28,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-
+            'cinematica5 = diffbot_description.cinematica5:main',
+            'cinematica6 = diffbot_description.cinematica6:main',
+            'cinematica7 = diffbot_description.cinematica7:main',
         ],
     },
 )

@@ -14,6 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+       ('share/' + package_name + '/config', ['config/gz_bridge.yaml']),
     ],
     install_requires=[
         'setuptools',
@@ -39,6 +40,8 @@ setup(
             'go_to_pose_controller = diffbot_control.go_to_pose_controller:main',
             'detector_lidar = diffbot_control.detector_lidar:main',
             'line_detector = diffbot_control.line_detector:main',
+            'ejercicio8 = diffbot_control.ejercicio8:main',
+            'ejercicio9 = diffbot_control.ejercicio9:main',
         ],
     },
 )

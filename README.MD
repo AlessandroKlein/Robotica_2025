@@ -267,12 +267,51 @@ ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.
 - Árbol TF: `odom` → `base_link` → `left_wheel`, `right_wheel`
 
 -----
-## Ejecuta el nodo de deteccion lidar
+## Ejercicio 14: Sistema de Sensores Avanzados (IMU, LiDAR, Cámara)
+
+Este ejercicio implementa un sistema completo de sensores simulados con ruido realista, incluyendo IMU, LiDAR y cámara. Los sensores están configurados con especificaciones técnicas reales y parámetros de ruido gaussiano.
+
+**Características implementadas:**
+- ✅ Sensor IMU BMI088 con ruido gaussiano realista
+- ✅ Sensor LiDAR Slamtec S3M1-R2 con configuración de escaneo 360°
+- ✅ Cámara con procesamiento de imágenes para detección de líneas
+- ✅ Mundo personalizado con obstáculos y líneas para pruebas
+- ✅ Puentes ROS-Gazebo configurados para todos los sensores
+- ✅ Arquitectura modular con archivos XACRO separados
+
 ```bash
+# Lanza el sistema completo con todos los sensores
+source install/setup.bash && ros2 launch diffbot_gz gzcamera.launch.py
+
+# Ejecuta el nodo de detección LiDAR
 source install/setup.bash && ros2 run diffbot_control detector_lidar
 
-source install/setup.bash && ros2 launch diffbot_gz gzlidar.launch.py 
+# Lanza solo el sistema LiDAR
+source install/setup.bash && ros2 launch diffbot_gz gzlidar.launch.py
+
+# Monitorea los datos de los sensores
+ros2 topic echo /scan        # Datos del LiDAR
+ros2 topic echo /imu         # Datos del IMU
+ros2 topic echo /camera      # Imágenes de la cámara
+ros2 topic echo /camera_info # Información de la cámara
+
+# Verifica las transformaciones tf2
+ros2 run tf2_ros tf2_echo base_link imu_link
+ros2 run tf2_ros tf2_echo base_link lidar_link
+ros2 run tf2_ros tf2_echo base_link camera_link
 ```
+
+**Componentes del sistema:**
+- `sim_imu.xacro`: Sensor IMU con ruido gaussiano configurado según especificaciones BMI088
+- `sim_lidar.xacro`: Sensor LiDAR con rango de 15m y resolución de 0.01m
+- `sim_camera.xacro`: Cámara con resolución 640x480 y FOV de 80°
+- `sensor_test_world.sdf`: Mundo personalizado con líneas, obstáculos y paredes
+- `gz_bridge.yaml`: Configuración completa de puentes ROS-Gazebo
+
+**Especificaciones técnicas:**
+- **IMU BMI088**: Ruido acelerómetro ±0.1 m/s², giroscopio ±0.01 rad/s
+- **LiDAR S3M1-R2**: Rango 0.05-15m, 3200 muestras, ruido gaussiano σ=0.03m
+- **Cámara**: 640x480px, 30Hz, rango 0.1-300m, formato RGB8
 
 ### Ejercicio 13: Sistema de Detección de Líneas con Cámara
 

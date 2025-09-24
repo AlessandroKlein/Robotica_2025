@@ -5,19 +5,14 @@
 
   <!-- ======================= -->
   <!-- === Propiedades === -->
-  <!-- Definición de propiedades reutilizables: masas, colores, dimensiones de ruedas y caster -->
-  <xacro:property name="chassis_mass" value="0.800" /> <!-- 800g -->
-  <!-- Radio de la rueda en metros -->
-  <xacro:property name="wheel_radius" value="0.035" /> <!-- 70mm de diámetro = 35mm de radio -->
-  <!-- Ancho de la rueda en metros -->
-  <xacro:property name="wheel_width" value="0.025" /> <!-- 25mm de ancho -->
-  <!-- Ancho entre ruedas en metros -->
-  <xacro:property name="wheel_separation" value="0.100" /> <!-- 100mm de ancho del chasis -->
-  <!-- Separación entre ruedas en metros -->
-  <xacro:property name="caster_origin_xyz" value="-0.075 0 -0.0075" /> <!-- Posición del caster respecto al chasis -->
-  <!-- Posición del caster respecto al chasis -->
+  <!-- Parámetros reutilizables -->
+  <xacro:property name="chassis_mass" value="0.8"/>
+  <xacro:property name="chassis_length" value="0.195"/>
+  <xacro:property name="chassis_width" value="0.1"/>
+  <xacro:property name="chassis_height" value="0.005"/>
 
-  <xacro:property name="base_elevation" value="0.055" />
+  <xacro:property name="wheel_radius" value="0.035"/>
+  <xacro:property name="wheel_separation" value="0.135"/>
   <!-- Colores definidos en materials.xacro -->
   <!-- <xacro:property name="base_color" value="green" />
   <xacro:property name="wheel_color" value="silver" />
@@ -27,10 +22,12 @@
   <!-- ======================= -->
   <!-- === Includes === -->
   <!-- Inclusión de archivos xacro auxiliares para macros de inercia y motor -->
+  <xacro:include filename="$(find diffbot_description)/urdf/materials.xacro" />
   <xacro:include filename="$(find diffbot_description)/urdf/inertial_macros.xacro" />
-  <!-- <xacro:include filename="$(find diffbot_description)/urdf/materials.xacro" /> -->
   <xacro:include filename="$(find diffbot_description)/urdf/motor.xacro" />
   <xacro:include filename="$(find diffbot_description)/urdf/sim_camera.xacro" />
+  <xacro:include filename="$(find diffbot_description)/urdf/sim_imu.xacro" />
+  <xacro:include filename="$(find diffbot_description)/urdf/sim_lidar.xacro" />
 
   <!-- ======================= -->
   <!-- === Chasis del robot === -->
@@ -50,12 +47,12 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.195 0.1 0.005" />
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}" />
       </geometry>
     </collision>
 
-    <xacro:inertial_box mass="0.8" x="0.195" y="0.100" z="0.005">
-      <origin xyz="0 0 0.0525" rpy="0 0 0" />
+    <xacro:inertial_box mass="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z="0.00">
+      <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
 
@@ -74,27 +71,22 @@
 
     <link name="${prefix}_wheel_link">
       <visual>
-        <origin xyz="0 0 0" rpy="1.5708 0 0" />
+        <origin xyz="0 -0.020 0" rpy="1.5708 0 0" />
         <geometry>
           <mesh filename="file://$(find diffbot_description)/meshes/wheel.stl"/>
         </geometry>
-        <material name="wheel_silver">
-          <color rgba="0.79 0.82 0.93 1"/>
-        </material>
-        <!-- Color que se visualiza en RViz-->
+        <material name="dark_grey"/>
       </visual>
 
       <collision>
-        <origin xyz="0 0 0" rpy="1.5708 0 0" />
+        <origin xyz="0 -0.020 0" rpy="1.5708 0 0" />
         <geometry>
-          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+          <cylinder radius="${wheel_radius}" length="0.025"/>
         </geometry>
-        <material name="wheel_silver_collision">
-          <color rgba="0.79 0.82 0.93 1"/>
-        </material>
+        <material name="dark_grey"/>
       </collision>
 
-      <xacro:inertial_cylinder mass="0.150" radius="${wheel_radius}" length="${wheel_width}"> <!-- 150g -->
+      <xacro:inertial_cylinder mass="0.150" radius="${wheel_radius}" length="0.025">
         <origin xyz="0 0 0" rpy="0 0 0" />
       </xacro:inertial_cylinder>
     </link>
@@ -104,25 +96,18 @@
   <!-- ======================= -->
   <!-- === Ruedas y motores === -->
   <!-- Instanciación de ruedas y motores usando las macros -->
-  <xacro:wheel prefix="left" xyz="0.0185  0.05 -0.0175" axis="0 1 0" rpy="0 1.5708 0"/> <!-- Posición rueda izquierda -->
-  <xacro:wheel prefix="right" xyz="0.0185 -0.05 -0.0175" axis="0 -1 0" rpy="0 1.5708 3.14159"/> <!-- Posición rueda derecha -->
+  <xacro:wheel prefix="left" xyz="0.0185  ${wheel_separation/2} -0.0175" axis="0 1 0" rpy="0 1.5708 0"/>
+  <xacro:wheel prefix="right" xyz="0.0185 -${wheel_separation/2} -0.0175" axis="0 -1 0" rpy="0 1.5708 3.14159"/>
   <!-- Motores -->
-  <xacro:motor prefix="left" chassis_width="0.1" reflect="false" />
-  <xacro:motor prefix="right" chassis_width="0.1" reflect="true" />
+  <xacro:motor prefix="left" chassis_width="${chassis_width}" reflect="false"/>
+  <xacro:motor prefix="right" chassis_width="${chassis_width}" reflect="true"/>
 
   <!-- ======================= -->
   <!-- === Caster (rueda loca) === -->
   <!-- Definición del caster y sus componentes -->
   <!-- BASE FIJA -->
 
-  <joint name="caster_base_joint" type="fixed">
-    <parent link="base_link" />
-    <child link="caster" />
-    <origin xyz="${caster_origin_xyz}" rpy="0 0 0" />
-  </joint>
-
-  <!-- BASE FIJA  -->
-  <link name="caster">
+  <link name="caster_base">
     <visual>
       <origin xyz="0 0 0.0045" rpy="0 0 0" />
       <geometry>
@@ -140,17 +125,15 @@
       </geometry>
     </collision>
 
-    <xacro:inertial_box mass="0.020" x="0.032" y="0.038" z="0.015"> <!-- 20g -->
+    <xacro:inertial_box mass="0.02" x="0.032" y="0.038" z="0.015">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
-
-  <!-- Rueda loca -->
-  <joint name="caster_wheel_joint" type="continuous">
-    <parent link="caster_wheel_support" />
-    <child link="caster_wheel" />
-    <origin xyz="-0.015 0 -0.020" rpy="0 0 0" /> <!-- Posición de la rueda giratoria respecto al soporte -->
-    <axis xyz="0 1 0" />
+  
+  <joint name="caster_base_joint" type="fixed">
+    <origin xyz="-0.075 0 -0.001" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="caster_base"/>
   </joint>
 
   <!-- RUEDA MOVIL  -->
@@ -168,27 +151,16 @@
     </visual>
 
     <collision>
-      <!-- Ajustado para evitar que la rueda esté por debajo del suelo -->
-      <!-- -0.007 -->
-      <origin xyz="0 0 -0.0075" rpy="0 0 0" />
+      <origin xyz="0 0 -0.007" rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.0075" length="0.015" />
+        <cylinder radius="0.015" length="0.016" />
       </geometry>
     </collision>
 
-    <!-- Inercia orientada correctamente -->
-    <xacro:inertial_cylinder mass="0.010" radius="0.0075" length="0.015"> <!-- 10g, 15mm diámetro = 7.5mm radio -->
+    <xacro:inertial_cylinder mass="0.01" radius="0.015" length="0.016">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_cylinder>
   </link>
-
-  <!-- Soporte de la rueda loca -->
-  <joint name="caster_wheel_support_joint" type="continuous">
-    <parent link="base_link" />
-    <child link="caster_wheel_support" />
-    <origin xyz="-0.075 0 -0.015" rpy="0 0 0" /> <!-- Posición del soporte de la rueda giratoria -->
-    <axis xyz="0 0 1" />
-  </joint>
 
   <link name="caster_wheel_support">
     <visual>
@@ -208,10 +180,25 @@
       </geometry>
     </collision>
 
-    <xacro:inertial_box mass="0.020" x="0.033" y="0.025" z="0.025"> <!-- 20g -->
+    <xacro:inertial_box mass="0.02" x="0.033" y="0.025" z="0.025">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
+  
+  <joint name="caster_wheel_support_joint" type="continuous">
+    <origin xyz="0 0 -0.015" rpy="0 0 0"/>
+    <parent link="caster_base"/>
+    <child link="caster_wheel_support"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- Rueda loca -->
+  <joint name="caster_wheel_joint" type="continuous">
+    <origin xyz="-0.015 0 -0.020" rpy="0 0 0"/>
+    <parent link="caster_wheel_support"/>
+    <child link="caster_wheel"/>
+    <axis xyz="0 1 0"/>
+  </joint>
 
 
   <!-- Configuración de ros2_control para la interfaz de hardware -->
@@ -319,20 +306,178 @@
   </gazebo>
 ================= FIN IMU COMENTADA ================= -->
 
-  <!-- Link del sensor LiDAR -->
-  <link name="lidar_link">
-    <!-- Inercial ,no funciona dummy -->
-    <xacro:dummy_inertial />
+
+
+  <!-- ======================= -->
+  <!-- === SENSOR IMU === -->
+  <!-- ======================= -->
+    
+  <!-- Link del IMU -->
+  <link name="imu_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.025 0.005"/>
+      </geometry>
+      <material name="imu_color">
+        <color rgba="0.2 0.2 0.8 1.0"/>
+      </material>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.025 0.025 0.005"/>
+      </geometry>
+    </collision>
+    
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
+    </inertial>
   </link>
 
-  <!-- Joint fijo entre base_link y lidar_link -->
+  <!-- Joint que conecta el IMU al link padre -->
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0.0 0.0 0.05" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Configuración del sensor IMU en Gazebo -->
+  <gazebo reference="imu_link">
+    <sensor name="imu" type="imu">
+      <plugin
+        filename="gz-sim-imu-system" 
+        name="gz::sim::systems::Imu">
+      </plugin>
+
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <topic>/imu/data</topic>
+      <visualize>true</visualize>
+
+      <imu>
+        <!-- Configuración del acelerómetro BMI088 -->
+        <linear_acceleration>
+          <x>
+            <noise type="gaussian">
+              <mean>0.020</mean>          <!-- Zero-g Offset: 20 mg -->
+              <stddev>0.0016</stddev>     <!-- Noise Density X,Y: 160 μg/√Hz -->
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.020</mean>
+              <stddev>0.0016</stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.020</mean>
+              <stddev>0.0019</stddev>     <!-- Noise Density Z: 190 μg/√Hz -->
+            </noise>
+          </z>
+        </linear_acceleration>
+        
+        <!-- Configuración del giróscopo BMI088 -->
+        <angular_velocity>
+          <x>
+            <noise type="gaussian">
+              <mean>0.0174533</mean>      <!-- Zero-rate Offset: ±1°/s en rad -->
+              <stddev>0.00174533</stddev> <!-- Output Noise: 0.1°/s en rad -->
+            </noise>
+          </x>
+          <y>
+            <noise type="gaussian">
+              <mean>0.0174533</mean>
+              <stddev>0.00174533</stddev>
+            </noise>
+          </y>
+          <z>
+            <noise type="gaussian">
+              <mean>0.0174533</mean>
+              <stddev>0.00174533</stddev>
+            </noise>
+          </z>
+        </angular_velocity>
+      </imu>
+    </sensor>
+  </gazebo>
+
+  <!-- ======================= -->
+  <!-- === SENSOR LIDAR === -->
+  <!-- ======================= -->
+    
+  <!-- Link del LiDAR -->
+  <link name="lidar_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.07"/>
+      </geometry>
+      <material name="lidar_color">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.07"/>
+      </geometry>
+    </collision>
+    
+    <inertial>
+      <mass value="0.190"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- Joint que conecta el LiDAR al link padre -->
   <joint name="lidar_joint" type="fixed">
     <parent link="base_link"/>
     <child link="lidar_link"/>
-    <origin xyz="0 0 0.15" rpy="0 0 0"/>
+    <origin xyz="0.0 0.0 0.12" rpy="0 0 0"/>
   </joint>
 
-  <!-- PLUGGIN VALIDO PARA LIDAR Y OTROS SENSORES, SIN COSAS RARAS-->
+  <!-- Configuración del sensor LiDAR en Gazebo -->
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="gpu_lidar">
+      <always_on>true</always_on>
+      <update_rate>10</update_rate>        <!-- Scanning Frequency: 10 Hz -->
+      <topic>/scan</topic>
+      <visualize>true</visualize>
+
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>3200</samples>           <!-- 360°/0.1125° = 3200 samples -->
+            <resolution>1</resolution>
+            <min_angle>-3.14159265359</min_angle>  <!-- -π rad -->
+            <max_angle>3.14159265359</max_angle>   <!-- +π rad -->
+          </horizontal>
+          <!-- Al ser LiDAR 2D no tiene parámetros verticales -->
+        </scan>
+        
+        <range>
+          <min>0.05</min>                   <!-- Distance Range: 0.05 m -->
+          <max>15.0</max>                   <!-- Distance Range: 15.0 m -->
+          <resolution>0.010</resolution>    <!-- Resolution: 10 mm -->
+        </range>
+        
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.030</stddev>            <!-- Accuracy: ±30 mm -->
+        </noise>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <!-- Plugin para sensores en Gazebo -->
   <gazebo>
     <plugin
       filename="gz-sim-sensors-system"
@@ -341,35 +486,6 @@
     </plugin>
   </gazebo>
 
-<!-- Sensor LiDAR en Gazebo -->
-  <gazebo reference="lidar_link">
-    <sensor name="lidar" type="gpu_lidar">
-      <always_on>true</always_on>
-      <update_rate>10</update_rate>
-      <topic>/scan</topic>
-      <visualize>true</visualize>
-    
-      <lidar>
-        <scan>
-          <horizontal>
-            <samples>3200</samples>
-            <min_angle>-3.14159</min_angle>
-            <max_angle>3.14159</max_angle>
-            <resolution>1</resolution>
-          </horizontal>
-        </scan>
-        <range>
-          <min>0.05</min>
-          <max>15.0</max>
-          <resolution>0.01</resolution>
-        </range>
-        <noise>
-          <type>gaussian</type>
-          <mean>0.0</mean>
-          <stddev>0.03</stddev>
-        </noise>
-      </lidar>
-    </sensor>
-  </gazebo>
+
 
 </robot>

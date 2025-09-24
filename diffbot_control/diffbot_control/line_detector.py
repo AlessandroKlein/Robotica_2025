@@ -12,6 +12,26 @@ class LineDetector(Node):
     def __init__(self):
         super().__init__('line_detector')
         
+        # Declarar parámetros configurables
+        self.declare_parameter('hsv_lower_h', 0)
+        self.declare_parameter('hsv_lower_s', 0)
+        self.declare_parameter('hsv_lower_v', 0)
+        self.declare_parameter('hsv_upper_h', 180)
+        self.declare_parameter('hsv_upper_s', 255)
+        self.declare_parameter('hsv_upper_v', 50)
+        self.declare_parameter('linear_speed', 0.2)
+        self.declare_parameter('angular_gain', 1.0)
+        
+        # Leer parámetros
+        self.hsv_lower_h = self.get_parameter('hsv_lower_h').get_parameter_value().integer_value
+        self.hsv_lower_s = self.get_parameter('hsv_lower_s').get_parameter_value().integer_value
+        self.hsv_lower_v = self.get_parameter('hsv_lower_v').get_parameter_value().integer_value
+        self.hsv_upper_h = self.get_parameter('hsv_upper_h').get_parameter_value().integer_value
+        self.hsv_upper_s = self.get_parameter('hsv_upper_s').get_parameter_value().integer_value
+        self.hsv_upper_v = self.get_parameter('hsv_upper_v').get_parameter_value().integer_value
+        self.linear_speed = self.get_parameter('linear_speed').get_parameter_value().double_value
+        self.angular_gain = self.get_parameter('angular_gain').get_parameter_value().double_value
+        
         # Crear el puente CV
         self.bridge = cv_bridge.CvBridge()
         
@@ -33,11 +53,10 @@ class LineDetector(Node):
         # Modo headless - sin ventana de visualización
         self.headless_mode = True
         
-        # Parámetros de control
-        self.linear_speed = 0.25  # m/s
-        self.max_angular_speed = 1.0  # rad/s
-        
-        self.get_logger().info('Line Detector iniciado')
+        self.get_logger().info('Line Detector iniciado con parámetros configurables')
+        self.get_logger().info(f'HSV Lower: [{self.hsv_lower_h}, {self.hsv_lower_s}, {self.hsv_lower_v}]')
+        self.get_logger().info(f'HSV Upper: [{self.hsv_upper_h}, {self.hsv_upper_s}, {self.hsv_upper_v}]')
+        self.get_logger().info(f'Linear Speed: {self.linear_speed}, Angular Gain: {self.angular_gain}')
 
     def sub_callback(self, msg: Image):
         try:
@@ -51,10 +70,9 @@ class LineDetector(Node):
             # 2. Detección del camino - conversión a HSV y máscara
             image_hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
             
-            # Definir rango para detectar línea negra
-            # H: (0-180°), S: (0-100%), V: (0-12%)
-            lower = np.array([0, 0, 0])
-            upper = np.array([255, 255, 30])
+            # Definir rango para detectar línea usando parámetros configurables
+            lower = np.array([self.hsv_lower_h, self.hsv_lower_s, self.hsv_lower_v])
+            upper = np.array([self.hsv_upper_h, self.hsv_upper_s, self.hsv_upper_v])
             
             # Aplicar máscara
             mask = cv2.inRange(image_hsv, lower, upper)
@@ -70,11 +88,11 @@ class LineDetector(Node):
                 # Dibujar centroide en la imagen
                 cv2.circle(image, (cx, cy), 5, (0, 255, 0), -1)
                 
-                # Control de velocidad angular
+                # Control de velocidad angular usando parámetros configurables
                 # e = (W/2) - cx
                 # alpha = e / (W/2) = 1 - (2*cx/W)
                 alpha = 1.0 - (2.0 * cx / width)
-                angular_z = alpha * self.max_angular_speed
+                angular_z = alpha * self.angular_gain
                 
                 # Crear mensaje Twist
                 twist = Twist()
