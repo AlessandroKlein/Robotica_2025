@@ -21,6 +21,8 @@ class LineDetector(Node):
         self.declare_parameter('hsv_upper_v', 50)
         self.declare_parameter('linear_speed', 0.2)
         self.declare_parameter('angular_gain', 1.0)
+        self.declare_parameter('search_angular_speed', 0.3)  # Velocidad angular para búsqueda
+        self.declare_parameter('min_line_area', 100)  # Área mínima para considerar línea válida
         
         # Leer parámetros
         self.hsv_lower_h = self.get_parameter('hsv_lower_h').get_parameter_value().integer_value
@@ -31,6 +33,13 @@ class LineDetector(Node):
         self.hsv_upper_v = self.get_parameter('hsv_upper_v').get_parameter_value().integer_value
         self.linear_speed = self.get_parameter('linear_speed').get_parameter_value().double_value
         self.angular_gain = self.get_parameter('angular_gain').get_parameter_value().double_value
+        self.search_angular_speed = self.get_parameter('search_angular_speed').get_parameter_value().double_value
+        self.min_line_area = self.get_parameter('min_line_area').get_parameter_value().integer_value
+        
+        # Variables de estado para manejo de pérdida de línea
+        self.last_known_direction = 0.0  # Última dirección conocida de la línea
+        self.line_lost_counter = 0  # Contador de frames sin línea
+        self.max_lost_frames = 5  # Máximo de frames antes de activar búsqueda
         
         # Crear el puente CV
         self.bridge = cv_bridge.CvBridge()
@@ -80,7 +89,10 @@ class LineDetector(Node):
             # 3. Estimación del curso - encontrar centroide
             M = cv2.moments(mask)
             
-            if M['m00'] > 0:
+            if M['m00'] > self.min_line_area:
+                # Línea detectada - resetear contador de pérdida
+                self.line_lost_counter = 0
+                
                 # Calcular centroide
                 cx = int(M['m10']/M['m00'])
                 cy = int(M['m01']/M['m00'])
@@ -94,6 +106,9 @@ class LineDetector(Node):
                 alpha = 1.0 - (2.0 * cx / width)
                 angular_z = alpha * self.angular_gain
                 
+                # Guardar última dirección conocida
+                self.last_known_direction = angular_z
+                
                 # Crear mensaje Twist
                 twist = Twist()
                 twist.linear.x = self.linear_speed
@@ -102,18 +117,37 @@ class LineDetector(Node):
                 # Publicar comando
                 self.cmd_vel_pub.publish(twist)
                 
-                # Log de información
-                self.get_logger().info(
-                    f'Centroide: ({cx}, {cy}), Alpha: {alpha:.3f}, Angular: {angular_z:.3f}'
-                )
+                # Log de información (solo cada 10 frames para reducir spam)
+                if self.line_lost_counter % 10 == 0:
+                    self.get_logger().debug(
+                        f'Línea detectada - Centroide: ({cx}, {cy}), Alpha: {alpha:.3f}, Angular: {angular_z:.3f}'
+                    )
             else:
-                # No se detectó línea, detener el robot
-                twist = Twist()
-                twist.linear.x = 0.0
-                twist.angular.z = 0.0
-                self.cmd_vel_pub.publish(twist)
+                # No se detectó línea - incrementar contador
+                self.line_lost_counter += 1
                 
-                self.get_logger().warn('No se detectó línea')
+                if self.line_lost_counter <= self.max_lost_frames:
+                    # Continuar en la última dirección conocida con velocidad reducida
+                    twist = Twist()
+                    twist.linear.x = self.linear_speed * 0.5  # Reducir velocidad lineal
+                    twist.angular.z = self.last_known_direction * 0.8  # Mantener dirección con factor de amortiguación
+                    
+                    self.cmd_vel_pub.publish(twist)
+                    
+                    if self.line_lost_counter == 1:  # Solo mostrar warning una vez
+                        self.get_logger().warn(f'Línea perdida - continuando en última dirección conocida (frame {self.line_lost_counter}/{self.max_lost_frames})')
+                else:
+                    # Activar modo de búsqueda - girar en la dirección de la última línea conocida
+                    twist = Twist()
+                    twist.linear.x = 0.1  # Velocidad lineal muy baja
+                    # Girar en la dirección de la última línea conocida, pero amplificado
+                    search_direction = 1.0 if self.last_known_direction >= 0 else -1.0
+                    twist.angular.z = search_direction * self.search_angular_speed
+                    
+                    self.cmd_vel_pub.publish(twist)
+                    
+                    if self.line_lost_counter % 20 == 0:  # Log cada 20 frames para evitar spam
+                        self.get_logger().warn(f'Modo búsqueda activo - buscando línea (frame {self.line_lost_counter})')
             
             # En modo headless, solo procesamos sin mostrar
             if not self.headless_mode:
