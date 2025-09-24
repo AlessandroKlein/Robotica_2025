@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""
+Calculador de Odometría para Robot Diferencial DiffBot
+
+Este nodo implementa el cálculo de odometría para un robot diferencial basado en
+las posiciones angulares de las ruedas. Utiliza la cinemática directa para estimar
+la posición y orientación del robot en el espacio.
+
+Autor: Sistema de Navegación DiffBot
+Fecha: 2025
+Versión: 1.0
+"""
 
 import rclpy
 from rclpy.node import Node
@@ -9,6 +20,28 @@ from tf2_ros import TransformBroadcaster
 import numpy as np
 
 class DiffbotOdometry(Node):
+    """
+    Calculador de odometría para robot diferencial.
+    
+    Este nodo calcula la odometría del robot basándose en las posiciones angulares
+    de las ruedas obtenidas del topic joint_states. Implementa la cinemática directa
+    del robot diferencial y opcionalmente publica transformaciones TF.
+    
+    Parámetros:
+        wheel_r (float): Radio de las ruedas en metros (default: 0.035)
+        wheel_sep (float): Separación entre ruedas en metros (default: 0.135)
+        left_wheel_joint (str): Nombre del joint de la rueda izquierda
+        right_wheel_joint (str): Nombre del joint de la rueda derecha
+        publish_tf (bool): Si publicar transformaciones TF (default: True)
+    
+    Topics:
+        Suscripciones:
+            /joint_states (sensor_msgs/JointState): Estados de las articulaciones
+        
+        Publicaciones:
+            /odom (nav_msgs/Odometry): Información de odometría
+            /tf (tf2_msgs/TFMessage): Transformaciones (si publish_tf=True)
+    """
     def __init__(self):
         super().__init__('diffbot_odometry_node')
 
@@ -48,6 +81,27 @@ class DiffbotOdometry(Node):
         self.get_logger().info(f"  Publicar TF: {self.publish_tf}")
 
     def sub_callback(self, msg: JointState):
+        """
+        Callback que procesa los estados de las articulaciones y calcula la odometría.
+        
+        Implementa la cinemática directa del robot diferencial:
+        1. Calcula los incrementos lineales de cada rueda
+        2. Aplica la cinemática directa para obtener desplazamiento y rotación
+        3. Actualiza la pose del robot
+        4. Publica la odometría y opcionalmente las transformaciones TF
+        
+        Ecuaciones utilizadas:
+        - dl_k = (theta_l_k - theta_l_k-1) * r
+        - dr_k = (theta_r_k - theta_r_k-1) * r
+        - dA_k = (dr_k + dl_k) / 2
+        - Dw_k = (dr_k - dl_k) / L
+        - x_k = x_k-1 + dA_k * cos(w_k-1)
+        - y_k = y_k-1 + dA_k * sin(w_k-1)
+        - w_k = w_k-1 + Dw_k
+        
+        Args:
+            msg (sensor_msgs.msg.JointState): Mensaje con estados de articulaciones
+        """
         # Extraer ángulos de las ruedas
         lwheel_ang, rwheel_ang = 0.0, 0.0
         for name, position in zip(msg.name, msg.position):
@@ -106,7 +160,15 @@ class DiffbotOdometry(Node):
 
     def send_tf(self, x, y, theta):
         """
-        Envía la transformación entre 'odom' y 'base_link'.
+        Publica la transformación entre los frames 'odom' y 'base_link'.
+        
+        Esta transformación permite a otros nodos conocer la posición del robot
+        en el frame de odometría, facilitando la navegación y localización.
+        
+        Args:
+            x (float): Posición X del robot en metros
+            y (float): Posición Y del robot en metros
+            theta (float): Orientación del robot en radianes
         """
         t = TransformStamped()
         t.header.stamp = self.get_clock().now().to_msg()
@@ -122,14 +184,29 @@ class DiffbotOdometry(Node):
         self.tf_broadcaster.sendTransform(t)
 
 def main(args=None):
+    """
+    Función principal del nodo calculador de odometría.
+    
+    Inicializa el nodo ROS2, crea una instancia del calculador de odometría
+    y mantiene el nodo activo hasta recibir una señal de interrupción.
+    
+    Args:
+        args: Argumentos de línea de comandos (opcional)
+    """
+    # Inicialización del sistema ROS2
     rclpy.init(args=args)
+    
+    # Creación del nodo calculador de odometría
     node = DiffbotOdometry()
     
     try:
+        # Mantener el nodo activo procesando callbacks
         rclpy.spin(node)
     except KeyboardInterrupt:
+        # Manejo de interrupción por teclado (Ctrl+C)
         pass
     finally:
+        # Limpieza y finalización
         node.destroy_node()
         rclpy.shutdown()
 

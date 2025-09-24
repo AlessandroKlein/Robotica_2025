@@ -1,4 +1,15 @@
 #!/usr/bin/env python3
+"""
+Controlador de Tracción Diferencial para DiffBot
+
+Este nodo implementa un controlador que convierte comandos de velocidad Twist
+en velocidades angulares específicas para las ruedas izquierda y derecha del robot.
+Utiliza el modelo cinemático inverso del robot diferencial.
+
+Autor: Sistema de Control DiffBot
+Fecha: 2025
+Versión: 1.0
+"""
 
 import rclpy
 from rclpy.node import Node
@@ -6,6 +17,24 @@ from geometry_msgs.msg import Twist
 from std_msgs.msg import Float64MultiArray
 
 class DiffDriveController(Node):
+    """
+    Controlador de tracción diferencial que convierte comandos Twist a velocidades de ruedas.
+    
+    Este nodo se suscribe al topic /cmd_vel y publica comandos de velocidad angular
+    a los controladores de las ruedas izquierda y derecha del robot diferencial.
+    
+    Parámetros:
+        wheel_radius (float): Radio de las ruedas en metros (default: 0.035)
+        wheel_separation (float): Separación entre ruedas en metros (default: 0.135)
+    
+    Topics:
+        Suscripciones:
+            /cmd_vel (geometry_msgs/Twist): Comandos de velocidad del robot
+        
+        Publicaciones:
+            /velocity_controller_l/commands (std_msgs/Float64MultiArray): Comandos para rueda izquierda
+            /velocity_controller_r/commands (std_msgs/Float64MultiArray): Comandos para rueda derecha
+    """
     def __init__(self):
         super().__init__('diff_drive_controller')
 
@@ -28,7 +57,21 @@ class DiffDriveController(Node):
 
     def cmd_vel_callback(self, msg):
         """
-        Convierte comandos de velocidad (Twist) a velocidades angulares de ruedas.
+        Callback que procesa comandos de velocidad y los convierte a velocidades angulares.
+        
+        Implementa la cinemática inversa del robot diferencial:
+        - phi_dot_R = (1/r) * (v + (L/2) * omega)
+        - phi_dot_L = (1/r) * (v - (L/2) * omega)
+        
+        Donde:
+            v: velocidad lineal del robot (m/s)
+            omega: velocidad angular del robot (rad/s)
+            r: radio de las ruedas (m)
+            L: separación entre ruedas (m)
+            phi_dot_R/L: velocidades angulares de las ruedas (rad/s)
+        
+        Args:
+            msg (geometry_msgs.msg.Twist): Comando de velocidad recibido
         """
         # Extraer velocidades del mensaje Twist
         linear_x = msg.linear.x   # m/s
@@ -56,19 +99,29 @@ class DiffDriveController(Node):
         self.get_logger().debug(f"wheel_speeds: left={phi_dot_left:.3f}, right={phi_dot_right:.3f}")
 
 def main(args=None):
-    # 1. Inicialización
+    """
+    Función principal del nodo controlador de tracción diferencial.
+    
+    Inicializa el nodo ROS2, crea una instancia del controlador y mantiene
+    el nodo activo hasta recibir una señal de interrupción.
+    
+    Args:
+        args: Argumentos de línea de comandos (opcional)
+    """
+    # Inicialización del sistema ROS2
     rclpy.init(args=args)
 
-    # 2. Creación de nodo
+    # Creación del nodo controlador
     nodo = DiffDriveController()
 
     try:
-        # 3. Procesamiento de mensajes y callback
+        # Mantener el nodo activo procesando callbacks
         rclpy.spin(nodo)
     except KeyboardInterrupt:
+        # Manejo de interrupción por teclado (Ctrl+C)
         pass
     finally:
-        # 4. Finalización
+        # Limpieza y finalización
         nodo.destroy_node()
         rclpy.shutdown()
 

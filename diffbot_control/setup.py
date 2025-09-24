@@ -35,13 +35,16 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'cmd_vel_listener = diffbot_control.cmd_vel_listener:main',
-            'odometry_publisher = diffbot_control.odometry_publisher:main',
+            # Controladores principales del robot
+            'differential_drive_controller = diffbot_control.differential_drive_controller:main',
+            'odometry_calculator = diffbot_control.odometry_calculator:main',
+            
+            # Controladores avanzados
             'go_to_pose_controller = diffbot_control.go_to_pose_controller:main',
+            
+            # Procesamiento de sensores
             'detector_lidar = diffbot_control.detector_lidar:main',
             'line_detector = diffbot_control.line_detector:main',
-            'ejercicio8 = diffbot_control.ejercicio8:main',
-            'ejercicio9 = diffbot_control.ejercicio9:main',
         ],
     },
 )

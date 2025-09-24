@@ -1,3 +1,20 @@
+#!/usr/bin/env python3
+"""
+Sistema Completo de Lanzamiento para Robot DiffBot
+
+Este archivo de lanzamiento integra todos los componentes necesarios para el
+funcionamiento completo del robot DiffBot, incluyendo:
+- Simulación en Gazebo
+- Controladores de movimiento
+- Sensores (LiDAR, cámara, IMU)
+- Nodos de procesamiento (detección de líneas, obstáculos)
+- Herramientas de visualización
+
+Autor: Sistema de Integración DiffBot
+Fecha: 2025
+Versión: 1.0
+"""
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
@@ -10,22 +27,33 @@ from launch.substitutions import Command, FindExecutable
 
 
 def generate_launch_description():
-    # Argumento para activar herramientas de prueba
+    """
+    Genera la descripción completa del lanzamiento del sistema DiffBot.
+    
+    Configura y lanza todos los nodos necesarios para el funcionamiento completo
+    del robot, incluyendo simulación, control, sensores y procesamiento.
+    
+    Returns:
+        LaunchDescription: Descripción completa del sistema a lanzar
+    """
+    # Argumento para activar herramientas de desarrollo y prueba
     declare_testing_arg = DeclareLaunchArgument(
         'testing',
         default_value='false',
-        description='Activa joint_state_publisher_gui y RViz si es true'
+        description='Activa herramientas de desarrollo: joint_state_publisher_gui y RViz'
     )
     testing = LaunchConfiguration('testing')
  
-    # Nodo opcional: joint_state_publisher_gui
+    # Nodo opcional: Interfaz gráfica para control manual de articulaciones
     joint_state_publisher_gui = Node(
         package='joint_state_publisher_gui',
         executable='joint_state_publisher_gui',
         condition=IfCondition(testing),
+        output='screen'
     )
 
-    # Nodo ros_gz_bridge para todos los sensores
+    # Puente de comunicación entre Gazebo y ROS2 para todos los sensores
+    # Configura la comunicación bidireccional para LiDAR, cámara, IMU y comandos
     bridge_node = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -63,32 +91,35 @@ def generate_launch_description():
         )
     )
 
-    # Nodo de control diferencial: traduce cmd_vel → velocidades angulares
+    # Controlador de tracción diferencial
+    # Convierte comandos de velocidad Twist en velocidades angulares específicas para cada rueda
     nodo_control = Node(
         package='diffbot_control',
-        executable='ejercicio8',
+        executable='differential_drive_controller',
         name='diff_drive_controller',
         output='screen',
         parameters=[{'use_sim_time': True}]
     )
     
-    # Nodo de odometría: calcula odometría desde joint_states
+    # Calculador de odometría del robot
+    # Estima la posición y orientación del robot basándose en las posiciones de las ruedas
     nodo_odometria = Node(
         package='diffbot_control',
-        executable='ejercicio9',
+        executable='odometry_calculator',
         name='diffbot_odometry_node',
         output='screen',
         parameters=[
-            {'wheel_r': 0.035},
-            {'wheel_sep': 0.135},
-            {'left_wheel_joint': 'left_wheel_joint'},
-            {'right_wheel_joint': 'right_wheel_joint'},
-            {'publish_tf': True},
-            {'use_sim_time': True},
+            {'wheel_r': 0.035},          # Radio de las ruedas (m)
+            {'wheel_sep': 0.135},        # Separación entre ruedas (m)
+            {'left_wheel_joint': 'left_wheel_joint'},   # Nombre del joint izquierdo
+            {'right_wheel_joint': 'right_wheel_joint'}, # Nombre del joint derecho
+            {'publish_tf': True},        # Publicar transformaciones TF
+            {'use_sim_time': True},      # Usar tiempo de simulación
         ]
     )
     
-    # Nodo detector de líneas para la cámara
+    # Detector de líneas basado en visión por computadora
+    # Procesa imágenes de la cámara para seguimiento de líneas usando filtros HSV
     line_detector_node = Node(
         package='diffbot_control',
         executable='line_detector',
@@ -96,19 +127,21 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'use_sim_time': True,
-            # Parámetros HSV configurables para detección de línea
-            'hsv_lower_h': 0,
-            'hsv_lower_s': 0,
-            'hsv_lower_v': 0,
-            'hsv_upper_h': 180,
-            'hsv_upper_s': 255,
-            'hsv_upper_v': 50,
-            'linear_speed': 0.2,
-            'angular_gain': 0.5
+            # Parámetros HSV para detección de líneas (rango de colores)
+            'hsv_lower_h': 0,      # Matiz mínimo
+            'hsv_lower_s': 0,      # Saturación mínima
+            'hsv_lower_v': 0,      # Valor mínimo
+            'hsv_upper_h': 180,    # Matiz máximo
+            'hsv_upper_s': 255,    # Saturación máxima
+            'hsv_upper_v': 50,     # Valor máximo
+            # Parámetros de control
+            'linear_speed': 0.2,   # Velocidad lineal base (m/s)
+            'angular_gain': 0.5    # Ganancia para corrección angular
         }]
     )
     
-    # Nodo detector de obstáculos usando LiDAR
+    # Detector de obstáculos basado en LiDAR
+    # Analiza datos del sensor láser para detectar obstáculos en zonas específicas
     lidar_detector_node = Node(
         package='diffbot_control',
         executable='detector_lidar',
@@ -116,12 +149,13 @@ def generate_launch_description():
         output='screen',
         parameters=[
             {'use_sim_time': True},
-            {'distance_threshold': 0.5},
-            {'zone_angle': 30.0}
+            {'distance_threshold': 0.5},  # Distancia mínima de detección (m)
+            {'zone_angle': 30.0}          # Ángulo de cada zona de detección (grados)
         ]
     )
     
-    # Nodo para visualización de imágenes de la cámara
+    # Visualizador de imágenes de la cámara
+    # Proporciona interfaz gráfica para monitorear el stream de video en tiempo real
     camera_viewer = Node(
         package='rqt_image_view',
         executable='rqt_image_view',
