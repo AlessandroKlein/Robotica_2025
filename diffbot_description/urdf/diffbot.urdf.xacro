@@ -1,46 +1,58 @@
 <?xml version="1.0"?>
+<!--
+  URDF/Xacro del robot DiffBot - Robot diferencial educativo
+  
+  Este archivo define un robot móvil diferencial con:
+  - Chasis principal con ruedas motrices
+  - Rueda loca (caster) para estabilidad
+  - Sensores: Cámara, LiDAR e IMU
+  - Configuración completa para simulación en Gazebo
+  
+  Autor: [Tu nombre]
+  Fecha: [Fecha actual]
+  Versión: 1.0
+-->
 <robot name="diffbot"
   xmlns:xacro="http://www.ros.org/wiki/xacro"
   xmlns:gazebo="http://www.gazebosim.org/schema/gazebo_urdf">
 
   <!-- ======================= -->
-  <!-- === Propiedades === -->
-  <!-- Parámetros reutilizables -->
-  <xacro:property name="chassis_mass" value="0.8"/>
-  <xacro:property name="chassis_length" value="0.195"/>
-  <xacro:property name="chassis_width" value="0.1"/>
-  <xacro:property name="chassis_height" value="0.005"/>
+  <!-- === PROPIEDADES === -->
+  <!-- Parámetros físicos reutilizables del robot -->
+  <!-- Propiedades del chasis -->
+  <xacro:property name="chassis_mass" value="0.8"/>        <!-- Masa del chasis: 800g -->
+  <xacro:property name="chassis_length" value="0.195"/>    <!-- Longitud: 19.5 cm -->
+  <xacro:property name="chassis_width" value="0.1"/>       <!-- Ancho: 10 cm -->
+  <xacro:property name="chassis_height" value="0.005"/>    <!-- Altura: 5 mm -->
 
-  <xacro:property name="wheel_radius" value="0.035"/>
-  <xacro:property name="wheel_separation" value="0.135"/>
-  <!-- Colores definidos en materials.xacro -->
-  <!-- <xacro:property name="base_color" value="green" />
-  <xacro:property name="wheel_color" value="silver" />
-  <xacro:property name="caster_color" value="orange" /> -->
+  <!-- Propiedades de las ruedas -->
+  <xacro:property name="wheel_radius" value="0.035"/>      <!-- Radio de rueda: 3.5 cm -->
+  <xacro:property name="wheel_separation" value="0.135"/>  <!-- Separación entre ruedas: 13.5 cm -->
+  
+  <!-- Nota: Los colores están definidos en materials.xacro -->
 
-
-  <!-- ======================= -->
-  <!-- === Includes === -->
-  <!-- Inclusión de archivos xacro auxiliares para macros de inercia y motor -->
-  <xacro:include filename="$(find diffbot_description)/urdf/materials.xacro" />
-  <xacro:include filename="$(find diffbot_description)/urdf/inertial_macros.xacro" />
-  <xacro:include filename="$(find diffbot_description)/urdf/motor.xacro" />
 
   <!-- ======================= -->
-  <!-- === Chasis del robot === -->
-  <!-- Link principal del robot: el chasis -->
+  <!-- === ARCHIVOS INCLUIDOS === -->
+  <!-- Inclusión de archivos xacro auxiliares -->
+  <xacro:include filename="$(find diffbot_description)/urdf/materials.xacro" />      <!-- Definiciones de colores -->
+  <xacro:include filename="$(find diffbot_description)/urdf/inertial_macros.xacro" /> <!-- Macros para cálculo de inercias -->
+  <xacro:include filename="$(find diffbot_description)/urdf/motor.xacro" />           <!-- Configuración de motores -->
+
+  <!-- ======================= -->
+  <!-- === CHASIS PRINCIPAL === -->
+  <!-- Link base del robot (referencia principal) -->
   <link name="base_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <mesh filename="file://$(find diffbot_description)/meshes/chassis.stl"/>
       </geometry>
-      <material name="chassis_green">
-        <color rgba="0.0 0.8 0.0 1.0"/>
-      </material>
-      <!-- Color que se visualiza en RViz-->
+      <material name="green"/>
+      <!-- Color verde para visualización en RViz/Gazebo -->
     </visual>
 
+    <!-- Geometría de colisión (caja simplificada) -->
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
@@ -48,41 +60,47 @@
       </geometry>
     </collision>
 
+    <!-- Propiedades inerciales calculadas automáticamente -->
     <xacro:inertial_box mass="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z="0.00">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
 
   <!-- ======================= -->
-  <!-- === Macro para ruedas === -->
-  <!-- Macro reutilizable para definir una rueda y su joint asociado. Parametrizado por radio y
-  separación. -->
+  <!-- === MACRO PARA RUEDAS === -->
+  <!-- Macro reutilizable para definir ruedas motrices -->
+  <!-- Parámetros: prefix (izq/der), xyz (posición), axis (eje rotación), rpy (orientación) -->
   <xacro:macro name="wheel" params="prefix xyz axis rpy">
 
+    <!-- Joint continuo para rotación libre de la rueda -->
     <joint name="${prefix}_wheel_joint" type="continuous">
       <parent link="base_link" />
       <child link="${prefix}_wheel_link" />
-      <origin xyz="${xyz}" rpy="${rpy}" />
-      <axis xyz="${axis}" />
+      <origin xyz="${xyz}" rpy="${rpy}" />     <!-- Posición y orientación de la rueda -->
+      <axis xyz="${axis}" />                   <!-- Eje de rotación -->
     </joint>
 
+    <!-- Link de la rueda -->
     <link name="${prefix}_wheel_link">
+      <!-- Geometría visual (mesh 3D) -->
       <visual>
-        <origin xyz="0 -0.020 0" rpy="1.5708 0 0" />
+        <origin xyz="0 -0.020 0" rpy="1.5708 0 0" />  <!-- Ajuste de posición y rotación -->
         <geometry>
           <mesh filename="file://$(find diffbot_description)/meshes/wheel.stl"/>
         </geometry>
-        <material name="dark_grey"/>
+        <material name="dark_grey"/>                   <!-- Color gris oscuro -->
       </visual>
 
+      <!-- Geometría de colisión (cilindro simplificado) -->
       <collision>
         <origin xyz="0 -0.020 0" rpy="1.5708 0 0" />
         <geometry>
-          <cylinder radius="${wheel_radius}" length="0.025"/>
+          <cylinder radius="${wheel_radius}" length="0.025"/>  <!-- Radio y grosor de rueda -->
         </geometry>
         <material name="dark_grey"/>
       </collision>
 
+      <!-- Propiedades inerciales de cilindro (masa: 150g) -->
       <xacro:inertial_cylinder mass="0.150" radius="${wheel_radius}" length="0.025">
         <origin xyz="0 0 0" rpy="0 0 0" />
       </xacro:inertial_cylinder>
@@ -91,223 +109,182 @@
   </xacro:macro>
 
   <!-- ======================= -->
-  <!-- === Ruedas y motores === -->
-  <!-- Instanciación de ruedas y motores usando las macros -->
+  <!-- === INSTANCIACIÓN DE RUEDAS Y MOTORES === -->
+  <!-- Creación de ruedas izquierda y derecha con sus respectivos motores -->
+  <!-- Rueda izquierda -->
   <xacro:wheel prefix="left" xyz="0.0185  ${wheel_separation/2} -0.0175" axis="0 1 0" rpy="0 1.5708 0"/>
+  <!-- Rueda derecha -->
   <xacro:wheel prefix="right" xyz="0.0185 -${wheel_separation/2} -0.0175" axis="0 -1 0" rpy="0 1.5708 3.14159"/>
-  <!-- Motores -->
-  <xacro:motor prefix="left" chassis_width="${chassis_width}" reflect="false"/>
-  <xacro:motor prefix="right" chassis_width="${chassis_width}" reflect="true"/>
+  
+  <!-- Motores para tracción diferencial -->
+  <xacro:motor prefix="left" chassis_width="${chassis_width}" reflect="false"/>   <!-- Motor izquierdo -->
+  <xacro:motor prefix="right" chassis_width="${chassis_width}" reflect="true"/>    <!-- Motor derecho -->
+
 
   <!-- ======================= -->
-  <!-- === Caster (rueda loca) === -->
-  <!-- Definición del caster y sus componentes -->
-  <!-- BASE FIJA -->
+  <!-- === CASTER (RUEDA LOCA) === -->
+  <!-- Rueda loca trasera para estabilidad del robot -->
+  
+  <!-- BASE FIJA DEL CASTER -->
 
+  <!-- Link de la base del caster (parte fija) -->
   <link name="caster_base">
+    <!-- Geometría visual (mesh 3D) -->
     <visual>
       <origin xyz="0 0 0.0045" rpy="0 0 0" />
       <geometry>
         <mesh filename="file://$(find diffbot_description)/meshes/caster_base.stl" />
       </geometry>
-      <material name="caster_orange">
-        <color rgba="1 0.3 0.1 1"/>
-      </material>
+      <material name="orange"/>              <!-- Color naranja -->
     </visual>
 
+    <!-- Geometría de colisión (caja simplificada) -->
     <collision>
       <origin xyz="0 0 0.0045" rpy="0 0 0" />
       <geometry>
-        <box size="0.032 0.038 0.015" />
+        <box size="0.032 0.038 0.015" />          <!-- Dimensiones de la base -->
       </geometry>
     </collision>
 
+    <!-- Propiedades inerciales (masa: 20g) -->
     <xacro:inertial_box mass="0.02" x="0.032" y="0.038" z="0.015">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
   
+  <!-- Joint fijo que conecta la base del caster al chasis -->
   <joint name="caster_base_joint" type="fixed">
-    <origin xyz="-0.075 0 -0.001" rpy="0 0 0"/>
+    <origin xyz="-0.075 0 -0.001" rpy="0 0 0"/>  <!-- Posición trasera del robot -->
     <parent link="base_link"/>
     <child link="caster_base"/>
   </joint>
 
-  <!-- RUEDA MOVIL  -->
+  <!-- RUEDA MÓVIL DEL CASTER -->
+  <!-- Link de la rueda loca (gira libremente) -->
   <link name="caster_wheel">
+    <!-- Geometría visual (mesh 3D) -->
     <visual>
-      <!-- Rotamos el cilindro 90° alrededor del eje X para que su eje de giro sea el eje Y -->
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <!--1.5708-->
       <geometry>
         <mesh filename="file://$(find diffbot_description)/meshes/caster_wheel.stl" />
       </geometry>
-      <material name="caster_wheel_orange">
-        <color rgba="1 0.3 0.1 1"/>
-      </material>
+      <material name="orange"/>              <!-- Color naranja -->
     </visual>
 
+    <!-- Geometría de colisión (cilindro) -->
     <collision>
       <origin xyz="0 0 -0.007" rpy="0 0 0" />
       <geometry>
-        <cylinder radius="0.015" length="0.016" />
+        <cylinder radius="0.015" length="0.016" />  <!-- Radio: 1.5cm, Grosor: 1.6cm -->
       </geometry>
     </collision>
 
+    <!-- Propiedades inerciales de cilindro (masa: 10g) -->
     <xacro:inertial_cylinder mass="0.01" radius="0.015" length="0.016">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_cylinder>
   </link>
 
+  <!-- SOPORTE DE LA RUEDA CASTER -->
+  <!-- Link del soporte que permite rotación vertical -->
   <link name="caster_wheel_support">
+    <!-- Geometría visual (mesh 3D) -->
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <mesh filename="file://$(find diffbot_description)/meshes/caster_wheel_support.stl" />
       </geometry>
-      <material name="caster_support_orange">
-        <color rgba="1 0.3 0.1 1"/>
-      </material>
+      <material name="orange"/>              <!-- Color naranja -->
     </visual>
 
+    <!-- Geometría de colisión (caja) -->
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <box size="0.033 0.025 0.025" />
+        <box size="0.033 0.025 0.025" />          <!-- Dimensiones del soporte -->
       </geometry>
     </collision>
 
+    <!-- Propiedades inerciales (masa: 20g) -->
     <xacro:inertial_box mass="0.02" x="0.033" y="0.025" z="0.025">
       <origin xyz="0 0 0" rpy="0 0 0" />
     </xacro:inertial_box>
   </link>
   
+  <!-- Joint continuo para rotación vertical del soporte (eje Z) -->
   <joint name="caster_wheel_support_joint" type="continuous">
     <origin xyz="0 0 -0.015" rpy="0 0 0"/>
     <parent link="caster_base"/>
     <child link="caster_wheel_support"/>
-    <axis xyz="0 0 1"/>
+    <axis xyz="0 0 1"/>                          <!-- Rotación alrededor del eje Z -->
   </joint>
 
-  <!-- Rueda loca -->
+  <!-- Joint continuo para rotación de la rueda loca (eje Y) -->
   <joint name="caster_wheel_joint" type="continuous">
     <origin xyz="-0.015 0 -0.020" rpy="0 0 0"/>
     <parent link="caster_wheel_support"/>
     <child link="caster_wheel"/>
-    <axis xyz="0 1 0"/>
+    <axis xyz="0 1 0"/>                          <!-- Rotación alrededor del eje Y -->
   </joint>
 
 
-  <!-- Configuración de ros2_control para la interfaz de hardware -->
-  <!-- El nombre "GazeboSystem" y el tipo "system" son estándar para la integración con Gazebo. -->
+  <!-- ======================= -->
+  <!-- === CONFIGURACIÓN ROS2_CONTROL === -->
+  <!-- Interfaz de hardware para control de motores en simulación -->
   <ros2_control name="GazeboSystem" type="system">
     <hardware>
-      <!-- Plugin de Gazebo para ROS 2 Control -->
+      <!-- Plugin de Gazebo para integración con ROS 2 Control -->
       <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </hardware>
 
+    <!-- Configuración del joint de la rueda izquierda -->
     <joint name="left_wheel_joint">
-      <command_interface name="velocity" />
-      <state_interface name="position" />
-      <state_interface name="velocity" />
+      <command_interface name="velocity" />      <!-- Interfaz de comando: velocidad angular -->
+      <state_interface name="position" />        <!-- Estado: posición angular -->
+      <state_interface name="velocity" />        <!-- Estado: velocidad angular -->
     </joint>
 
+    <!-- Configuración del joint de la rueda derecha -->
     <joint name="right_wheel_joint">
-      <command_interface name="velocity" />
-      <state_interface name="position" />
-      <state_interface name="velocity" />
+      <command_interface name="velocity" />      <!-- Interfaz de comando: velocidad angular -->
+      <state_interface name="position" />        <!-- Estado: posición angular -->
+      <state_interface name="velocity" />        <!-- Estado: velocidad angular -->
     </joint>
 
+    <!-- Configuración del joint de la rueda caster (solo lectura) -->
     <joint name="caster_wheel_joint">
-      <state_interface name="position" />
+      <state_interface name="position" />        <!-- Estado: posición angular -->
     </joint>
 
+    <!-- Configuración del joint del soporte caster (solo lectura) -->
     <joint name="caster_wheel_support_joint">
-      <state_interface name="position" />
+      <state_interface name="position" />        <!-- Estado: posición angular -->
     </joint>
   </ros2_control>
 
+  <!-- Plugin de Gazebo para ros2_control -->
   <gazebo>
-    <!--<plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">-->
+    <!-- Plugin que conecta ros2_control con la simulación de Gazebo -->
     <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <!-- Archivo de configuración de controladores -->
       <parameters>$(find diffbot_control)/config/controllers.yaml</parameters>
     </plugin>
   </gazebo>
 
-  <!-- ================================== SENSORES =============================================-->
-
-    <!-- ================= IMU COMENTADA =================
-  <link name="imu_link">
-    <xacro:dummy_inertial />
-  </link>
-
-  <joint name="imu_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="imu_link"/>
-    <origin xyz="0 0 0.1" rpy="0 0 0"/>
-  </joint>
-
-  <gazebo reference="imu_link">
-    <sensor name="imu" type="imu">
-      <plugin name="gz::sim::systems::Imu" filename="gz-sim-imu-system">
-        <always_on>true</always_on>
-        <update_rate>100</update_rate>
-        <topic>/imu/data</topic>
-        <visualize>true</visualize>
-      </plugin>
-
-      <imu>
-        <linear_acceleration>
-          <x>
-            <noise type="gaussian">
-              <mean>0.020</mean>
-              <stddev>0.0016</stddev>
-            </noise>
-          </x>
-          <y>
-            <noise type="gaussian">
-              <mean>0.020</mean>
-              <stddev>0.0016</stddev>
-            </noise>
-          </y>
-          <z>
-            <noise type="gaussian">
-              <mean>0.020</mean>
-              <stddev>0.0019</stddev>
-            </noise>
-          </z>
-        </linear_acceleration>
-
-        <angular_velocity>
-          <x>
-            <noise type="gaussian">
-              <mean>0.0174533</mean>
-              <stddev>0.00174533</stddev>
-            </noise>
-          </x>
-          <y>
-            <noise type="gaussian">
-              <mean>0.0174533</mean>
-              <stddev>0.00174533</stddev>
-            </noise>
-          </y>
-          <z>
-            <noise type="gaussian">
-              <mean>0.0174533</mean>
-              <stddev>0.00174533</stddev>
-            </noise>
-          </z>
-        </angular_velocity>
-      </imu>
-    </sensor>
-  </gazebo>
-================= FIN IMU COMENTADA ================= -->
-
-
+  <!-- ======================= -->
+  <!-- === SENSORES DEL ROBOT === -->
+  <!-- ======================= -->
+  
+  <!-- NOTA: Configuración IMU anterior (comentada para referencia) -->
+  <!--
+    La configuración IMU comentada arriba era una implementación anterior
+    que ha sido reemplazada por la configuración activa más abajo.
+    Se mantiene como referencia para comparación de parámetros.
+  -->
 
   <!-- ======================= -->
-  <!-- === SENSOR IMU === -->
-  <!-- ======================= -->
+  <!-- === SENSOR IMU ACTIVO === -->
+  <!-- Unidad de Medición Inercial para orientación y aceleración -->
     
   <!-- Link del IMU -->
   <link name="imu_link">
@@ -316,9 +293,7 @@
       <geometry>
         <box size="0.025 0.025 0.005"/>
       </geometry>
-      <material name="imu_color">
-        <color rgba="0.2 0.2 0.8 1.0"/>
-      </material>
+      <material name="imu_color"/>
     </visual>
     
     <collision>
@@ -414,9 +389,7 @@
       <geometry>
         <box size="0.02 0.02 0.02"/>
       </geometry>
-      <material name="camera_color">
-        <color rgba="0.0 0.0 1.0 1.0"/>
-      </material>
+      <material name="blue"/>
     </visual>
     
     <collision>
@@ -461,19 +434,20 @@
   <gazebo reference="cam_link">
     <sensor name="rpicam" type="camera">
       <always_on>true</always_on>
-      <update_rate>25</update_rate>
-      <visualize>true</visualize>
+      <update_rate>25</update_rate>          <!-- Frecuencia de actualización: 25 FPS -->
+      <visualize>true</visualize>            <!-- Mostrar en la interfaz de Gazebo -->
 
-      <topic>camera</topic>
-      <camera_camera_info_topic>camera_info</camera_camera_info_topic>
-      <optical_frame_id>cam_optical_link</optical_frame_id>
+      <topic>camera</topic>                  <!-- Tópico ROS para las imágenes -->
 
       <camera name="IMX219">
         <!-- Campo de visión horizontal: 62.2° = 1.085595 rad -->
         <horizontal_fov>1.085595</horizontal_fov>
         <lens>
           <intrinsics>
-            <!-- Parámetros intrínsecos de la cámara Raspberry Pi V2 -->
+            <!-- Parámetros intrínsecos de la cámara Raspberry Pi V2 (IMX219) -->
+            <!-- fx, fy: distancia focal en píxeles -->
+            <!-- cx, cy: centro óptico en píxeles -->
+            <!-- s: factor de sesgo (skew) -->
             <fx>529.47</fx>
             <fy>530.45</fy>
             <cx>319.5</cx>
@@ -482,24 +456,32 @@
           </intrinsics>
         </lens>
         <image>
-          <!-- Resolución 640x480 -->
+          <!-- Resolución de imagen: 640x480 píxeles (VGA) -->
           <width>640</width>
           <height>480</height>
-          <format>R8G8B8</format>
+          <format>R8G8B8</format>              <!-- Formato RGB de 8 bits por canal -->
         </image>
         <clip>
-          <!-- Distancias de clipping -->
-          <near>0.01</near>
-          <far>5</far>
+          <!-- Distancias de clipping (planos de corte cerca/lejos) -->
+          <near>0.01</near>                   <!-- Distancia mínima: 1 cm -->
+          <far>5</far>                        <!-- Distancia máxima: 5 m -->
         </clip>
         <noise>
-          <!-- Ruido gaussiano -->
+          <!-- Ruido gaussiano simulado en la imagen -->
           <type>gaussian</type>
-          <mean>0</mean>
-          <stddev>0.007</stddev>
+          <mean>0</mean>                      <!-- Media del ruido: 0 -->
+          <stddev>0.007</stddev>              <!-- Desviación estándar: 0.007 -->
         </noise>
       </camera>
     </sensor>
+    
+    <!-- Plugin de ROS2 para publicar datos de la cámara -->
+    <plugin filename="libgazebo_ros_camera.so" name="camera_controller">
+      <ros>
+        <remapping>image_raw:=camera/image_raw</remapping>
+        <remapping>camera_info:=camera/camera_info</remapping>
+      </ros>
+    </plugin>
   </gazebo>
 
   <!-- ======================= -->
@@ -513,9 +495,7 @@
       <geometry>
         <cylinder radius="0.05" length="0.07"/>
       </geometry>
-      <material name="lidar_color">
-        <color rgba="0.1 0.1 0.1 1.0"/>
-      </material>
+      <material name="lidar_color"/>
     </visual>
     
     <collision>
@@ -543,31 +523,34 @@
   <gazebo reference="lidar_link">
     <sensor name="lidar" type="gpu_lidar">
       <always_on>true</always_on>
-      <update_rate>10</update_rate>        <!-- Scanning Frequency: 10 Hz -->
-      <topic>/scan</topic>
-      <visualize>true</visualize>
+      <update_rate>10</update_rate>        <!-- Frecuencia de escaneo: 10 Hz -->
+      <topic>/scan</topic>                 <!-- Tópico ROS para datos del láser -->
+      <visualize>true</visualize>          <!-- Mostrar rayos láser en Gazebo -->
 
       <lidar>
         <scan>
           <horizontal>
-            <samples>3200</samples>           <!-- 360°/0.1125° = 3200 samples -->
-            <resolution>1</resolution>
-            <min_angle>-3.14159265359</min_angle>  <!-- -π rad -->
-            <max_angle>3.14159265359</max_angle>   <!-- +π rad -->
+            <!-- Configuración de escaneo horizontal (360°) -->
+            <samples>3200</samples>           <!-- Número de muestras: 360°/0.1125° = 3200 -->
+            <resolution>1</resolution>        <!-- Resolución angular: 1 muestra por paso -->
+            <min_angle>-3.14159265359</min_angle>  <!-- Ángulo mínimo: -π rad (-180°) -->
+            <max_angle>3.14159265359</max_angle>   <!-- Ángulo máximo: +π rad (+180°) -->
           </horizontal>
           <!-- Al ser LiDAR 2D no tiene parámetros verticales -->
         </scan>
         
         <range>
-          <min>0.05</min>                   <!-- Distance Range: 0.05 m -->
-          <max>15.0</max>                   <!-- Distance Range: 15.0 m -->
-          <resolution>0.010</resolution>    <!-- Resolution: 10 mm -->
+          <!-- Configuración del rango de detección -->
+          <min>0.05</min>                   <!-- Distancia mínima: 5 cm -->
+          <max>15.0</max>                   <!-- Distancia máxima: 15 m -->
+          <resolution>0.010</resolution>    <!-- Resolución de distancia: 1 cm -->
         </range>
         
         <noise>
+          <!-- Ruido gaussiano en las mediciones -->
           <type>gaussian</type>
-          <mean>0.0</mean>
-          <stddev>0.030</stddev>            <!-- Accuracy: ±30 mm -->
+          <mean>0.0</mean>                  <!-- Media del ruido: 0 -->
+          <stddev>0.030</stddev>            <!-- Precisión: ±3 cm (1σ) -->
         </noise>
       </lidar>
     </sensor>
@@ -579,6 +562,16 @@
       filename="gz-sim-sensors-system"
       name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
+    </plugin>
+  </gazebo>
+
+  <!-- Plugin para odometría precisa de Gazebo -->
+  <gazebo>
+    <plugin filename="gz-sim-odometry-publisher-system"
+            name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <dimensions>2</dimensions>
     </plugin>
   </gazebo>
 

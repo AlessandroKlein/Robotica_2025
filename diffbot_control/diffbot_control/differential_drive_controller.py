@@ -41,10 +41,16 @@ class DiffDriveController(Node):
         # Declarar parámetros (se pueden cargar desde robot_description vía launch)
         self.declare_parameter('wheel_radius', 0.035)
         self.declare_parameter('wheel_separation', 0.135)
+        
+        # Parámetros de calibración de odometría
+        self.declare_parameter('c_L', 1.0)  # Coeficiente de corrección rueda izquierda
+        self.declare_parameter('c_R', 1.0)  # Coeficiente de corrección rueda derecha
 
         # Leer parámetros
         self.wheel_radius = self.get_parameter('wheel_radius').get_parameter_value().double_value
         self.wheel_separation = self.get_parameter('wheel_separation').get_parameter_value().double_value
+        self.c_L = self.get_parameter('c_L').get_parameter_value().double_value
+        self.c_R = self.get_parameter('c_R').get_parameter_value().double_value
 
         # Suscriptor a cmd_vel
         self.create_subscription(Twist, 'cmd_vel', self.cmd_vel_callback, 10)
@@ -54,6 +60,7 @@ class DiffDriveController(Node):
         self.right_pub = self.create_publisher(Float64MultiArray, '/velocity_controller_r/commands', 10)
 
         self.get_logger().info(f"Parámetros: radio={self.wheel_radius} m, separación={self.wheel_separation} m")
+        self.get_logger().info(f"Calibración: c_L={self.c_L:.6f}, c_R={self.c_R:.6f}")
 
     def cmd_vel_callback(self, msg):
         """
@@ -77,11 +84,11 @@ class DiffDriveController(Node):
         linear_x = msg.linear.x   # m/s
         angular_z = msg.angular.z # rad/s
 
-        # Cinemática inversa del robot diferencial
-        # phi_dot_R = (1/r) * (x_dot + (b/2) * theta_dot)
-        # phi_dot_L = (1/r) * (x_dot - (b/2) * theta_dot)
-        phi_dot_right = (1.0 / self.wheel_radius) * (linear_x + (self.wheel_separation / 2.0) * angular_z)
-        phi_dot_left  = (1.0 / self.wheel_radius) * (linear_x - (self.wheel_separation / 2.0) * angular_z)
+        # Cinemática inversa del robot diferencial con corrección de calibración
+        # phi_dot_R = (1/r) * (x_dot + (b/2) * theta_dot) * c_R
+        # phi_dot_L = (1/r) * (x_dot - (b/2) * theta_dot) * c_L
+        phi_dot_right = (1.0 / self.wheel_radius) * (linear_x + (self.wheel_separation / 2.0) * angular_z) * self.c_R
+        phi_dot_left  = (1.0 / self.wheel_radius) * (linear_x - (self.wheel_separation / 2.0) * angular_z) * self.c_L
 
         # Crear mensajes Float64MultiArray
         left_msg = Float64MultiArray()

@@ -51,12 +51,22 @@ class DiffbotOdometry(Node):
         self.declare_parameter('left_wheel_joint', 'left_wheel_joint')
         self.declare_parameter('right_wheel_joint', 'right_wheel_joint')
         self.declare_parameter('publish_tf', True)  # nuevo parámetro ACTIVA / DESACTIVA TF
+        
+        # Parámetros de calibración de odometría
+        self.declare_parameter('c_L', 1.0)  # Coeficiente de corrección rueda izquierda
+        self.declare_parameter('c_R', 1.0)  # Coeficiente de corrección rueda derecha
+        self.declare_parameter('b_actual', 0.135)  # Separación corregida entre ruedas
 
         self.wheel_r = self.get_parameter('wheel_r').get_parameter_value().double_value
         self.wheel_sep = self.get_parameter('wheel_sep').get_parameter_value().double_value
         self.left_wheel_name = self.get_parameter('left_wheel_joint').get_parameter_value().string_value
         self.right_wheel_name = self.get_parameter('right_wheel_joint').get_parameter_value().string_value
         self.publish_tf = self.get_parameter('publish_tf').get_parameter_value().bool_value
+        
+        # Parámetros de calibración
+        self.c_L = self.get_parameter('c_L').get_parameter_value().double_value
+        self.c_R = self.get_parameter('c_R').get_parameter_value().double_value
+        self.b_actual = self.get_parameter('b_actual').get_parameter_value().double_value
 
         # Estado inicial
         self.lwheel_ang_old = 0.0
@@ -75,10 +85,12 @@ class DiffbotOdometry(Node):
 
         self.get_logger().info(f"Nodo de odometría iniciado con parámetros:")
         self.get_logger().info(f"  Radio de rueda: {self.wheel_r} m")
-        self.get_logger().info(f"  Separación de ruedas: {self.wheel_sep} m")
+        self.get_logger().info(f"  Separación nominal: {self.wheel_sep} m")
+        self.get_logger().info(f"  Separación corregida: {self.b_actual} m")
         self.get_logger().info(f"  Rueda izquierda: {self.left_wheel_name}")
         self.get_logger().info(f"  Rueda derecha: {self.right_wheel_name}")
         self.get_logger().info(f"  Publicar TF: {self.publish_tf}")
+        self.get_logger().info(f"  Calibración: c_L={self.c_L:.6f}, c_R={self.c_R:.6f}")
 
     def sub_callback(self, msg: JointState):
         """
@@ -110,13 +122,13 @@ class DiffbotOdometry(Node):
             elif name == self.right_wheel_name:
                 rwheel_ang = position
 
-        # Incrementos lineales de cada rueda
-        dl_k = (lwheel_ang - self.lwheel_ang_old) * self.wheel_r
-        dr_k = (rwheel_ang - self.rwheel_ang_old) * self.wheel_r
+        # Incrementos lineales de cada rueda con corrección de calibración
+        dl_k = (lwheel_ang - self.lwheel_ang_old) * self.wheel_r * self.c_L
+        dr_k = (rwheel_ang - self.rwheel_ang_old) * self.wheel_r * self.c_R
 
-        # Cinemática directa diferencial
+        # Cinemática directa diferencial con separación corregida
         dA_k = (dr_k + dl_k) / 2.0
-        Dw_k = (dr_k - dl_k) / self.wheel_sep
+        Dw_k = (dr_k - dl_k) / self.b_actual
 
         # Pose nueva (usar w_k anterior para x,y)
         x_k_new = self.x_k + dA_k * np.cos(self.w_k)

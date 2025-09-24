@@ -39,7 +39,7 @@ class LineDetector(Node):
         # Variables de estado para manejo de pérdida de línea
         self.last_known_direction = 0.0  # Última dirección conocida de la línea
         self.line_lost_counter = 0  # Contador de frames sin línea
-        self.max_lost_frames = 5  # Máximo de frames antes de activar búsqueda
+        self.max_lost_frames = 25  # Máximo de frames antes de activar búsqueda
         
         # Crear el puente CV
         self.bridge = cv_bridge.CvBridge()
