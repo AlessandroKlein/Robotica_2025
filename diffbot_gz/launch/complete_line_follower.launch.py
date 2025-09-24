@@ -59,18 +59,31 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'use_sim_time': True,
-            # Parámetros HSV optimizados para mejor detección
+            # Parámetros HSV optimizados para detección de líneas negras
             'hsv_lower_h': 0,      # Matiz mínimo
-            'hsv_lower_s': 0,      # Saturación mínima
-            'hsv_lower_v': 0,      # Valor mínimo (negro)
-            'hsv_upper_h': 180,    # Matiz máximo
-            'hsv_upper_s': 255,    # Saturación máxima
-            'hsv_upper_v': 50,     # Valor máximo aumentado para mejor detección
-            # Parámetros de control optimizados para curvas cerradas
-            'linear_speed': 0.15,  # Velocidad lineal reducida para curvas
-            'angular_gain': 1.25,  # Ganancia angular reducida a la mitad
-            'search_angular_speed': 0.4,   # Velocidad de búsqueda reducida a la mitad
-            'min_line_area': 80    # Área mínima reducida para detectar líneas más delgadas
+            'hsv_lower_s': 0,      # Saturación mínima  
+            'hsv_lower_v': 0,      # Valor mínimo (negro puro)
+            'hsv_upper_h': 180,    # Matiz máximo (todo el rango)
+            'hsv_upper_s': 30,     # Saturación máxima reducida para evitar colores
+            'hsv_upper_v': 30,     # Valor máximo reducido para detectar solo negro/gris oscuro
+            # Parámetros de control mejorados
+            'linear_speed': 0.2,   # Velocidad lineal aumentada
+            'angular_gain': 2.0,   # Ganancia angular aumentada para mejor respuesta
+            'search_angular_speed': 0.6,   # Velocidad de búsqueda aumentada
+            'min_line_area': 50    # Área mínima reducida para mayor sensibilidad
+        }]
+    )
+
+    # Nodo controlador diferencial para convertir cmd_vel a comandos de ruedas
+    differential_drive_controller_node = Node(
+        package='diffbot_control',
+        executable='differential_drive_controller',
+        name='differential_drive_controller',
+        output='screen',
+        parameters=[{
+            'use_sim_time': True,
+            'wheel_radius': 0.035,
+            'wheel_separation': 0.135
         }]
     )
 
@@ -78,5 +91,6 @@ def generate_launch_description():
         set_env_vars_resources,
         set_env_vars_ogre,
         gazebo_launch,
-        line_detector_node
+        line_detector_node,
+        differential_drive_controller_node
     ])

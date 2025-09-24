@@ -86,6 +86,11 @@ class LineDetector(Node):
             # Aplicar máscara
             mask = cv2.inRange(image_hsv, lower, upper)
             
+            # Aplicar región de interés - enfocar en la parte inferior de la imagen
+            H, W = mask.shape
+            search_top = int(3*H/4)
+            mask[0:search_top, :] = 0
+            
             # 3. Estimación del curso - encontrar centroide
             M = cv2.moments(mask)
             
