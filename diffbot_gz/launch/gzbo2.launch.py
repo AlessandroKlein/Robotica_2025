@@ -114,10 +114,20 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Puente de reloj entre Gazebo y ROS (sincroniza el tiempo)
+    clock_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        parameters=[{'use_sim_time': True}],
+        output='screen'
+    )
+
     return LaunchDescription([
         robot_state_publisher,
         gz_resource_path,
         gz_sim2,
+        clock_bridge,
         spawn_entity,
         joint_state_broadcaster,
         velocity_controller_l,

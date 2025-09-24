@@ -9,8 +9,6 @@ from launch_ros.parameter_descriptions import ParameterValue
 from launch.substitutions import Command, FindExecutable
 
 
-
-
 def generate_launch_description():
     # Argumento para activar herramientas de prueba
     declare_testing_arg = DeclareLaunchArgument(
@@ -27,7 +25,7 @@ def generate_launch_description():
         condition=IfCondition(testing),
     )
 
-    # Nodo ros_gz_bridge
+    # Nodo ros_gz_bridge para todos los sensores
     bridge_node = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -51,8 +49,7 @@ def generate_launch_description():
             'diffbot.rviz'
         ])],
         condition=IfCondition(testing),
-        parameters=[{'use_sim_time': True, 
-                     }]
+        parameters=[{'use_sim_time': True}]
     )
 
     # Incluir launch de Gazebo + spawn + controladores
@@ -66,18 +63,16 @@ def generate_launch_description():
         )
     )
 
-    # Nodo Ej. 8: traduce cmd_vel → velocidades angulares
+    # Nodo de control diferencial: traduce cmd_vel → velocidades angulares
     nodo_control = Node(
         package='diffbot_control',
         executable='ejercicio8',
         name='diff_drive_controller',
         output='screen',
-        parameters=[{'use_sim_time': True, 
-                     }]
+        parameters=[{'use_sim_time': True}]
     )
     
-
-    # Nodo Ej. 9: calcula odometría desde joint_states
+    # Nodo de odometría: calcula odometría desde joint_states
     nodo_odometria = Node(
         package='diffbot_control',
         executable='ejercicio9',
@@ -93,35 +88,57 @@ def generate_launch_description():
         ]
     )
     
-    # Nodo camara eliminado - ya está incluido en bridge_node
-    
+    # Nodo detector de líneas para la cámara
     line_detector_node = Node(
         package='diffbot_control',
         executable='line_detector',
         name='line_detector',
         output='screen',
+        parameters=[{
+            'use_sim_time': True,
+            # Parámetros HSV configurables para detección de línea
+            'hsv_lower_h': 0,
+            'hsv_lower_s': 0,
+            'hsv_lower_v': 0,
+            'hsv_upper_h': 180,
+            'hsv_upper_s': 255,
+            'hsv_upper_v': 50,
+            'linear_speed': 0.2,
+            'angular_gain': 0.5
+        }]
+    )
+    
+    # Nodo detector de obstáculos usando LiDAR
+    lidar_detector_node = Node(
+        package='diffbot_control',
+        executable='detector_lidar',
+        name='lidar_detector',
+        output='screen',
         parameters=[
             {'use_sim_time': True},
-            {'hsv_lower_h': 0},
-            {'hsv_lower_s': 0},
-            {'hsv_lower_v': 0},
-            {'hsv_upper_h': 180},
-            {'hsv_upper_s': 255},
-            {'hsv_upper_v': 50},
-            {'linear_speed': 0.2},
-            {'angular_gain': 1.0}
+            {'distance_threshold': 0.5},
+            {'zone_angle': 30.0}
         ]
     )
-
-
+    
+    # Nodo para visualización de imágenes de la cámara
+    camera_viewer = Node(
+        package='rqt_image_view',
+        executable='rqt_image_view',
+        name='camera_viewer',
+        output='screen',
+        parameters=[{'use_sim_time': True}]
+    )
 
     return LaunchDescription([
         declare_testing_arg,
         joint_state_publisher_gui,
         rviz,
         sim_stack,
+        bridge_node,
         nodo_control,
         nodo_odometria,
-        bridge_node,
-        line_detector_node
+        line_detector_node,
+        lidar_detector_node,
+        camera_viewer
     ])
