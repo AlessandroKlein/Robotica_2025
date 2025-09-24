@@ -25,9 +25,6 @@
   <xacro:include filename="$(find diffbot_description)/urdf/materials.xacro" />
   <xacro:include filename="$(find diffbot_description)/urdf/inertial_macros.xacro" />
   <xacro:include filename="$(find diffbot_description)/urdf/motor.xacro" />
-  <xacro:include filename="$(find diffbot_description)/urdf/sim_camera.xacro" />
-  <xacro:include filename="$(find diffbot_description)/urdf/sim_imu.xacro" />
-  <xacro:include filename="$(find diffbot_description)/urdf/sim_lidar.xacro" />
 
   <!-- ======================= -->
   <!-- === Chasis del robot === -->

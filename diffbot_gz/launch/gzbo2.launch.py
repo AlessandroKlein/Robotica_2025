@@ -15,7 +15,7 @@ def generate_launch_description():
         PathJoinSubstitution([
             FindPackageShare('diffbot_description'),
             'urdf',
-            'diffbot.urdf.xacro'
+            'diffbot.urdf.xacro' ##'diffbot_no_sensors.urdf.xacro'
         ])
     ])
 
@@ -48,7 +48,7 @@ def generate_launch_description():
         ]),
         launch_arguments={
             'gz_args': PathJoinSubstitution([
-                TextSubstitution(text='-r '),
+                TextSubstitution(text='-r -s '),
                 FindPackageShare('diffbot_gz'),
                 'models',
                 'obstaculos.sdf'
