@@ -47,12 +47,7 @@ def generate_launch_description():
             ])
         ]),
         launch_arguments={
-            'gz_args': PathJoinSubstitution([
-                TextSubstitution(text='-r -s '),
-                FindPackageShare('diffbot_gz'),
-                'models',
-                'obstaculos.sdf'
-            ])
+            'gz_args': '-r --render-engine ogre2 empty.sdf'
         }.items()
     )
 
@@ -114,6 +109,12 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Controlador diferencial para odometría y movimiento coordinado
+    diff_drive_controller = ExecuteProcess(
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active', 'diff_drive_controller','--use-sim-time'],
+        output='screen'
+    )
+
     # Puente de reloj entre Gazebo y ROS (sincroniza el tiempo)
     clock_bridge = Node(
         package='ros_gz_bridge',
@@ -132,6 +133,7 @@ def generate_launch_description():
         joint_state_broadcaster,
         velocity_controller_l,
         velocity_controller_r,
+        diff_drive_controller,
         remove_ground_plane,
         load_track
     ])

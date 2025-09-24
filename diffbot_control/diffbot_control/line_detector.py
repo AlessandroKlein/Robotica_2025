@@ -89,6 +89,10 @@ class LineDetector(Node):
             # 3. Estimación del curso - encontrar centroide
             M = cv2.moments(mask)
             
+            # Log de información de debugging
+            total_pixels = M['m00']
+            self.get_logger().info(f'Píxeles detectados: {total_pixels}, Umbral mínimo: {self.min_line_area}')
+            
             if M['m00'] > self.min_line_area:
                 # Línea detectada - resetear contador de pérdida
                 self.line_lost_counter = 0
@@ -119,7 +123,7 @@ class LineDetector(Node):
                 
                 # Log de información (solo cada 10 frames para reducir spam)
                 if self.line_lost_counter % 10 == 0:
-                    self.get_logger().debug(
+                    self.get_logger().info(
                         f'Línea detectada - Centroide: ({cx}, {cy}), Alpha: {alpha:.3f}, Angular: {angular_z:.3f}'
                     )
             else:

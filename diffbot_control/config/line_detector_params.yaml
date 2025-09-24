@@ -1,0 +1,15 @@
+line_detector:
+  ros__parameters:
+    # Parámetros HSV para detectar líneas negras (según teoría Clase 15)
+    hsv_lower_h: 0      # Hue mínimo (0-180)
+    hsv_lower_s: 0      # Saturación mínima (0-255)
+    hsv_lower_v: 0      # Valor mínimo (0-255) - negro
+    hsv_upper_h: 180    # Hue máximo (0-180)
+    hsv_upper_s: 255    # Saturación máxima (0-255)
+    hsv_upper_v: 30     # Valor máximo (0-255) - solo negro/gris muy oscuro
+    
+    # Parámetros de control optimizados
+    linear_speed: 0.2           # Velocidad lineal (m/s)
+    angular_gain: 2.0           # Ganancia angular para corrección más rápida
+    search_angular_speed: 0.6   # Velocidad angular en modo búsqueda
+    min_line_area: 100          # Área mínima de píxeles para detectar línea

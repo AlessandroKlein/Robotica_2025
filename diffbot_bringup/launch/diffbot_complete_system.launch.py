@@ -127,16 +127,16 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'use_sim_time': True,
-            # Parámetros HSV para detección de líneas (rango de colores)
+            # Parámetros HSV para detección de líneas negras (rango de colores)
             'hsv_lower_h': 0,      # Matiz mínimo
             'hsv_lower_s': 0,      # Saturación mínima
-            'hsv_lower_v': 0,      # Valor mínimo
+            'hsv_lower_v': 0,      # Valor mínimo (negro)
             'hsv_upper_h': 180,    # Matiz máximo
             'hsv_upper_s': 255,    # Saturación máxima
-            'hsv_upper_v': 50,     # Valor máximo
+            'hsv_upper_v': 30,     # Valor máximo (negro hasta gris oscuro)
             # Parámetros de control
-            'linear_speed': 0.2,   # Velocidad lineal base (m/s)
-            'angular_gain': 0.5    # Ganancia para corrección angular
+            'linear_speed': 0.25,  # Velocidad lineal base (m/s)
+            'angular_gain': 1.0    # Ganancia para corrección angular
         }]
     )
     

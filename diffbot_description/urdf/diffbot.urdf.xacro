@@ -432,12 +432,14 @@
 
   <!-- Configuración del sensor de cámara en Gazebo -->
   <gazebo reference="cam_link">
-    <sensor name="rpicam" type="camera">
-      <always_on>true</always_on>
+    <sensor name="RPiCamV2" type="camera">
+      <always_on>1</always_on>
       <update_rate>25</update_rate>          <!-- Frecuencia de actualización: 25 FPS -->
       <visualize>true</visualize>            <!-- Mostrar en la interfaz de Gazebo -->
 
       <topic>camera</topic>                  <!-- Tópico ROS para las imágenes -->
+      <camera_camera_info_topic>camera_info</camera_camera_info_topic>
+      <optical_frame_id>cam_optical_link</optical_frame_id>
 
       <camera name="IMX219">
         <!-- Campo de visión horizontal: 62.2° = 1.085595 rad -->
@@ -448,8 +450,8 @@
             <!-- fx, fy: distancia focal en píxeles -->
             <!-- cx, cy: centro óptico en píxeles -->
             <!-- s: factor de sesgo (skew) -->
-            <fx>529.47</fx>
-            <fy>530.45</fy>
+            <fx>530.47</fx>
+            <fy>529.08</fy>
             <cx>319.5</cx>
             <cy>239.5</cy>
             <s>0</s>
@@ -464,7 +466,7 @@
         <clip>
           <!-- Distancias de clipping (planos de corte cerca/lejos) -->
           <near>0.01</near>                   <!-- Distancia mínima: 1 cm -->
-          <far>5</far>                        <!-- Distancia máxima: 5 m -->
+          <far>25</far>                       <!-- Distancia máxima: 25 m -->
         </clip>
         <noise>
           <!-- Ruido gaussiano simulado en la imagen -->
@@ -475,12 +477,16 @@
       </camera>
     </sensor>
     
-    <!-- Plugin de ROS2 para publicar datos de la cámara -->
-    <plugin filename="libgazebo_ros_camera.so" name="camera_controller">
+    <!-- Plugin de ROS2 para la cámara -->
+    <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
       <ros>
-        <remapping>image_raw:=camera/image_raw</remapping>
-        <remapping>camera_info:=camera/camera_info</remapping>
+        <namespace></namespace>
+        <remapping>image_raw:=camera</remapping>
+        <remapping>camera_info:=camera_info</remapping>
       </ros>
+      <camera_name>camera</camera_name>
+      <frame_name>cam_optical_link</frame_name>
+      <hack_baseline>0.07</hack_baseline>
     </plugin>
   </gazebo>
 
