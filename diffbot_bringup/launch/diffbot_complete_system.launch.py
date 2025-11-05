@@ -8,15 +8,16 @@ ejercicio de la Clase 13, incluyendo:
 - Controladores de movimiento
 - Sensores IMU y LiDAR
 - Detector de obstáculos con LiDAR
+- Obstáculos configurables para entorno desafiante
 - Herramientas de visualización
 
 Autor: Sistema de Integración DiffBot
 Fecha: 2025
-Versión: 1.0 - Clase 13 (IMU y LiDAR)
+Versión: 1.1 - Clase 13 (IMU, LiDAR y Obstáculos)
 """
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, ExecuteProcess
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -31,7 +32,8 @@ def generate_launch_description():
     Genera la descripción del lanzamiento del sistema DiffBot para Clase 13.
     
     Configura y lanza los nodos necesarios para el ejercicio de sensores
-    IMU y LiDAR, incluyendo simulación, control y procesamiento de obstáculos.
+    IMU y LiDAR, incluyendo simulación, control, obstáculos configurables
+    y procesamiento de obstáculos.
     
     Returns:
         LaunchDescription: Descripción del sistema a lanzar
@@ -43,6 +45,37 @@ def generate_launch_description():
         description='Activa herramientas de desarrollo: joint_state_publisher_gui y RViz'
     )
     testing = LaunchConfiguration('testing')
+    
+    # Argumentos para configurar obstáculos
+    declare_obstacles_arg = DeclareLaunchArgument(
+        'enable_obstacles',
+        default_value='true',
+        description='Activa la generación de obstáculos en el entorno'
+    )
+    
+    declare_obstacle_count_arg = DeclareLaunchArgument(
+        'obstacle_count',
+        default_value='5',
+        description='Número de obstáculos a generar (1-10)'
+    )
+    
+    declare_obstacle_size_arg = DeclareLaunchArgument(
+        'obstacle_size',
+        default_value='medium',
+        description='Tamaño de obstáculos: small, medium, large, mixed'
+    )
+    
+    declare_obstacle_pattern_arg = DeclareLaunchArgument(
+        'obstacle_pattern',
+        default_value='strategic',
+        description='Patrón de colocación: random, strategic, corridor, maze'
+    )
+    
+    # Configuraciones de obstáculos
+    enable_obstacles = LaunchConfiguration('enable_obstacles')
+    obstacle_count = LaunchConfiguration('obstacle_count')
+    obstacle_size = LaunchConfiguration('obstacle_size')
+    obstacle_pattern = LaunchConfiguration('obstacle_pattern')
  
     # Nodo opcional: Interfaz gráfica para control manual de articulaciones
     joint_state_publisher_gui = Node(
@@ -131,14 +164,36 @@ def generate_launch_description():
             {'zone_angle': 30.0}          # Ángulo de cada zona de detección (grados)
         ]
     )
+    
+    # Generador de obstáculos configurables
+    # Crea obstáculos dinámicos en Gazebo según los parámetros especificados
+    obstacle_spawner_node = Node(
+        package='diffbot_control',
+        executable='obstacle_spawner',
+        name='obstacle_spawner',
+        output='screen',
+        condition=IfCondition(enable_obstacles),
+        parameters=[
+            {'use_sim_time': True},
+            {'obstacle_count': obstacle_count},
+            {'obstacle_size': obstacle_size},
+            {'obstacle_pattern': obstacle_pattern},
+            {'enable_obstacles': enable_obstacles}
+        ]
+    )
 
     return LaunchDescription([
         declare_testing_arg,
+        declare_obstacles_arg,
+        declare_obstacle_count_arg,
+        declare_obstacle_size_arg,
+        declare_obstacle_pattern_arg,
         joint_state_publisher_gui,
         rviz,
         sim_stack,
         bridge_node,
         nodo_control,
         nodo_odometria,
-        lidar_detector_node
+        lidar_detector_node,
+        obstacle_spawner_node
     ])

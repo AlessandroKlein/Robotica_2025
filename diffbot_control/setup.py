@@ -45,6 +45,9 @@ setup(
             # Procesamiento de sensores
             'detector_lidar = diffbot_control.detector_lidar:main',
             'line_detector = diffbot_control.line_detector:main',
+            'obstacle_spawner = diffbot_control.obstacle_spawner:main',
+            'point_follower = diffbot_control.point_follower:main',
+            'potential_field_controller = diffbot_control.potential_field_controller:main',
             
             # Scripts de calibración de odometría
             'square_trajectory = diffbot_control.square_trajectory:main',
