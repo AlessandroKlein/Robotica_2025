@@ -48,6 +48,7 @@ setup(
             'obstacle_spawner = diffbot_control.obstacle_spawner:main',
             'point_follower = diffbot_control.point_follower:main',
             'potential_field_controller = diffbot_control.potential_field_controller:main',
+            'bug2_controller = diffbot_control.bug2_controller:main',
             
             # Scripts de calibración de odometría
             'square_trajectory = diffbot_control.square_trajectory:main',
