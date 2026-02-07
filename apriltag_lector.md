@@ -138,3 +138,122 @@ Point centre           # Centro en coordenadas de píxeles (x,y)
 Point[4] corners       # Las 4 esquinas de la etiqueta ((x1,y1),(x2,y2),...)
 float64[9] homography  # Matriz homográfica para conversión a Pose 3D
 ```
+
+## Implementación del Lector en Python (`robot_control/z_apriltag.py`)
+
+Para "leer" y procesar los datos de las etiquetas detectadas por el nodo de ROS 2, se implementa un suscriptor que procesa el arreglo `AprilTagDetectionArray`.
+
+```python
+import rclpy
+from rclpy.node import Node
+from apriltag_msgs.msg import AprilTagDetectionArray
+
+class AprilTagReader(Node):
+    def __init__(self):
+        super().__init__('apriltag_reader')
+        
+        # Suscripción al tópico de detecciones definido en la teoría
+        self.subscription = self.create_subscription(
+            AprilTagDetectionArray,
+            '/detections',
+            self.listener_callback,
+            10)
+        self.subscription  # prevenir que la variable sea eliminada por el garbage collector
+
+    def listener_callback(self, msg):
+        # Según la teoría, el mensaje contiene un arreglo de detecciones
+        for detection in msg.detections:
+            # Extraemos los campos definidos en AprilTagDetection.msg
+            tag_id = detection.id
+            center_x = detection.centre.x
+            center_y = detection.centre.y
+            
+            self.get_logger().info(f'Tag detectado - ID: {tag_id} | Centro: ({center_x:.2f}, {center_y:.2f})')
+            
+            # También se dispone de las esquinas (corners) y la matriz homográfica
+            # corners = detection.corners
+            # homography = detection.homography
+
+def main(args=None):
+    rclpy.init(args=args)
+    reader = AprilTagReader()
+    try:
+        rclpy.spin(reader)
+    except KeyboardInterrupt:
+        pass
+    reader.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
+```
+
+## Estructura del Paquete ROS 2
+
+Para que el nodo y los archivos de configuración funcionen correctamente, el paquete debe estar bien definido.
+
+### `package.xml`
+Se deben incluir las dependencias mencionadas en la teoría (`apriltag_ros`, `image_proc`) y las necesarias para el nodo Python.
+
+```xml
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>robot_control</name>
+  <version>0.0.0</version>
+  <description>Paquete para el control de robot y lectura de AprilTags</description>
+  <maintainer email="franco@unl.edu.ar">Franco</maintainer>
+  <license>Apache License 2.0</license>
+
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>apriltag_msgs</depend>
+  <depend>apriltag_ros</depend>
+  <depend>image_proc</depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
+```
+
+### `setup.py`
+Para registrar el script del lector y los archivos de lanzamiento:
+
+```python
+from setuptools import find_packages, setup
+import os
+from glob import glob
+
+package_name = 'robot_control'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        # Incluir archivos de lanzamiento y configuración
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
+        (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='Franco',
+    maintainer_email='franco@unl.edu.ar',
+    description='Lector de AprilTags basado en Clase 20',
+    license='Apache License 2.0',
+    tests_require=['pytest'],
+    entry_points={
+        'console_scripts': [
+            'z_apriltag = robot_control.z_apriltag:main',
+        ],
+    },
+)
+```
